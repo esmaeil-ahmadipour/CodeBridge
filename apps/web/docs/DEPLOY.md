@@ -31,6 +31,14 @@ Notes
 - Changing the site later: push to GitHub; Vercel redeploys. Bump `VERSION` in `public/sw.js` when you want installed
   copies to drop their old cache.
 
+Desktop downloads (when `NEXT_PUBLIC_ENABLE_DOWNLOADS=true`)
+- The Download section lists Windows x64, macOS ARM64 and Linux x64 ZIPs. Each button links to
+  `https://github.com/esmaeil-ahmadipour/codebridge/releases/latest/download/<asset>`, so new releases need no redeploy.
+- The shown version/date comes from the GitHub releases API, fetched on the server and cached for an hour (the page
+  revalidates hourly). It is optional: if the API is rate-limited or unreachable, the section shows a plain link to
+  GitHub Releases and the download buttons still work. Optionally set a server-only `GITHUB_TOKEN` (no scopes needed) to
+  avoid anonymous rate limits at build time. Never prefix it with `NEXT_PUBLIC_`.
+
 Checks after the first deploy
 - Open the site on a phone: Android Chrome shows the install button; on iPhone use Safari -> Share -> Add to Home Screen.
 - Open DevTools -> Network, convert a ZIP: there must be no request carrying your files.
