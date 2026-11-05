@@ -14,11 +14,11 @@ Pick one. Git must be on your PATH for patch features.
 
 | Way | Python needed | Notes |
 |---|---|---|
-| Download a binary from **Releases** | no | `codebridge-windows-x64.exe`, `codebridge-linux-x64`, `codebridge-macos-arm64` |
+| Download a ZIP from **Releases** | no | `codebridge-windows-x64.zip`, `codebridge-linux-x64.zip`, `codebridge-macos-arm64.zip` (binary + launcher + README) |
 | `pipx install .` (from this folder) | 3.9+ | gives the `codebridge` command |
 | Launchers `launchers/run.ps1`, `run.sh`, `run_macos.command` | no (if the binary sits next to them) | thin: they only start the binary |
 
-macOS first run: `xattr -d com.apple.quarantine ./codebridge-macos-arm64`.
+macOS first run: `xattr -d com.apple.quarantine ./codebridge`.
 Windows SmartScreen may warn about an unsigned binary: More info → Run anyway.
 
 ## Daily use

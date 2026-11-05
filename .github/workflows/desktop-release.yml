@@ -1,11 +1,14 @@
 name: Desktop release
-# Tag a version to publish binaries for Windows, Linux and macOS:
-#   git tag desktop-v1.0.0 && git push origin desktop-v1.0.0
-# Manual runs (Actions tab) build and upload artifacts but do not publish a release.
+# Tag a version to publish desktop builds for Windows, Linux and macOS:
+#   git tag v1.2.3 && git push origin v1.2.3
+# Only stable tags vMAJOR.MINOR.PATCH publish. Manual runs (Actions tab) build and upload artifacts only.
 on:
   push:
-    tags: ["desktop-v*"]
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 defaults:
   run:
@@ -18,6 +21,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
+      - name: Tag matches the package version
+        if: github.ref_type == 'tag'
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          grep -q "^version = \"$v\"$" pyproject.toml || { echo "pyproject.toml version != $v"; exit 1; }
+          grep -q "^__version__ = \"$v\"$" src/codebridge/__init__.py || { echo "__version__ != $v"; exit 1; }
       - run: git config --global user.email "ci@example.com" && git config --global user.name "ci"
       - run: python -m unittest discover -s tests
 
@@ -27,9 +36,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, asset: codebridge-windows-x64.exe, bin: codebridge.exe }
-          - { os: ubuntu-22.04,   asset: codebridge-linux-x64,       bin: codebridge }
-          - { os: macos-latest,   asset: codebridge-macos-arm64,     bin: codebridge }
+          - { os: windows-latest, platform: windows-x64, bin: codebridge.exe }
+          - { os: ubuntu-22.04,   platform: linux-x64,   bin: codebridge }
+          - { os: macos-latest,   platform: macos-arm64, bin: codebridge }
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -41,20 +50,27 @@ jobs:
           python -m pip install --upgrade pip pyinstaller
           python -m pip install .
           pyinstaller --onefile --clean --name codebridge --paths src packaging/entry.py
-      - name: Smoke test
+      - name: Smoke test binary
         shell: bash
         run: ./dist/${{ matrix.bin }} --version
-      - name: Rename
+      - name: Package ZIP
         shell: bash
-        run: mv dist/${{ matrix.bin }} dist/${{ matrix.asset }}
+        run: python packaging/make_zip.py build --platform ${{ matrix.platform }} --binary dist/${{ matrix.bin }} --out dist
+      - name: Verify ZIP (contents, then --version from the extracted copy)
+        shell: bash
+        run: python packaging/make_zip.py verify dist/codebridge-${{ matrix.platform }}.zip --platform ${{ matrix.platform }} --run
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.asset }}
-          path: apps/desktop/dist/${{ matrix.asset }}
+          name: codebridge-${{ matrix.platform }}
+          path: apps/desktop/dist/codebridge-${{ matrix.platform }}.zip
+          if-no-files-found: error
 
+  # Runs only if every platform build above succeeded, so an incomplete release is never published.
   package:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # create the release and upload assets
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -64,16 +80,25 @@ jobs:
         with:
           path: apps/desktop/release
           merge-multiple: true
-      - name: Launchers and checksums
+      - name: Collect, validate and checksum release assets
         run: |
-          cp launchers/run.ps1 launchers/run.sh launchers/run_macos.command release/
           cp dist/* release/
-          cd release && sha256sum * > SHA256SUMS.txt
+          for f in codebridge-windows-x64.zip codebridge-linux-x64.zip codebridge-macos-arm64.zip; do
+            test -s "release/$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+          ls release/*.whl release/*.tar.gz >/dev/null
+          cd release && sha256sum * > SHA256SUMS.txt && sha256sum -c SHA256SUMS.txt
+          ls -l
       - uses: actions/upload-artifact@v4
         with: { name: release-files, path: apps/desktop/release/* }
-      - name: Publish GitHub release (tags only)
-        if: startsWith(github.ref, 'refs/tags/desktop-v')
+      - name: Publish GitHub release (version tags only)
+        if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
           files: apps/desktop/release/*
           generate_release_notes: true
+          draft: false
+          prerelease: false
+          make_latest: "true"
+          fail_on_unmatched_files: true
