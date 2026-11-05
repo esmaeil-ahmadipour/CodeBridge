@@ -21,7 +21,8 @@ def make_repo(files: dict) -> Path:
     for n, c in files.items():
         f = d / n
         f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_text(c, encoding="utf-8", newline="")
+        with f.open("w", encoding="utf-8", newline="") as stream:
+            stream.write(c)
     sh(d, "git", "add", "-A")
     sh(d, "git", "commit", "-q", "-m", "init")
     return d
@@ -35,7 +36,8 @@ def make_diff(repo: Path, edits: dict) -> str:
             f.unlink()
         else:
             f.parent.mkdir(parents=True, exist_ok=True)
-            f.write_text(c, encoding="utf-8", newline="")
+            with f.open("w", encoding="utf-8", newline="") as stream:
+                stream.write(c)
     sh(repo, "git", "add", "-A")
     d = sh(repo, "git", "diff", "--cached", "--no-color")
     sh(repo, "git", "reset", "-q", "--hard")
