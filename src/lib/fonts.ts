@@ -1,6 +1,11 @@
-import { Inter, JetBrains_Mono } from 'next/font/google';
+import localFont from "next/font/local";
 
-const sans = Inter({ subsets: ['latin'], display: 'swap', variable: '--font-inter', weight: ['400', '500', '600', '700'] });
-const mono = JetBrains_Mono({ subsets: ['latin'], display: 'swap', variable: '--font-jetbrains', weight: ['500'] });
+export const inter = localFont({
+  src: "../../public/fonts/inter-variable.woff",
+  variable: "--font-inter",
+  display: "swap",
+  weight: "100 900",
+});
 
-export const fontVariables = `${sans.variable} ${mono.variable}`;
+// Combined CSS variables for the application layout.
+export const fontVariables = [inter.variable].filter(Boolean).join(' ');
