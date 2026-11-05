@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+backup/
+*.spec
+settings.json
+settings.json.bak
+history.jsonl
+code_report_*.txt
+codebridge-fix.txt

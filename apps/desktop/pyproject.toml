@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codebridge"
+version = "1.0.0"
+description = "AI-assisted code workflow: export context, apply AI diffs safely, undo."
+requires-python = ">=3.9"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Esmaeil Ahmadipour" }]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+]
+
+[project.scripts]
+codebridge = "codebridge.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

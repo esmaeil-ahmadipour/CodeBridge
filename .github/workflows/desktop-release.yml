@@ -1,0 +1,79 @@
+name: Desktop release
+# Tag a version to publish binaries for Windows, Linux and macOS:
+#   git tag desktop-v1.0.0 && git push origin desktop-v1.0.0
+# Manual runs (Actions tab) build and upload artifacts but do not publish a release.
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: apps/desktop
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: git config --global user.email "ci@example.com" && git config --global user.name "ci"
+      - run: python -m unittest discover -s tests
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { os: windows-latest, asset: codebridge-windows-x64.exe, bin: codebridge.exe }
+          - { os: ubuntu-22.04,   asset: codebridge-linux-x64,       bin: codebridge }
+          - { os: macos-latest,   asset: codebridge-macos-arm64,     bin: codebridge }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Build binary
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip pyinstaller
+          python -m pip install .
+          pyinstaller --onefile --clean --name codebridge --paths src packaging/entry.py
+      - name: Smoke test
+        shell: bash
+        run: ./dist/${{ matrix.bin }} --version
+      - name: Rename
+        shell: bash
+        run: mv dist/${{ matrix.bin }} dist/${{ matrix.asset }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: apps/desktop/dist/${{ matrix.asset }}
+
+  package:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: python -m pip install build && python -m build
+      - uses: actions/download-artifact@v4
+        with:
+          path: apps/desktop/release
+          merge-multiple: true
+      - name: Launchers and checksums
+        run: |
+          cp launchers/run.ps1 launchers/run.sh launchers/run_macos.command release/
+          cp dist/* release/
+          cd release && sha256sum * > SHA256SUMS.txt
+      - uses: actions/upload-artifact@v4
+        with: { name: release-files, path: apps/desktop/release/* }
+      - name: Publish GitHub release (tags only)
+        if: startsWith(github.ref, 'refs/tags/desktop-v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: apps/desktop/release/*
+          generate_release_notes: true

@@ -1,45 +1,37 @@
-# CodeBridge website
+# CodeBridge
 
-Landing page + a browser-only tool that turns a project ZIP into one AI-ready text file.
-Next.js (App Router) + React + Tailwind v4, 3 languages (en, fa, ar), light and dark themes, installable PWA.
-Reuses the structure of the portfolio site (theme + i18n + SEO), with the CodeBridge palette and fonts.
+Turn a project into one clean, AI-ready text file, apply the AI's diff safely, and undo it.
+Private by design: nothing is uploaded.
 
-## Privacy by construction
-- The conversion runs entirely in the browser (JSZip + `src/core`). There is **no API route** and no server code for files.
-- Production responses send `Content-Security-Policy: connect-src 'self'` (see `next.config.ts`), so the browser itself
-  blocks this page from sending data to any other server.
-- Keep it that way: do not add analytics, trackers or `fetch` calls that carry file content, and keep JSZip bundled
-  (no third-party script tags).
+| App | What it is | Where |
+|---|---|---|
+| **Website** | Landing page + an in-browser ZIP to TXT tool (PWA, en/fa/ar, light/dark) | [`apps/web`](apps/web) |
+| **Desktop tool** | CLI/menu for Windows, macOS, Linux: export context, apply AI diffs, undo | [`apps/desktop`](apps/desktop) |
 
-## Develop
+Site: https://codebridge.tarvix.org
+
+## Repository layout
 ```text
-npm install
-npm run dev          # http://localhost:3000   (/fa, /ar for the other languages)
-npm run test         # pure logic tests (Node >= 22.18, no extra tools)
-npm run typecheck
-npm run build && npm start
+apps/web/        Next.js site (pnpm workspace package; deployed on Vercel, Root Directory = apps/web)
+apps/desktop/    Python tool (binaries are built by GitHub Actions on tag desktop-v*)
+docs/            architecture, privacy promise, report format, releasing
+.github/         one workflow set per app (path-filtered)
+```
+The repository root owns the pnpm workspace and the single `pnpm-lock.yaml`; the Python desktop app is not a pnpm package. Start with the README inside the app you work on.
+
+## Quick start
+```text
+# website (install once at the repository root)
+pnpm install
+pnpm dev
+
+# equivalent commands from apps/web
+cd apps/web && pnpm dev
+
+# desktop tool
+cd apps/desktop && PYTHONPATH=src python -m codebridge
 ```
 
-## Structure
-```text
-app/[locale]/        layout (html lang/dir, theme init) and the single page
-app/                 manifest (PWA), sitemap, robots, icons, 404
-src/core/            ZIP -> text logic: .gitignore, filters, redaction, tokens, tree, split (pure TypeScript)
-src/components/      Navbar, Hero, Tool, Privacy, Features, Download, InstallCard, Footer
-src/i18n/            locales + all texts (en, fa, ar)
-src/context/         ThemeContext, LanguageContext
-src/index.css        design tokens (light/dark) and styles
-public/sw.js         service worker (offline); bump VERSION on each release
-tests/               core logic + translation consistency
-```
+More: [docs/architecture.md](docs/architecture.md) · [docs/privacy.md](docs/privacy.md) · [docs/releasing.md](docs/releasing.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## Before going live
-1. `src/lib/site.ts`: set `repoUrl` to the real GitHub repository. The download buttons point to
-   `releases/latest/download/codebridge-windows-x64.exe`, `codebridge-macos-arm64` and `codebridge-linux-x64`,
-   which are the asset names produced by the CodeBridge release workflow.
-2. Optional: set `NEXT_PUBLIC_SITE_URL` (defaults to `https://codebridge.tarvix.org`).
-
-3. Downloads are **off** by default. Set `NEXT_PUBLIC_ENABLE_DOWNLOADS=true` (see `.env.example`) and rebuild
-   to show the Download section, its nav link and the hero download button once a release exists.
-
-Deployment steps: [docs/DEPLOY.md](docs/DEPLOY.md).
+License: MIT.

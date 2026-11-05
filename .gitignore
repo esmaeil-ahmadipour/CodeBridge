@@ -1,29 +1,30 @@
+
 # Dependencies
 node_modules/
+.pnpm-store/
 .pnp/
 .pnp.*
-.yarn/*
 
 # Next.js
 .next/
 out/
-next-env.d.ts
-dist/
+.vercel/
 
-*.local
+# Build artifacts
+dist/
+build/
+coverage/
+.nyc_output/
 
 # TypeScript
 *.tsbuildinfo
-
-# Testing and coverage
-coverage/
-.nyc_output/
 
 # Environment variables and secrets
 .env
 .env.*
 !.env.example
 !.env.sample
+!.env.*.example
 
 # Logs
 logs/
@@ -32,11 +33,44 @@ npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*
 
-# Deployment platforms
-.vercel/
-.netlify/
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
 
-# Operating system files
+# CodeBridge local files
+settings.json
+settings.json.bak
+history.jsonl
+code_report_*.txt
+codebridge-fix.txt
+
+# Local tooling caches
+.turbo/
+.eslintcache
+.stylelintcache
+
+# Temporary files and backups
+*.tmp
+*.temp
+*.bak
+*.backup
+*.backup.*
+*.orig
+*.rej
+*.swp
+*.swo
+*~
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.db
+
+# Operating system
 .DS_Store
 Thumbs.db
 Desktop.ini
@@ -48,25 +82,3 @@ Desktop.ini
 !.vscode/settings.json
 !.vscode/launch.json
 !.vscode/tasks.json
-*.swp
-*.swo
-*~
-
-# Temporary files and backups
-*.tmp
-*.temp
-*.bak
-*.backup
-*.backup.*
-*.orig
-*.rej
-
-# Local databases
-*.sqlite
-*.sqlite3
-*.db
-
-# Optional: local tooling caches
-.turbo/
-.eslintcache
-.stylelintcache
