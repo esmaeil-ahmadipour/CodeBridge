@@ -7,11 +7,15 @@ export type Detected = PlatformId | 'mobile' | null;
  * Returns null when unsure (e.g. ChromeOS, unknown) so the UI shows the neutral fallback.
  * CPU architecture is never guessed: browsers do not expose it reliably (Apple Silicon reports as Intel).
  */
-export function detectPlatform(ua = '', uaPlatform = '', touchPoints = 0): Detected {
+export function detectPlatform(ua = '', uaPlatform = '', touchPoints = 0, architecture = '', bitness = ''): Detected {
   const p = uaPlatform.toLowerCase();
+  const arch = architecture.toLowerCase();
   if (/android|iphone|ipad|ipod|mobile/i.test(ua)) return 'mobile';
   if (/cros/i.test(ua)) return null;
-  if (/mac/i.test(p) || /macintosh|mac os x/i.test(ua)) return touchPoints > 1 ? 'mobile' : 'macos'; // iPadOS looks like a Mac
+  if (/mac/i.test(p) || /macintosh|mac os x/i.test(ua)) {
+    if (touchPoints > 1) return 'mobile'; // iPadOS looks like a Mac
+    return arch === 'arm64' || arch === 'aarch64' || (arch === 'arm' && bitness === '64') ? 'macos' : null;
+  }
   if (/win/i.test(p) || /windows nt/i.test(ua)) return 'windows';
   if (/linux/i.test(p) || /linux|x11/i.test(ua)) return 'linux';
   return null;
