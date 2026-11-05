@@ -31,8 +31,12 @@ test('detectPlatform: desktop OSes, mobile and unknown fallbacks', () => {
   const lin = 'Mozilla/5.0 (X11; Linux x86_64) Firefox/130';
   assert.equal(detectPlatform(win), 'windows');
   assert.equal(detectPlatform('', 'Windows'), 'windows');
-  assert.equal(detectPlatform(mac), 'macos');
-  assert.equal(detectPlatform('', 'macOS'), 'macos');
+  assert.equal(detectPlatform(mac), null); // OS alone cannot distinguish Intel from Apple Silicon
+  assert.equal(detectPlatform(mac, '', 0, 'arm', '64'), 'macos');
+  assert.equal(detectPlatform(mac, '', 0, 'arm64', ''), 'macos');
+  assert.equal(detectPlatform(mac, '', 0, 'x86', '64'), null);
+  assert.equal(detectPlatform('', 'macOS'), null);
+  assert.equal(detectPlatform('', 'macOS', 0, 'arm', '64'), 'macos');
   assert.equal(detectPlatform(lin), 'linux');
   assert.equal(detectPlatform(mac, '', 5), 'mobile'); // iPadOS pretends to be a Mac
   assert.equal(detectPlatform('Mozilla/5.0 (Linux; Android 14; Pixel 8) Mobile'), 'mobile');

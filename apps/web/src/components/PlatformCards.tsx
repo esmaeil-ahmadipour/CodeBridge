@@ -9,6 +9,14 @@ export interface PlatformLabels {
   recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
 }
 
+interface ArchitectureHints { architecture?: string; bitness?: string }
+interface NavigatorWithHints extends Navigator {
+  userAgentData?: {
+    platform?: string;
+    getHighEntropyValues?: (hints: string[]) => Promise<ArchitectureHints>;
+  };
+}
+
 const fmt = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_, k: string) => v[k] ?? '');
 
 // Detection runs after mount, so server and first client render are identical (no hydration mismatch).
@@ -16,8 +24,20 @@ const fmt = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_
 export function PlatformCards({ items, t }: { items: PlatformItem[]; t: PlatformLabels }) {
   const [det, setDet] = useState<Detected>(null);
   useEffect(() => {
-    const n = navigator as Navigator & { userAgentData?: { platform?: string } };
-    setDet(detectPlatform(n.userAgent, n.userAgentData?.platform, n.maxTouchPoints));
+    let active = true;
+    const n = navigator as NavigatorWithHints;
+    const detect = async () => {
+      let architecture = '';
+      let bitness = '';
+      try {
+        ({ architecture = '', bitness = '' } = await n.userAgentData?.getHighEntropyValues?.(['architecture', 'bitness']) ?? {});
+      } catch {
+        // Keep the neutral recommendation when the browser withholds architecture hints.
+      }
+      if (active) setDet(detectPlatform(n.userAgent, n.userAgentData?.platform, n.maxTouchPoints, architecture, bitness));
+    };
+    void detect();
+    return () => { active = false; };
   }, []);
   const found = items.find((i) => i.id === det);
   const hint = det === 'mobile' ? t.hintMobile : found ? fmt(t.hintDetected, { os: found.name }) : t.hintDefault;
