@@ -12,17 +12,21 @@ Site: https://codebridge.tarvix.org
 
 ## Repository layout
 ```text
-apps/web/        Next.js site (deployed on Vercel, Root Directory = apps/web)
+apps/web/        Next.js site (pnpm workspace package; deployed on Vercel, Root Directory = apps/web)
 apps/desktop/    Python tool (binaries are built by GitHub Actions on tag desktop-v*)
 docs/            architecture, privacy promise, report format, releasing
 .github/         one workflow set per app (path-filtered)
 ```
-Each app is self-contained (own lockfile, tests and README). Start with the README inside the app you work on.
+The repository root owns the pnpm workspace and the single `pnpm-lock.yaml`; the Python desktop app is not a pnpm package. Start with the README inside the app you work on.
 
 ## Quick start
 ```text
-# website
-cd apps/web && pnpm install && pnpm dev
+# website (install once at the repository root)
+pnpm install
+pnpm dev
+
+# equivalent commands from apps/web
+cd apps/web && pnpm dev
 
 # desktop tool
 cd apps/desktop && PYTHONPATH=src python -m codebridge

@@ -12,10 +12,13 @@ Thumbs.db
 
 # generated everywhere
 node_modules/
+.vercel/
 .next/
 out/
 dist/
 build/
+coverage/
+*.log
 __pycache__/
 *.pyc
 *.egg-info/

@@ -1,0 +1,13 @@
+{
+  "name": "codebridge",
+  "private": true,
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "dev": "pnpm --filter codebridge-site dev",
+    "build": "pnpm --filter codebridge-site build",
+    "start": "pnpm --filter codebridge-site start",
+    "check": "pnpm --filter codebridge-site check",
+    "typecheck": "pnpm --filter codebridge-site typecheck",
+    "test": "pnpm --filter codebridge-site test"
+  }
+}

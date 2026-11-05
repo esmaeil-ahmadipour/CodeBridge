@@ -13,12 +13,14 @@ Reuses the structure of the portfolio site (theme + i18n + SEO), with the CodeBr
 
 ## Develop
 ```text
-npm install
-npm run dev          # http://localhost:3000   (/fa, /ar for the other languages)
-npm run test         # pure logic tests (Node >= 22.18, no extra tools)
-npm run typecheck
-npm run build && npm start
+# Install dependencies from the repository root once: pnpm install
+pnpm dev             # http://localhost:3000   (/fa, /ar for the other languages)
+pnpm test            # pure logic tests (Node >= 22.18)
+pnpm typecheck
+pnpm check
+pnpm build && pnpm start
 ```
+These commands also work from the repository root through its workspace scripts. Next.js 16 no longer has `next lint`; `pnpm check` is the project check, combining TypeScript validation and the test suite.
 
 ## Structure
 ```text
@@ -37,9 +39,9 @@ tests/               core logic + translation consistency
 1. `src/lib/site.ts`: set `repoUrl` to the real GitHub repository. The download buttons point to
    `releases/latest/download/codebridge-windows-x64.exe`, `codebridge-macos-arm64` and `codebridge-linux-x64`,
    which are the asset names produced by the CodeBridge release workflow.
-2. Optional: set `NEXT_PUBLIC_SITE_URL` (defaults to `https://codebridge.tarvix.org`).
+2. No environment variables are required. Optional `NEXT_PUBLIC_SITE_URL` (defaults to `https://codebridge.tarvix.org`) and `NEXT_PUBLIC_ENABLE_DOWNLOADS` (defaults to `false`) are read at build time. See `.env.example` for safe local values.
 
-3. Downloads are **off** by default. Set `NEXT_PUBLIC_ENABLE_DOWNLOADS=true` (see `.env.example`) and rebuild
+3. Downloads are **off** by default. Set `NEXT_PUBLIC_ENABLE_DOWNLOADS=true` in the relevant Vercel environment and rebuild
    to show the Download section, its nav link and the hero download button once a release exists.
 
 Deployment steps: [docs/DEPLOY.md](docs/DEPLOY.md).
