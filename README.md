@@ -13,7 +13,7 @@ Site: https://codebridge.tarvix.org
 ## Repository layout
 ```text
 apps/web/        Next.js site (pnpm workspace package; deployed on Vercel, Root Directory = apps/web)
-apps/desktop/    Python tool (binaries are built by GitHub Actions on tag desktop-v*)
+apps/desktop/    Python tool (binaries are built by GitHub Actions on tag v*)
 docs/            architecture, privacy promise, report format, releasing
 .github/         one workflow set per app (path-filtered)
 ```

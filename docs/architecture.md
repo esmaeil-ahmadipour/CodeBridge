@@ -24,5 +24,5 @@ docs          cross-cutting documents
 
 ## Deploy and release
 - Web: push to `main`; Vercel (Root Directory `apps/web`) deploys. `vercel.json` skips builds when `apps/web` did not change.
-- Desktop: tag `desktop-vX.Y.Z`; the release workflow builds and publishes the binaries. The website's download buttons use
-  `releases/latest/download/<asset>`, so the website never needs its own GitHub release.
+- Desktop: tag `vX.Y.Z`; the release workflow tests, builds and publishes one ZIP per platform (see [releasing.md](releasing.md)).
+  The website's download buttons use `releases/latest/download/<asset>.zip`, so a new release needs no website change or redeploy.

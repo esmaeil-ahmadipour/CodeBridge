@@ -37,8 +37,9 @@ tests/               core logic + translation consistency
 
 ## Before going live
 1. `src/lib/site.ts`: set `repoUrl` to the real GitHub repository. The download buttons point to
-   `releases/latest/download/codebridge-windows-x64.exe`, `codebridge-macos-arm64` and `codebridge-linux-x64`,
-   which are the asset names produced by the CodeBridge release workflow.
+   `releases/latest/download/codebridge-windows-x64.zip`, `codebridge-macos-arm64.zip` and `codebridge-linux-x64.zip`,
+   the asset names produced by the CodeBridge release workflow. They always resolve to the newest stable release, so new
+   releases need no website change.
 2. No environment variables are required. Optional `NEXT_PUBLIC_SITE_URL` (defaults to `https://codebridge.tarvix.org`) and `NEXT_PUBLIC_ENABLE_DOWNLOADS` (defaults to `false`) are read at build time. See `.env.example` for safe local values.
 
 3. Downloads are **off** by default. Set `NEXT_PUBLIC_ENABLE_DOWNLOADS=true` in the relevant Vercel environment and rebuild
