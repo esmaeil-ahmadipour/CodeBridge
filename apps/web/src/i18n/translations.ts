@@ -22,6 +22,8 @@ export interface Dictionary {
     eyebrow: string; title: string; sub: string; pwaBadge: string; pwaTitle: string; pwaText: string;
     android: string; iphone: string; steps: string[]; install: string; installed: string; iosHint: string; noPrompt: string;
     desktop: string; win: string; winSub: string; mac: string; macSub: string; linux: string; linuxSub: string; note: string;
+    recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
+    relVersion: string; relPublished: string; relNotes: string; relFallback: string;
   };
   footer: { license: string; tagline: string };
 }
@@ -103,8 +105,9 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'Install on this phone', installed: 'Installed',
       iosHint: 'On iPhone use Safari: tap Share, then Add to Home Screen.',
       noPrompt: 'Use your browser menu and choose Install app or Add to Home Screen.',
-      desktop: 'Desktop apps', win: 'Windows', winSub: 'ZIP with a single .exe, no install', mac: 'macOS', macSub: 'Apple Silicon binary', linux: 'Linux', linuxSub: 'x64 binary',
+      desktop: 'Desktop apps', win: 'Windows', winSub: 'Windows 10 or later · unzip and run, no install', mac: 'macOS', macSub: 'Apple Silicon (M1 or newer) only', linux: 'Linux', linuxSub: 'Built on Ubuntu 22.04 · unzip and run',
       note: 'Checksums and source on GitHub · Git needed for patch features',
+      recommended: 'Recommended for you', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Latest release: {v}', relPublished: 'Published {date}', relNotes: 'Release notes and all assets', relFallback: 'Release notes and all assets on GitHub',
     },
     footer: { license: 'MIT licensed · Made by Esmaeil Ahmadipour', tagline: 'Free, private and open source. Your code stays on your device.' },
   },
@@ -184,8 +187,9 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'نصب روی این گوشی', installed: 'نصب شده',
       iosHint: 'در آیفون از Safari استفاده کنید: Share و سپس Add to Home Screen.',
       noPrompt: 'از منوی مرورگر، Install app یا Add to Home Screen را انتخاب کنید.',
-      desktop: 'اپ‌های دسکتاپ', win: 'ویندوز', winSub: 'فایل ZIP شامل یک exe، بدون نصب', mac: 'مک', macSub: 'نسخه‌ی Apple Silicon', linux: 'لینوکس', linuxSub: 'نسخه‌ی x64',
+      desktop: 'اپ‌های دسکتاپ', win: 'ویندوز', winSub: 'ویندوز ۱۰ یا بالاتر · بازکردن ZIP و اجرا، بدون نصب', mac: 'مک', macSub: 'فقط Apple Silicon (M1 یا جدیدتر)', linux: 'لینوکس', linuxSub: 'ساخته‌شده روی Ubuntu 22.04 · بازکردن ZIP و اجرا',
       note: 'Checksum و سورس در GitHub · قابلیت‌های Patch به Git نیاز دارند',
+      recommended: 'پیشنهاد برای شما', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'آخرین نسخه: {v}', relPublished: 'منتشرشده در {date}', relNotes: 'یادداشت‌های نسخه و همه‌ی فایل‌ها', relFallback: 'یادداشت‌های نسخه و همه‌ی فایل‌ها در GitHub',
     },
     footer: { license: 'مجوز MIT · ساخته‌ی اسماعیل احمدی‌پور', tagline: 'رایگان، خصوصی و متن‌باز. کد شما روی دستگاه خودتان می‌ماند.' },
   },
@@ -265,8 +269,9 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'ثبّت على هذا الهاتف', installed: 'تم التثبيت',
       iosHint: 'على الآيفون استخدم Safari: اضغط Share ثم Add to Home Screen.',
       noPrompt: 'من قائمة المتصفح اختر Install app أو Add to Home Screen.',
-      desktop: 'تطبيقات الحاسوب', win: 'ويندوز', winSub: 'ملف ZIP يحتوي exe واحدًا دون تثبيت', mac: 'ماك', macSub: 'نسخة Apple Silicon', linux: 'لينكس', linuxSub: 'نسخة x64',
+      desktop: 'تطبيقات الحاسوب', win: 'ويندوز', winSub: 'ويندوز 10 أو أحدث · فك الضغط والتشغيل دون تثبيت', mac: 'ماك', macSub: 'لأجهزة Apple Silicon (M1 أو أحدث) فقط', linux: 'لينكس', linuxSub: 'مبني على Ubuntu 22.04 · فك الضغط والتشغيل',
       note: 'المجاميع الاختبارية والمصدر على GitHub · ميزات التعديل تحتاج Git',
+      recommended: 'موصى به لك', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'أحدث إصدار: {v}', relPublished: 'نُشر في {date}', relNotes: 'ملاحظات الإصدار وكل الملفات', relFallback: 'ملاحظات الإصدار وكل الملفات على GitHub',
     },
     footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'مجاني وخاص ومفتوح المصدر. يبقى كودك على جهازك.' },
   },
