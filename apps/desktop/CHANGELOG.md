@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+Fix the release metadata mismatch by aligning the package version with the new patch tag.
+
+## 2.1.0
+Automated stable release packages for Windows x64, Linux x64, and macOS ARM64.
+
 ## 1.0.0
 First release. Merges CodeDump (context export) and dw.py (diff apply) into one tool.
 
