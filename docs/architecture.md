@@ -24,5 +24,6 @@ docs          cross-cutting documents
 
 ## Deploy and release
 - Web: push to `main`; Vercel (Root Directory `apps/web`) deploys. `vercel.json` skips builds when `apps/web` did not change.
-- Desktop: tag `vX.Y.Z`; the release workflow tests, builds and publishes one ZIP per platform (see [releasing.md](releasing.md)).
+- Desktop: change the root `package.json` version and merge to `main`; the release workflow tests, builds and publishes
+  one ZIP per platform (see [RELEASING.md](../RELEASING.md)).
   The website's download buttons use `releases/latest/download/<asset>.zip`, so a new release needs no website change or redeploy.
