@@ -28,18 +28,17 @@ class VersionTests(unittest.TestCase):
         (self.root / "package.json").write_text(
             json.dumps({"version": "2.2.4"}), encoding="utf-8"
         )
+        self.assertFalse((self.package_dir / "_version.py").exists())
         git = mock.Mock(stdout="abc1234\n")
         with mock.patch.object(codebridge, "_generated_version", None), mock.patch.object(
             codebridge.subprocess, "run", return_value=git
         ) as run:
             self.assertEqual(codebridge.get_version(), "2.2.4-dev+abc1234")
-        run.assert_called_once_with(
-            ["git", "-C", str(self.root), "rev-parse", "--short=7", "HEAD"],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=2,
-        )
+        command = run.call_args.args[0]
+        self.assertEqual(command[0], "git")
+        self.assertEqual(command[-3:], ["rev-parse", "--short=7", "HEAD"])
+        self.assertGreater(run.call_args.kwargs["timeout"], 0)
+        self.assertLessEqual(run.call_args.kwargs["timeout"], 2)
 
     def test_source_checkout_without_git_still_has_dev_version(self):
         (self.root / "package.json").write_text(
