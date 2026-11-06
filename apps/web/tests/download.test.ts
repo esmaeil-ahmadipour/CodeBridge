@@ -1,13 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { downloads, latestReleaseApi, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
+import { downloads, downloadConfig, latestReleaseApi, latestReleaseUrl, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
 import { detectPlatform } from '../src/lib/platform.ts';
 import { formatReleaseDate, getLatestRelease, parseRelease } from '../src/lib/release.ts';
 import { translations } from '../src/i18n/translations.ts';
 
-const BASE = 'https://github.com/esmaeil-ahmadipour/codebridge/releases';
+const BASE = 'https://github.com/esmaeil-ahmadipour/CodeBridge/releases';
 
 test('platform -> asset -> latest-release URL mapping', () => {
+  assert.equal(downloadConfig.owner, 'esmaeil-ahmadipour');
+  assert.equal(downloadConfig.repository, 'CodeBridge');
+  assert.deepEqual(downloadConfig.assets, {
+    windows: 'codebridge-windows-x64.zip',
+    macos: 'codebridge-macos-arm64.zip',
+    linux: 'codebridge-linux-x64.zip',
+  });
+  assert.equal(latestReleaseUrl, `${BASE}/latest`);
   assert.equal(releaseUrl, `${BASE}/latest/download`);
   assert.deepEqual(
     platforms.map((p) => [p.id, p.asset, p.arch, p.format]),
@@ -105,8 +113,8 @@ test('feature flag: downloads are off unless NEXT_PUBLIC_ENABLE_DOWNLOADS === "t
 });
 
 test('download UI strings exist and are non-empty in en, fa and ar', () => {
-  const keys = ['desktop', 'win', 'winSub', 'mac', 'macSub', 'linux', 'linuxSub', 'note', 'recommended', 'hintDefault', 'hintDetected',
-    'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished', 'relNotes', 'relFallback'] as const;
+  const keys = ['desktop', 'win', 'mac', 'linux', 'appleSilicon', 'note', 'winHint', 'macHint', 'linuxHint', 'releaseChecksums',
+    'recommended', 'hintDefault', 'hintDetected', 'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished'] as const;
   for (const l of ['en', 'fa', 'ar'] as const) {
     for (const k of keys) assert.ok(translations[l].download[k].trim().length > 0, `${l}.download.${k}`);
     assert.match(translations[l].download.downloadFor, /\{os\}/);
