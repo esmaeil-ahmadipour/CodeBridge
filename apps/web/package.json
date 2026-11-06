@@ -1,6 +1,5 @@
 {
   "name": "codebridge-site",
-  "version": "2.2.1",
   "private": true,
   "type": "module",
   "scripts": {

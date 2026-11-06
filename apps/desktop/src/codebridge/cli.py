@@ -1,7 +1,7 @@
 from __future__ import annotations
 import argparse, os, shutil, sys, time
 from pathlib import Path
-from . import __version__
+from . import get_version
 from .context.exporter import export_project
 from .context.scanner import changed_files
 from .core import history
@@ -19,7 +19,7 @@ DEFAULT_DIFFS = ("diff.patch", "changes.patch", "diff.txt")
 def build_parser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(prog="codebridge", description="AI-assisted code workflow: "
                                  "export context, apply AI diffs safely, undo.")
-    ap.add_argument("-v", "--version", action="version", version=f"codebridge {__version__}")
+    ap.add_argument("-v", "--version", action="version", version=f"codebridge {get_version()}")
     ap.add_argument("--config", help="path to settings.json")
     sub = ap.add_subparsers(dest="cmd")
 
