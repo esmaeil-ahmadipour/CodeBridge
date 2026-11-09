@@ -5,7 +5,8 @@ from . import __version__
 from .context.exporter import export_project
 from .context.scanner import changed_files
 from .core import history
-from .core.config import (PRESETS, load_settings, project_options, save_settings)
+from .core.config import (PRESETS, export_config_from_dict, load_settings, project_options,
+                          save_settings)
 from .core.git import repo_root, require_repo
 from .core.paths import resolve_config
 from .core.util import CBError, from_clipboard, setup_console, to_clipboard
@@ -93,9 +94,20 @@ def cmd_context(a, cfg, s) -> int:
         pj = next((x for x in s["projects"] if os.path.abspath(x["path"]) == root), None)
         targets = [(pj["name"] if pj else Path(root).name or "project", root, project_options(s, pj))]
     total = 0
+    export_cfg = None
+    if s.get("export"):
+        try:
+            export_cfg = export_config_from_dict(s["export"])
+        except Exception:
+            export_cfg = None
     for name, root, o in targets:
         if a.compact:
             o["compact"] = True
+        # Merge wizard export choices into scanner/exporter options.
+        if export_cfg is not None:
+            o["include_svg"] = export_cfg.include_svg
+            o["exclude_lock_files"] = export_cfg.exclude_lock_files
+            o["exclude_test_files"] = export_cfg.exclude_test_files
         only = None
         if a.files:
             only = [f.replace("\\", "/") for f in a.files]
@@ -108,7 +120,8 @@ def cmd_context(a, cfg, s) -> int:
                 raise CBError(str(e))
         r = export_project(name, root, o, outdir=os.getcwd(), output=a.output if len(targets) == 1 else None,
                            dry=dry, backup=not a.no_backup, only=only,
-                           clipboard=True if a.clipboard else None)
+                           clipboard=True if a.clipboard else None,
+                           export_cfg=export_cfg)
         if r:
             total += r["files"]
             if not dry:
