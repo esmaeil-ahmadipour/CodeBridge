@@ -14,11 +14,15 @@ Site: https://codebridge.tarvix.org
 ```text
 apps/web/        Next.js site (pnpm workspace package; deployed on Vercel, Root Directory = apps/web)
 apps/desktop/    Python tool (binaries and releases are built from the root package.json version)
+tests/           shared version and changelog metadata tests
 docs/            architecture, privacy promise, report format, releasing
-.github/         one workflow set per app (path-filtered)
+.github/         path-filtered app CI plus a reusable metadata-check workflow
 ```
 The repository root owns the pnpm workspace and the single `pnpm-lock.yaml`; its `package.json` is also the only typed
-application version. The Python desktop app is not a pnpm package. Start with the README inside the app you work on.
+application version, and the root `CHANGELOG.md` holds release notes. Shared version/changelog checks live in `tests/`;
+desktop-specific tests remain in `apps/desktop/tests/`. See [RELEASING.md](RELEASING.md) for the local check command and
+how the reusable metadata workflow participates in CI and releases. The Python desktop app is not a pnpm package.
+Start with the README inside the app you work on.
 
 ## Quick start
 ```text

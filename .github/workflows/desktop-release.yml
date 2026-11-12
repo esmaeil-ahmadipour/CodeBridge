@@ -14,7 +14,13 @@ defaults:
     working-directory: apps/desktop
 
 jobs:
+  metadata:
+    uses: ./.github/workflows/metadata-check.yml
+    permissions:
+      contents: read
+
   version:
+    needs: metadata
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -80,13 +86,6 @@ jobs:
               output.write(f"version={version}\n")
               output.write(f"should_release={should_release}\n")
           PY
-
-
-      - name: Sync version and run tests
-        shell: bash
-        run: |
-          python ../../scripts/sync_version.py
-          PYTHONPATH=src python -m unittest discover -s tests -v
 
 
   test:
@@ -273,7 +272,7 @@ jobs:
 
       - name: Extract release notes from CHANGELOG
         shell: bash
-        run: python ../../scripts/changelog_section.py CHANGELOG.md "${{ needs.version.outputs.version }}" > release-notes.md
+        run: python ../../scripts/changelog_section.py ../../CHANGELOG.md "${{ needs.version.outputs.version }}" > release-notes.md
 
       - name: Ensure the version tag is still available
         shell: bash

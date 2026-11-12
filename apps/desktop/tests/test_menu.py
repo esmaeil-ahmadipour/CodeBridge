@@ -7,8 +7,6 @@ import codebridge
 from codebridge.core.config import load_settings, save_settings
 from codebridge.ui import menu
 
-ROOT = Path(__file__).resolve().parents[1]
-
 
 def run(cfg, inputs, clipboard=None):
     out = io.StringIO()
@@ -18,48 +16,6 @@ def run(cfg, inputs, clipboard=None):
         code = menu.run_menu(cfg)
     return code, out.getvalue()
 
-
-
-class VersionTests(unittest.TestCase):
-    def test_version_is_consistent(self):
-        import json
-
-        # Find monorepo root reliably (works on Linux, macOS and Windows).
-        repo_root = next(
-            (
-                parent
-                for parent in ROOT.parents
-                if (parent / "package.json").is_file()
-                and (parent / "apps" / "desktop").is_dir()
-            ),
-            None,
-        )
-
-        self.assertIsNotNone(repo_root, "Could not locate repository root")
-
-        package = json.loads(
-            (repo_root / "package.json").read_text(encoding="utf-8")
-        )
-        version = package["version"]
-
-        self.assertEqual(
-            codebridge.__version__.split("-dev+", 1)[0],
-            version,
-        )
-
-        pyproject = (ROOT / "pyproject.toml").read_text(encoding="utf-8")
-
-        self.assertIn('dynamic = ["version"]', pyproject)
-        self.assertIn(
-            'version = { attr = "codebridge._version.__version__" }',
-            pyproject,
-        )
-
-        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
-        self.assertTrue(
-            changelog.splitlines()[2].startswith(f"## {version}"),
-            "CHANGELOG.md version heading does not match package.json",
-        )
 
 
 class MenuTests(unittest.TestCase):

@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.0.1
+Improved release version and changelog consistency.
+
+- Release builds verify the generated desktop version matches the root `package.json` before packaging binaries.
+- Moved the changelog to the repository root and require exactly one non-empty section for the current version.
+- Release notes use the matching changelog section; missing or duplicate sections block release builds.
+- Shared version and changelog checks live in root `tests/`; desktop-specific tests remain in `apps/desktop/tests/`.
+- A reusable metadata workflow runs in desktop and web CI and gates the desktop release workflow.
+
 ## 3.0.0
 Faster interactive menu. Exporting and applying now take one screen each instead of many questions.
 
