@@ -7,10 +7,40 @@ import {
 } from '@/core';
 import type { Dictionary } from '@/i18n/translations';
 import { SelectDialog } from './SelectDialog';
+import { Icon } from './Icons';
 
 const fmt = (s: string, v: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(v[k] ?? ''));
 const SPLITS_KB = [0, 200, 500, 1024, 2048, 5120, 10240];
 const kbLabel = (n: number) => (n >= 1024 ? `${n / 1024} MB` : `${n} KB`);
+
+// Counts 0 -> total in `ms`, slow at first and accelerating (ease-in), regardless of how fast the ZIP was read.
+const countUp = (total: number, set: (n: number) => void, ms = 1250) =>
+  new Promise<void>((done) => {
+    if (!total || window.matchMedia('(prefers-reduced-motion: reduce)').matches) { set(total); done(); return; }
+    const start = performance.now();
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / ms);
+      set(Math.round(total * p ** 3));
+      if (p < 1) requestAnimationFrame(tick); else done();
+    };
+    requestAnimationFrame(tick);
+  });
+
+// Rolling digits: every digit is a vertical 0-9 strip that slides to its value.
+function Odometer({ value, digits }: { value: number; digits: number }) {
+  const s = String(value).padStart(digits, '0');
+  return (
+    <span className="odo" dir="ltr" aria-hidden="true">
+      {[...s].map((c, i) => (
+        <span className="odo-d" key={i}>
+          <span className="odo-s" style={{ transform: `translateY(-${Number(c) * 10}%)` }}>
+            {'0123456789'.split('').map((d) => <i key={d}>{d}</i>)}
+          </span>
+        </span>
+      ))}
+    </span>
+  );
+}
 
 interface Result { files: InFile[]; stats: LoadStats; name: string }
 
@@ -24,6 +54,7 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
   const [off, setOff] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(-1);
   const [dlg, setDlg] = useState(false);
+  const [fin, setFin] = useState(false);
 
   const set = <K extends keyof Options>(k: K, v: Options[K]) => setOpts((o) => ({ ...o, [k]: v }));
 
@@ -40,11 +71,12 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
           size: (z as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize,
           read: () => z.async('uint8array'),
         }));
-      const r = await loadFiles(
-        entries,
-        opts,
-        (done, total) => { if (done % 25 === 0 || done === total) setBusy({ done, total }); },
-      );
+      const r = await loadFiles(entries, opts);
+      if (r.files.length) {
+        await countUp(r.stats.total, (n) => setBusy({ done: n, total: r.stats.total }));
+        setFin(true); // show the check mark for half a second, then reveal the result
+        await new Promise<void>((x) => setTimeout(x, 500));
+      }
       if (!r.files.length) setErr(t.errEmpty);
       else setRes({ files: r.files, stats: r.stats, name: f.name.replace(/\.zip$/i, '') || 'project' });
     } catch (e) {
@@ -52,6 +84,7 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
       setErr(/zip|central directory|corrupt/i.test(msg) ? t.errNotZip : fmt(t.errRead, { msg }));
     } finally {
       setBusy(null);
+      setFin(false);
     }
   }
 
@@ -127,7 +160,17 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
         )}
 
         <div aria-live="polite">
-          {busy && <p className="mut sm">{fmt(t.working, { done: busy.done, total: busy.total })}</p>}
+          {busy && (
+            <div className="odo-wrap" aria-hidden="true">
+              <div className="row gap8" dir="ltr">
+                <Odometer value={busy.done} digits={String(busy.total || 1).length} />
+                {busy.total > 0 && <span className="mut odo-total" dir="ltr">/ {busy.total}</span>}
+                {fin && <span className="odo-ok"><Icon name="check" size={30} /></span>}
+              </div>
+              <div className="odo-bar"><span style={{ width: busy.total ? `${(busy.done / busy.total) * 100}%` : '0%' }} /></div>
+              {busy.total > 0 && <p className="mut sm">{fmt(t.working, { done: busy.done, total: busy.total })}</p>}
+            </div>
+          )}
           {warn && <p className="mut sm">{warn}</p>}
           {err && <p className="err" role="alert">{err}</p>}
         </div>

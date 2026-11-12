@@ -2,14 +2,14 @@ import type { Dictionary } from '@/i18n/translations';
 
 function Preview({ label, lines, result, undo }: { label: string; lines: Dictionary['hero']['previewLines']; result: string; undo: string }) {
   return (
-    <div className="ref-preview" role="img" aria-label={label} dir="ltr">
-      <div className="ref-preview-title" dir="rtl">{label}</div>
-      <div className="ref-code">
+    <div className="ref-preview" role="img" aria-label={label}>
+      <div className="ref-preview-title">{label}</div>
+      <div className="ref-code" dir="ltr">
         {lines.map((line, index) => (
           <div className={`ref-diff-line ref-diff-${line.kind}`} key={`${line.text}-${index}`}>{line.text}</div>
         ))}
       </div>
-      <div className="ref-preview-result" dir="rtl">
+      <div className="ref-preview-result">
         <span>{result}</span><span className="ref-undo">{undo}</span>
       </div>
     </div>

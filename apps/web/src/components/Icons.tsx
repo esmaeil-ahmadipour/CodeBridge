@@ -25,6 +25,8 @@ const paths = {
   filter: <path d="M3 5h18l-7 8v6l-4 2v-8z" />,
   split: <><rect x="3" y="4" width="7" height="16" rx="1.5" /><rect x="14" y="4" width="7" height="16" rx="1.5" /></>,
   arrow: <path d="M5 12h14M13 6l6 6-6 6" />,
+  menu: <path d="M4 6h16M4 12h16M4 18h16" />,
+  close: <path d="M6 6l12 12M18 6L6 18" />,
   windows: <><rect x="3" y="3" width="8" height="8" rx="1" /><rect x="13" y="3" width="8" height="8" rx="1" /><rect x="3" y="13" width="8" height="8" rx="1" /><rect x="13" y="13" width="8" height="8" rx="1" /></>,
   macos: <><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></>,
   linux: <><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M7 10l3 2-3 2M13 15h4" /></>,

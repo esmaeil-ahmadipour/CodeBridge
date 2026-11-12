@@ -34,15 +34,16 @@ export interface Dictionary {
   privacy: { title: string; items: Pair[] };
   features: { title: string; beforeTitle: string; beforeItems: string[]; afterTitle: string; afterItems: string[] };
   download: {
-    eyebrow: string; title: string; sub: string; osPrompt: string; desktopNote: string; browserCta: string; installMore: string;
+    eyebrow: string; title: string; sub: string; osPrompt: string; desktopNote: string; browserCta: string; installMore: string; installTitle: string; installSteps: string[]; guideLink: string;
     pwaBadge: string; pwaTitle: string; pwaText: string;
     android: string; iphone: string; steps: string[]; install: string; installed: string; iosHint: string; noPrompt: string;
     desktop: string; win: string; mac: string; linux: string; appleSilicon: string; note: string;
     winHint: string; macHint: string; linuxHint: string; releaseChecksums: string;
+    installNotes: string;
     recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
     relVersion: string; relPublished: string;
   };
-  footer: { license: string; tagline: string };
+  footer: { license: string; tagline: string; developer: string; developerName: string };
   guide: {
     metadata: { title: string; description: string };
     eyebrow: string; title: string; sub: string; toc: string; home: string; shotLabel: string;
@@ -157,6 +158,9 @@ export const translations: Record<Locale, Dictionary> = {
       desktopNote: 'The desktop app applies diffs and supports undo. Only need an export?',
       browserCta: 'Try the browser version on your phone or desktop',
       installMore: 'Install the web app',
+      installTitle: 'How to install the desktop app',
+      installSteps: ['Download the ZIP for your system and unzip it. No installer is needed.', 'Open the launcher inside: run.ps1 on Windows, run_macos.command on macOS, run.sh on Linux.', 'The menu opens in a terminal. Type 1 to export a project or 2 to apply an AI diff.'],
+      guideLink: 'Read the full guide',
       pwaBadge: 'PWA · No store needed',
       pwaTitle: 'Android & iPhone, installed in 10 seconds',
       pwaText: 'Add it to your Home Screen. It opens like an app, works offline, and your files never leave your phone.',
@@ -171,9 +175,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'First run: right-click run_macos.command and choose Open, or run `xattr -d com.apple.quarantine ./codebridge`. Intel Macs are not supported.',
       linuxHint: 'If needed, run `chmod +x codebridge run.sh` before launching.',
       releaseChecksums: 'Checksums and source on GitHub',
+      installNotes: 'Install notes',
       recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Application version: {v}', relPublished: 'Published {date}',
     },
-    footer: { license: 'MIT licensed · Developed by Esmaeil Ahmadipour', tagline: 'CodeBridge · Free and open-source tool for working with AI' },
+    footer: { license: 'MIT licensed · Developed by Esmaeil Ahmadipour', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
       metadata: { title: 'CodeBridge guide: use the desktop app step by step', description: 'Learn the CodeBridge desktop app: export your project for an AI, apply its diff safely, undo, and fix common problems.' },
       eyebrow: 'Guide · Desktop app 3.0',
@@ -392,6 +397,9 @@ export const translations: Record<Locale, Dictionary> = {
       desktopNote: 'اپ دسکتاپ برای اعمال diff و Undo است. فقط خروجی می‌خواهی؟',
       browserCta: 'نسخه‌ی مرورگر را روی گوشی یا دسکتاپ امتحان کن',
       installMore: 'نصب اپ وب',
+      installTitle: 'نصب اپ دسکتاپ',
+      installSteps: ['ZIP مخصوص سیستم‌تان را دانلود و باز کنید. نصب‌کننده لازم نیست.', 'فایل اجرا را داخل پوشه بزنید: در ویندوز run.ps1، در مک run_macos.command و در لینوکس run.sh.', 'منو در ترمینال باز می‌شود. عدد 1 را برای خروجی گرفتن از پروژه و 2 را برای اعمال Diff بزنید.'],
+      guideLink: 'خواندن راهنمای کامل',
       pwaBadge: 'PWA · بدون نیاز به استور',
       pwaTitle: 'اندروید و آیفون، نصب در ۱۰ ثانیه',
       pwaText: 'آن را به صفحه‌ی اصلی اضافه کنید. مثل اپ باز می‌شود، آفلاین کار می‌کند و فایل‌هایتان از گوشی بیرون نمی‌رود.',
@@ -406,9 +414,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'در نخستین اجرا، روی run_macos.command راست‌کلیک و Open را انتخاب کنید، یا دستور `xattr -d com.apple.quarantine ./codebridge` را اجرا کنید. مک‌های Intel پشتیبانی نمی‌شوند.',
       linuxHint: 'در صورت نیاز، پیش از اجرا `chmod +x codebridge run.sh` را اجرا کنید.',
       releaseChecksums: 'Checksumها و کد منبع در GitHub',
+      installNotes: 'نکات اجرا',
       recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'نسخه‌ی برنامه: {v}', relPublished: 'منتشرشده در {date}',
     },
-    footer: { license: 'مجوز MIT · توسعه دهنده اسماعیل احمدی‌پور', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی' },
+    footer: { license: 'مجوز MIT · توسعه دهنده اسماعیل احمدی‌پور', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
       metadata: { title: 'راهنمای CodeBridge: کار با اپ دسکتاپ قدم‌به‌قدم', description: 'کار با اپ دسکتاپ CodeBridge را یاد بگیرید: خروجی پروژه برای AI، اعمال امن Diff، Undo و رفع مشکل‌های رایج.' },
       eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
@@ -627,6 +636,9 @@ export const translations: Record<Locale, Dictionary> = {
       desktopNote: 'تطبيق سطح المكتب لتطبيق diff والتراجع. أتحتاج إلى التصدير فقط؟',
       browserCta: 'جرّب إصدار المتصفح على هاتفك أو حاسوبك',
       installMore: 'تثبيت تطبيق الويب',
+      installTitle: 'تثبيت تطبيق سطح المكتب',
+      installSteps: ['حمّل ملف ZIP المناسب لنظامك وفك ضغطه. لا حاجة إلى مثبّت.', 'شغّل الملف داخل المجلد: run.ps1 على ويندوز، وrun_macos.command على ماك، وrun.sh على لينكس.', 'تفتح القائمة في الطرفية. اكتب 1 لتصدير مشروع أو 2 لتطبيق diff.'],
+      guideLink: 'اقرأ الدليل الكامل',
       pwaBadge: 'PWA · بلا متجر',
       pwaTitle: 'أندرويد وآيفون، تثبيت في ١٠ ثوانٍ',
       pwaText: 'أضفه إلى الشاشة الرئيسية. يفتح كتطبيق ويعمل دون إنترنت، وملفاتك لا تغادر هاتفك.',
@@ -641,9 +653,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'عند التشغيل أول مرة، انقر بزر الفأرة الأيمن على run_macos.command واختر Open، أو نفّذ `xattr -d com.apple.quarantine ./codebridge`. أجهزة Intel Mac غير مدعومة.',
       linuxHint: 'عند الحاجة، نفّذ `chmod +x codebridge run.sh` قبل التشغيل.',
       releaseChecksums: 'المجاميع الاختبارية والمصدر على GitHub',
+      installNotes: 'ملاحظات التشغيل',
       recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'إصدار التطبيق: {v}', relPublished: 'نُشر في {date}',
     },
-    footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي' },
+    footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {
       metadata: { title: 'دليل CodeBridge: استخدم تطبيق سطح المكتب خطوة بخطوة', description: 'تعلّم تطبيق CodeBridge لسطح المكتب: صدّر مشروعك للذكاء الاصطناعي، وطبّق تعديلاته بأمان، وتراجع عنها، وأصلح المشكلات الشائعة.' },
       eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',

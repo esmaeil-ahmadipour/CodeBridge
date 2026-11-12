@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Download } from '@/components/Download';
 import { Features } from '@/components/Features';
 import { Footer } from '@/components/Footer';
+import { Help } from '@/components/Help';
 import { HowItWorks } from '@/components/HowItWorks';
 import { Hero } from '@/components/Hero';
 import { MobileShowcase } from '@/components/MobileShowcase';
@@ -35,10 +36,11 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         <Hero t={t.hero} downloads={flags.downloads} />
         <Features t={t.features} />
         <MobileShowcase mobile={t.mobile} />
+        {flags.downloads && <Download t={t.download} locale={locale} />}
+        <Tool t={t.tool} />
         <HowItWorks t={t.how} locale={locale} />
         <Privacy t={t.privacy} />
-        <Tool t={t.tool} />
-        {flags.downloads && <Download t={t.download} locale={locale} />}
+        <Help t={t.help} locale={locale} />
       </main>
       <Footer t={t.footer} nav={t.nav} locale={locale} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(locale)) }} />

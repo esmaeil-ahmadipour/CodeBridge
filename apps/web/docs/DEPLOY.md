@@ -12,7 +12,7 @@ Import the repository root and use these project settings:
 
 The root `pnpm-workspace.yaml` and `pnpm-lock.yaml` define dependency resolution. Vercel detects the workspace lockfile while building the app from `apps/web`; the repository checkout also makes the root `package.json` available to `next.config.ts` at `../../package.json`. Do not add a nested lockfile or a custom `vercel.json`; Next.js integration handles the `.next` output and the existing redirects, rewrites, and headers.
 
-No manually configured version environment variable is required: `next.config.ts` reads the root version and injects `NEXT_PUBLIC_CODEBRIDGE_VERSION` at build time. The localized version label uses it directly. To customize metadata URLs, set `NEXT_PUBLIC_SITE_URL`; to show desktop downloads, set `NEXT_PUBLIC_ENABLE_DOWNLOADS=true`. Both are public build-time variables, so set them for each Vercel environment that needs the value and redeploy after changing them. Safe local defaults are in `.env.example`; do not store secrets in `NEXT_PUBLIC_*` variables.
+No manually configured version environment variable is required: `next.config.ts` reads the root version and injects `NEXT_PUBLIC_CODEBRIDGE_VERSION` at build time. The localized version label uses it directly. To customize metadata URLs, set `NEXT_PUBLIC_SITE_URL`; desktop downloads are shown by default, so set `NEXT_PUBLIC_ENABLE_DOWNLOADS=false` only to hide them. Both are public build-time variables, so set them for each Vercel environment that needs the value and redeploy after changing them. Safe local defaults are in `.env.example`; do not store secrets in `NEXT_PUBLIC_*` variables.
 
 No `outputFileTracingRoot` or `turbopack.root` override is needed: the app has no source imports from outside `apps/web`, and the framework can infer the workspace from the root lockfile. `next.config.ts` reads the root manifest during the build from the repository checkout. TypeScript aliases resolve relative to the app's `tsconfig.json`. Fonts and PWA assets are in `public/` and use root-relative URLs. Locale routes, the global not-found page, and the rewrite/redirect behavior are built into the app's normal Next.js output.
 
@@ -34,7 +34,7 @@ Notes
 - Changing the site later: push to GitHub; Vercel redeploys. Bump `VERSION` in `public/sw.js` when you want installed
   copies to drop their old cache.
 
-Desktop downloads (when `NEXT_PUBLIC_ENABLE_DOWNLOADS=true`)
+Desktop downloads (shown unless `NEXT_PUBLIC_ENABLE_DOWNLOADS=false`)
 - The Download section lists Windows x64, macOS ARM64 and Linux x64 ZIPs. Each button links to
   `https://github.com/esmaeil-ahmadipour/codebridge/releases/latest/download/<asset>`, so new releases need no redeploy.
 - The shown application version comes from the root `package.json` at build time. The GitHub Releases API supplies only

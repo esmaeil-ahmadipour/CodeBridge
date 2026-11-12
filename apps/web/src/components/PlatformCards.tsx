@@ -6,7 +6,7 @@ import { Icon } from './Icons';
 
 export interface PlatformItem { id: 'windows' | 'macos' | 'linux'; name: string; arch: string; format: string; hint: string; href: string }
 export interface PlatformLabels {
-  recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
+  recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string; installNotes: string;
 }
 
 interface ArchitectureHints { architecture?: string; bitness?: string }
@@ -54,17 +54,22 @@ export function PlatformCards({ items, t }: { items: PlatformItem[]; t: Platform
           const rec = det === i.id;
           const label = fmt(t.downloadFor, { os: i.name });
           return (
-            <li key={i.id} className={rec ? 'dl-row rec' : 'dl-row'} data-os={i.id}>
-              <a className="dl-link" href={i.href} aria-label={fmt(t.dlAria, { label, arch: i.arch, format: i.format })}>
+            <li key={i.id} className={rec ? 'dl-card rec' : 'dl-card'} data-os={i.id}>
+              <div className="dl-card-top">
                 <span className="ico"><Icon name={i.id} fill={i.id === 'windows' ? 'currentColor' : 'none'} /></span>
-                <span className="dl-info">
-                  <b>{i.name}</b>
-                  <span className="dl-spec" dir="auto">{i.arch} · {i.format}</span>
-                </span>
                 <span className={rec ? 'dl-recommended on' : 'dl-recommended'} aria-hidden={!rec}>{t.recommended}</span>
-                <Icon name="download" size={20} />
+              </div>
+              <div className="dl-info">
+                <b>{i.name}</b>
+                <span className="dl-spec" dir="auto">{i.arch} · {i.format}</span>
+              </div>
+              <a className="btn pri dl-btn" href={i.href} aria-label={fmt(t.dlAria, { label, arch: i.arch, format: i.format })}>
+                <Icon name="download" size={18} />{label}
               </a>
-              <p className="dl-install-hint">{renderHint(i.hint)}</p>
+              <details className="dl-notes-d">
+                <summary>{t.installNotes}</summary>
+                <p className="dl-install-hint">{renderHint(i.hint)}</p>
+              </details>
             </li>
           );
         })}

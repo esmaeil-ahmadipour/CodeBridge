@@ -1,17 +1,14 @@
 import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
 import { flags } from '@/lib/flags';
+import { fmt } from '@/lib/fmt';
 import { formatReleaseDate, getLatestRelease } from '@/lib/release';
 import { downloads, getApplicationVersion, latestReleaseUrl, platforms } from '@/lib/site';
 import { Icon } from './Icons';
-import { InstallCard } from './InstallCard';
 import { PlatformCards, type PlatformItem } from './PlatformCards';
-
-const fmt = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_, k: string) => v[k] ?? '');
 
 export async function Download({ t, locale }: { t: Dictionary['download']; locale: Locale }) {
   if (!flags.downloads) return null; // the flag also guards this component, not only its call site
-  const applicationVersion = getApplicationVersion();
   const release = await getLatestRelease(); // never throws; null on any failure
   const date = formatReleaseDate(release?.publishedAt ?? null, locale);
   const names = { windows: t.win, macos: t.mac, linux: t.linux };
@@ -25,38 +22,28 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
     href: downloads[p.id],
   }));
   return (
-    <section id="dl" className="ref-download">
-      <div className="ref-wrap">
-        <div className="ref-download-card">
-          <div className="ref-download-heading">
-            <h2>{t.title}</h2>
-            <p>{t.sub}</p>
+    <section id="dl" className="ref-downloads" aria-labelledby="download-title">
+      <div className="ref-wrap ref-downloads-card">
+        <div className="ref-downloads-head">
+          <h2 id="download-title">{t.osPrompt}</h2>
+          <div className="ref-downloads-meta">
+            <span className="ref-badge" dir="ltr">v{getApplicationVersion()}</span>
+            {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
+            <a className="ref-checksum" href={latestReleaseUrl} aria-label={t.releaseChecksums}>
+              Checksum<Icon name="arrow" size={14} />
+            </a>
           </div>
-          <p className="ref-download-prompt">{t.osPrompt}</p>
-          <div className="ref-download-grid">
-            <div className="ref-download-desktop">
-              <h3>{t.desktop}</h3>
-              <PlatformCards
-                items={items}
-                t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
-              />
-              <div className="row wrap8 dl-rel">
-                <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: applicationVersion })}</span>
-                {release && date && <span className="download-published">{fmt(t.relPublished, { date })}</span>}
-                <a className="dl-notes" href={latestReleaseUrl}>
-                  {t.releaseChecksums}<Icon name="arrow" size={16} />
-                </a>
-              </div>
-              <p className="download-note">{t.note}</p>
-              <p className="ref-download-note">{t.desktopNote} <a href="#mobile">{t.browserCta}</a></p>
-            </div>
-            <details className="ref-install-details">
-              <summary>{t.installMore}</summary>
-              <div className="ref-install-panel">
-                <InstallCard t={t} />
-              </div>
-            </details>
+        </div>
+        <PlatformCards
+          items={items}
+          t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria, installNotes: t.installNotes }}
+        />
+        <div className="ref-downloads-foot">
+          <div className="ref-downloads-info">
+            <p className="sm">{t.note}</p>
+            <p className="sm">{t.desktopNote}</p>
           </div>
+          <a className="ref-button ref-button-secondary" href="#mobile">{t.browserCta}</a>
         </div>
       </div>
     </section>
