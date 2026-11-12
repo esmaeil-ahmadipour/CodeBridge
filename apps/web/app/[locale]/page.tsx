@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Download } from '@/components/Download';
 import { Features } from '@/components/Features';
 import { Footer } from '@/components/Footer';
+import { Help } from '@/components/Help';
 import { Hero } from '@/components/Hero';
 import { Navbar } from '@/components/Navbar';
 import { Privacy } from '@/components/Privacy';
@@ -35,8 +36,9 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         <Privacy t={t.privacy} />
         <Features t={t.features} downloads={flags.downloads} />
         {flags.downloads && <Download t={t.download} locale={locale} />}
+        <Help t={t.help} locale={locale} />
       </main>
-      <Footer t={t.footer} nav={t.nav} />
+      <Footer t={t.footer} nav={t.nav} locale={locale} home />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(locale)) }} />
     </>
   );

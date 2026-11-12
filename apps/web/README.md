@@ -24,10 +24,12 @@ These commands also work from the repository root through its workspace scripts.
 
 ## Structure
 ```text
-app/[locale]/        layout (html lang/dir, theme init) and the single page
+app/[locale]/        layout (html lang/dir, theme init) and the landing page
+app/[locale]/guide/  the desktop app guide (terminal screens, all steps, fixes)
 app/                 manifest (PWA), sitemap, robots, icons, 404
 src/core/            ZIP -> text logic: .gitignore, filters, redaction, tokens, tree, split (pure TypeScript)
-src/components/      Navbar, Hero, Tool, Privacy, Features, Download, InstallCard, Footer
+src/components/      Navbar, Hero, Tool, Privacy, Features, Download, InstallCard, Help, Guide, Footer
+src/lib/guide.ts     terminal screens used by the guide (keep in sync with apps/desktop)
 src/i18n/            locales + all texts (en, fa, ar)
 src/context/         ThemeContext, LanguageContext
 src/index.css        design tokens (light/dark) and styles

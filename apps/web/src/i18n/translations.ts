@@ -2,9 +2,14 @@ import type { Locale } from './config';
 
 interface Pair { t: string; s: string }
 
+export interface GuideSection {
+  id: string; title: string; intro: string;
+  steps?: string[]; keys?: Pair[]; notes?: string[]; qa?: Pair[];
+}
+
 export interface Dictionary {
   metadata: { title: string; description: string };
-  nav: { tryIt: string; privacy: string; download: string; theme: string; language: string; skip: string };
+  nav: { tryIt: string; privacy: string; download: string; theme: string; language: string; skip: string; guide: string };
   hero: { eyebrow: string; title: string; sub: string; ctaTry: string; ctaPrivacy: string; ctaDownload: string; proof: string[]; soon: string; previewLabel: string };
   tool: {
     title: string; sub: string; choose: string; chooseHint: string;
@@ -27,6 +32,12 @@ export interface Dictionary {
     relVersion: string; relPublished: string;
   };
   footer: { license: string; tagline: string };
+  guide: {
+    metadata: { title: string; description: string };
+    eyebrow: string; title: string; sub: string; toc: string; home: string; shotLabel: string;
+    sections: GuideSection[];
+  };
+  help: { title: string; sub: string; items: Pair[]; cta: string };
 }
 
 export const translations: Record<Locale, Dictionary> = {
@@ -36,7 +47,7 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'Convert a project ZIP into one clean text file for any AI, right in your browser. Free, private, and nothing is uploaded.',
     },
-    nav: { tryIt: 'Try it', privacy: 'Privacy', download: 'Download', theme: 'Switch light or dark theme', language: 'Language', skip: 'Skip to content' },
+    nav: { tryIt: 'Try it', privacy: 'Privacy', download: 'Download', theme: 'Switch light or dark theme', language: 'Language', skip: 'Skip to content', guide: 'Guide' },
     hero: {
       eyebrow: 'Free · Private · In your browser',
       title: 'Turn your project into AI-ready text. Privately.',
@@ -114,7 +125,119 @@ export const translations: Record<Locale, Dictionary> = {
       releaseChecksums: 'Checksums and source on GitHub',
       recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Latest release: {v}', relPublished: 'Published {date}',
     },
-    footer: { license: 'MIT licensed · Made by Esmaeil Ahmadipour', tagline: 'Free, private and open source. Your code stays on your device.' },
+    footer: { license: 'MIT licensed · Developed by Esmaeil Ahmadipour', tagline: 'Free, private and open source. Your code stays on your device.' },
+    guide: {
+      metadata: { title: 'CodeBridge guide: use the desktop app step by step', description: 'Learn the CodeBridge desktop app: export your project for an AI, apply its diff safely, undo, and fix common problems.' },
+      eyebrow: 'Guide · Desktop app 3.0',
+      title: 'Learn CodeBridge in 5 minutes',
+      sub: 'Export your project for an AI, apply its reply safely, and undo if needed. The screens below are exactly what you see in the app.',
+      toc: 'On this page',
+      home: 'Back to home',
+      shotLabel: 'Example of what you see in the terminal',
+      sections: [
+        {
+          id: 'install',
+          title: 'Install and start',
+          intro: 'Download the ZIP for your system from Releases, unzip it and run the launcher. No installer and no Python needed. Git must be installed to apply diffs.',
+          steps: ['Download the ZIP for your system from the Releases page and unzip it.', 'Start the launcher: run.sh on Linux, run_macos.command on macOS, run.ps1 on Windows.', 'The menu opens. Type a number and press Enter.'],
+          notes: ['macOS first run: run the xattr line once, because the app is not signed.', 'Windows may show SmartScreen: choose More info, then Run anyway.'],
+        },
+        {
+          id: 'menu',
+          title: 'The main menu',
+          intro: 'Type the number of what you want and press Enter. Type 0 to leave.',
+          keys: [
+            { t: '1', s: 'Export: build the text file you give to the AI.' },
+            { t: '2', s: 'Apply: put the AI’s diff into your project.' },
+            { t: '3', s: 'Undo: restore the files of the last apply.' },
+            { t: '4', s: 'Projects: save folders so you can pick them by name.' },
+            { t: '5', s: 'Settings: change defaults such as folders to skip.' },
+            { t: '6', s: 'History: see recent exports and applies.' },
+            { t: '0', s: 'Exit.' },
+          ],
+        },
+        {
+          id: 'export',
+          title: 'Export your project on one screen',
+          intro: 'Everything is on one page. Tick what you want, then press Enter. Pressing Enter alone exports exactly what you see.',
+          steps: ['Pick the project first: type p, then choose it from the list or type its folder.', 'Type keys separated by spaces, for example “3 s t”: a Next.js project, with SVG contents and with test files. Typing a key again undoes it.', 'Read the “Will export” line above the box, then press Enter on an empty line.'],
+          keys: [
+            { t: '1-6', s: 'Project type (one). Changing it resets the languages to that type’s defaults.' },
+            { t: 'a-j', s: 'Turn languages on or off.' },
+            { t: 'x', s: 'Add a custom language, for example lua.' },
+            { t: 's', s: 'Include the contents of SVG files.' },
+            { t: 'l', s: 'Exclude lock files such as package-lock.json and pubspec.lock.' },
+            { t: 't', s: 'Exclude test files and folders.' },
+            { t: 'o', s: 'Only the files changed in git.' },
+            { t: 'p', s: 'Choose another project.' },
+            { t: 'q', s: 'Cancel and go back.' },
+          ],
+          notes: ['Secrets are always hidden in the report. Still skim it before you share it.', 'The report is saved as code_report_<project>.txt in the folder you started the app from. Give that file to the AI.', 'Your choices are remembered for the next export.'],
+        },
+        {
+          id: 'apply',
+          title: 'Apply the AI’s diff',
+          intro: 'Ask the AI to answer with a git diff. CodeBridge then puts it into your project safely: it checks everything first and changes nothing if any part fails.',
+          steps: ['In the AI’s reply, copy the whole diff with Ctrl+C (or its copy button).', 'In CodeBridge type 2 and press Enter, then choose the repo: Enter picks the first one in the list, or type a number, a name or a folder.', 'When asked, press Enter. The diff is read from your clipboard. Do not paste it into the terminal: a multi-line paste is cut after the first line.', 'Look at the list of files, confirm, and you are done.'],
+          notes: ['If the diff does not apply, nothing changes and the app writes codebridge-fix.txt (also copied to the clipboard). Send it back to the AI.', 'Git must be installed. Your uncommitted work stays untouched.'],
+        },
+        {
+          id: 'undo',
+          title: 'Undo the last apply',
+          intro: 'Changed your mind, or the result is wrong? Type 3, choose the repo, and the files are restored exactly as they were.',
+          steps: ['Type 3 and press Enter.', 'Choose the repo the same way as in Apply.'],
+          notes: ['If you edited a file after the apply, undo refuses to overwrite it. In the CLI, use --force only if you are sure.'],
+        },
+        {
+          id: 'manage',
+          title: 'Projects, Settings and History',
+          intro: 'Save your folders once, then pick them by name everywhere.',
+          keys: [
+            { t: '4', s: 'Projects: a adds a folder (optionally with a preset: flutter, node, python), d removes one.' },
+            { t: '5', s: 'Settings: type a number to change it, for example folders to skip, max file size, split size or copy to clipboard. r resets everything.' },
+            { t: '6', s: 'History: recent exports and applies.' },
+          ],
+        },
+        {
+          id: 'cli',
+          title: 'For scripts and power users',
+          intro: 'Every menu action is also a command. Run codebridge --help to see all of them.',
+          keys: [
+            { t: 'codebridge context export --changed', s: 'Export only the changed files.' },
+            { t: 'codebridge patch apply fix.patch -r ./app', s: 'Apply a diff file to a repo.' },
+            { t: 'codebridge patch undo -r ./app', s: 'Undo the last apply.' },
+            { t: 'codebridge history -n 10', s: 'Show the last 10 runs.' },
+          ],
+          notes: ['More commands are listed in docs/USAGE.md on GitHub.'],
+        },
+        {
+          id: 'trouble',
+          title: 'Fix common problems',
+          intro: 'Find your message or symptom below.',
+          qa: [
+            { t: 'My diff is cut when I paste it', s: 'Do not paste. Copy the diff (Ctrl+C), choose 2, then press Enter. It is read from the clipboard.' },
+            { t: '“Clipboard has no diff”', s: 'Copy the full AI reply or the whole diff block again and retry. On Linux, install xclip, xsel or wl-clipboard.' },
+            { t: 'The diff failed to apply', s: 'Nothing was changed. Send codebridge-fix.txt to the AI and apply its new answer.' },
+            { t: '“no terminal to confirm; re-run with -y”', s: 'This appears only when the app does not run in a real terminal, for example inside a script. Use a normal terminal, or add -y.' },
+            { t: '“Folder not found”', s: 'Type the full path, or save the project once in Projects (4) and pick it by number.' },
+            { t: '“Pick at least one language”', s: 'Press a letter from a to j (or x for a custom one), then Enter.' },
+            { t: 'Git is missing', s: 'Apply and Undo need Git. Install it from git-scm.com and restart the terminal.' },
+            { t: 'macOS cannot open the app', s: 'In the unzipped folder run: xattr -d com.apple.quarantine ./codebridge' },
+            { t: 'Windows SmartScreen warning', s: 'Choose More info, then Run anyway. The binary is not code-signed.' },
+          ],
+        },
+      ],
+    },
+    help: {
+      title: 'Need help?',
+      sub: 'The guide takes you from install to undo, with screens you can compare against what you see.',
+      items: [
+        { t: 'Export on one screen', s: 'Which keys to press and what each option does.' },
+        { t: 'Apply an AI diff', s: 'Copy, press Enter, done. And why you must not paste.' },
+        { t: 'Something went wrong?', s: 'Short fixes for the most common messages.' },
+      ],
+      cta: 'Open the full guide',
+    },
   },
   fa: {
     metadata: {
@@ -122,7 +245,7 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'ZIP پروژه را همین‌جا در مرورگر به یک فایل متنی مرتب برای هر هوش مصنوعی تبدیل کنید. رایگان و خصوصی است و هیچ‌چیز آپلود نمی‌شود.',
     },
-    nav: { tryIt: 'امتحان کنید', privacy: 'حریم خصوصی', download: 'دانلود', theme: 'تغییر تم روشن یا تاریک', language: 'زبان', skip: 'رفتن به محتوا' },
+    nav: { tryIt: 'امتحان کنید', privacy: 'حریم خصوصی', download: 'دانلود', theme: 'تغییر تم روشن یا تاریک', language: 'زبان', skip: 'رفتن به محتوا', guide: 'راهنما' },
     hero: {
       eyebrow: 'رایگان · خصوصی · داخل مرورگر',
       title: 'پروژه‌تان را به متن آماده‌ی هوش مصنوعی تبدیل کنید. کاملاً خصوصی.',
@@ -200,7 +323,119 @@ export const translations: Record<Locale, Dictionary> = {
       releaseChecksums: 'Checksumها و کد منبع در GitHub',
       recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'آخرین نسخه: {v}', relPublished: 'منتشرشده در {date}',
     },
-    footer: { license: 'مجوز MIT · ساخته‌ی اسماعیل احمدی‌پور', tagline: 'رایگان، خصوصی و متن‌باز. کد شما روی دستگاه خودتان می‌ماند.' },
+    footer: { license: 'مجوز MIT · توسعه دهنده اسماعیل احمدی‌پور', tagline: 'رایگان، خصوصی و متن‌باز. کد شما روی دستگاه خودتان می‌ماند.' },
+    guide: {
+      metadata: { title: 'راهنمای CodeBridge: کار با اپ دسکتاپ قدم‌به‌قدم', description: 'کار با اپ دسکتاپ CodeBridge را یاد بگیرید: خروجی پروژه برای AI، اعمال امن Diff، Undo و رفع مشکل‌های رایج.' },
+      eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
+      title: 'CodeBridge را در ۵ دقیقه یاد بگیرید',
+      sub: 'پروژه‌تان را برای AI خروجی بگیرید، پاسخ آن را امن اعمال کنید و در صورت نیاز Undo بزنید. صفحه‌های زیر دقیقاً همان چیزی است که در برنامه می‌بینید.',
+      toc: 'در این صفحه',
+      home: 'بازگشت به صفحه‌ی اصلی',
+      shotLabel: 'نمونه‌ی آنچه در ترمینال می‌بینید',
+      sections: [
+        {
+          id: 'install',
+          title: 'نصب و اجرا',
+          intro: 'ZIP مخصوص سیستم‌تان را از صفحه‌ی Releases بگیرید، باز کنید و فایل اجرا را بزنید. نصب‌کننده و Python لازم نیست. برای اعمال Diff باید Git نصب باشد.',
+          steps: ['ZIP مخصوص سیستم‌تان را از صفحه‌ی Releases دانلود و باز کنید.', 'فایل اجرا را بزنید: در لینوکس run.sh، در مک run_macos.command و در ویندوز run.ps1.', 'منو باز می‌شود. شماره‌ی گزینه را بنویسید و Enter بزنید.'],
+          notes: ['اجرای اول در مک: خط xattr را یک‌بار بزنید، چون برنامه امضا نشده است.', 'ویندوز ممکن است SmartScreen نشان دهد: More info و سپس Run anyway را بزنید.'],
+        },
+        {
+          id: 'menu',
+          title: 'منوی اصلی',
+          intro: 'شماره‌ی کار موردنظر را بنویسید و Enter بزنید. با 0 خارج می‌شوید.',
+          keys: [
+            { t: '1', s: 'Export: فایل متنی‌ای می‌سازد که به AI می‌دهید.' },
+            { t: '2', s: 'Apply: Diff پاسخ AI را در پروژه‌تان اعمال می‌کند.' },
+            { t: '3', s: 'Undo: فایل‌های آخرین اعمال را برمی‌گرداند.' },
+            { t: '4', s: 'Projects: پوشه‌ها را ذخیره می‌کند تا با نام انتخابشان کنید.' },
+            { t: '5', s: 'Settings: پیش‌فرض‌ها (مثل پوشه‌های ردشونده) را تغییر می‌دهد.' },
+            { t: '6', s: 'History: خروجی‌ها و اعمال‌های اخیر را نشان می‌دهد.' },
+            { t: '0', s: 'خروج.' },
+          ],
+        },
+        {
+          id: 'export',
+          title: 'خروجی پروژه در یک صفحه',
+          intro: 'همه‌چیز در یک صفحه است. موارد را تیک بزنید و Enter بزنید. Enter خالی دقیقاً همان چیزی را خروجی می‌گیرد که می‌بینید.',
+          steps: ['اول پروژه را انتخاب کنید: p را بزنید و از لیست انتخاب کنید یا پوشه را بنویسید.', 'کلیدها را با فاصله بنویسید؛ مثلاً «3 s t» یعنی پروژه‌ی Next.js، با محتوای SVG و با فایل‌های تست. زدن دوباره‌ی یک کلید آن را برمی‌گرداند.', 'خط «Will export» بالای کادر را بخوانید و روی یک خط خالی Enter بزنید.'],
+          keys: [
+            { t: '1-6', s: 'نوع پروژه (یکی). با تغییر آن، زبان‌ها به پیش‌فرض همان نوع برمی‌گردند.' },
+            { t: 'a-j', s: 'روشن یا خاموش‌کردن زبان‌ها.' },
+            { t: 'x', s: 'افزودن زبان دلخواه، مثل lua.' },
+            { t: 's', s: 'محتوای فایل‌های SVG هم بیاید.' },
+            { t: 'l', s: 'فایل‌های lock (مثل package-lock.json و pubspec.lock) نیایند.' },
+            { t: 't', s: 'فایل‌ها و پوشه‌های تست نیایند.' },
+            { t: 'o', s: 'فقط فایل‌های تغییرکرده در git.' },
+            { t: 'p', s: 'انتخاب پروژه‌ی دیگر.' },
+            { t: 'q', s: 'انصراف و بازگشت.' },
+          ],
+          notes: ['رمزها همیشه در گزارش پنهان می‌شوند؛ باز هم پیش از اشتراک‌گذاری گزارش را مرور کنید.', 'گزارش با نام code_report_<project>.txt در همان پوشه‌ای که برنامه را از آن اجرا کرده‌اید ذخیره می‌شود. این فایل را به AI بدهید.', 'انتخاب‌هایتان برای خروجی بعدی یادآوری می‌شود.'],
+        },
+        {
+          id: 'apply',
+          title: 'اعمال Diff پیشنهادی AI',
+          intro: 'از AI بخواهید پاسخ را به‌صورت git diff بدهد. بعد CodeBridge آن را امن در پروژه می‌گذارد: اول همه‌چیز را بررسی می‌کند و اگر بخشی شکست بخورد هیچ چیز را عوض نمی‌کند.',
+          steps: ['در پاسخ AI کل Diff را با Ctrl+C کپی کنید (یا با دکمه‌ی کپی).', 'در CodeBridge عدد 2 را بزنید و ریپو را انتخاب کنید: Enter اولین مورد لیست را برمی‌دارد، یا شماره، نام یا پوشه را بنویسید.', 'وقتی خواست، Enter بزنید. Diff از کلیپ‌بورد خوانده می‌شود. آن را در ترمینال Paste نکنید؛ Paste چندخطی بعد از خط اول بریده می‌شود.', 'فهرست فایل‌ها را ببینید و تأیید کنید؛ تمام.'],
+          notes: ['اگر Diff اعمال نشود هیچ چیز عوض نمی‌شود و فایل codebridge-fix.txt ساخته (و کپی) می‌شود. آن را برای AI بفرستید.', 'Git باید نصب باشد. کارهای Commit‌نشده‌ی شما دست‌نخورده می‌ماند.'],
+        },
+        {
+          id: 'undo',
+          title: 'بازگرداندن آخرین اعمال (Undo)',
+          intro: 'نظرتان عوض شد یا نتیجه درست نبود؟ عدد 3 را بزنید، ریپو را انتخاب کنید و فایل‌ها دقیقاً به حالت قبل برمی‌گردند.',
+          steps: ['عدد 3 را بزنید و Enter کنید.', 'ریپو را مثل Apply انتخاب کنید.'],
+          notes: ['اگر بعد از اعمال فایلی را ویرایش کرده باشید، Undo آن را بازنویسی نمی‌کند. در CLI فقط وقتی مطمئنید از --force استفاده کنید.'],
+        },
+        {
+          id: 'manage',
+          title: 'Projects، Settings و History',
+          intro: 'پوشه‌هایتان را یک‌بار ذخیره کنید و بعد همه‌جا با نام انتخابشان کنید.',
+          keys: [
+            { t: '4', s: 'Projects: a پوشه اضافه می‌کند (می‌توانید preset بدهید: flutter، node، python) و d حذف می‌کند.' },
+            { t: '5', s: 'Settings: شماره‌ی هر مورد را بزنید تا تغییر کند؛ مثلاً پوشه‌های ردشونده، حداکثر حجم فایل، اندازه‌ی تقسیم یا کپی در کلیپ‌بورد. r همه را به پیش‌فرض برمی‌گرداند.' },
+            { t: '6', s: 'History: خروجی‌ها و اعمال‌های اخیر.' },
+          ],
+        },
+        {
+          id: 'cli',
+          title: 'برای اسکریپت و کاربران حرفه‌ای',
+          intro: 'هر کار منو یک دستور هم دارد. با codebridge --help همه را ببینید.',
+          keys: [
+            { t: 'codebridge context export --changed', s: 'فقط فایل‌های تغییرکرده را خروجی بگیرید.' },
+            { t: 'codebridge patch apply fix.patch -r ./app', s: 'فایل Diff را روی یک ریپو اعمال کنید.' },
+            { t: 'codebridge patch undo -r ./app', s: 'آخرین اعمال را برگردانید.' },
+            { t: 'codebridge history -n 10', s: 'ده اجرای آخر را نشان بدهید.' },
+          ],
+          notes: ['دستورهای بیشتر در docs/USAGE.md در GitHub است.'],
+        },
+        {
+          id: 'trouble',
+          title: 'رفع مشکل‌های رایج',
+          intro: 'پیام یا مشکل خود را در فهرست زیر پیدا کنید.',
+          qa: [
+            { t: 'Diff من هنگام Paste بریده می‌شود', s: 'Paste نکنید. Diff را کپی کنید (Ctrl+C)، گزینه‌ی 2 را بزنید و Enter کنید. از کلیپ‌بورد خوانده می‌شود.' },
+            { t: '«Clipboard has no diff»', s: 'کل پاسخ AI یا کل بلوک Diff را دوباره کپی کنید و دوباره امتحان کنید. در لینوکس xclip، xsel یا wl-clipboard نصب کنید.' },
+            { t: 'Diff اعمال نشد', s: 'هیچ چیز تغییر نکرده است. فایل codebridge-fix.txt را برای AI بفرستید و پاسخ جدیدش را اعمال کنید.' },
+            { t: '«no terminal to confirm; re-run with -y»', s: 'این پیام فقط وقتی می‌آید که برنامه داخل ترمینال واقعی اجرا نشده باشد، مثلاً داخل یک اسکریپت. از ترمینال معمولی استفاده کنید یا -y بدهید.' },
+            { t: '«Folder not found»', s: 'مسیر کامل را بنویسید، یا پروژه را یک‌بار در Projects (گزینه‌ی 4) ذخیره کنید و با شماره انتخاب کنید.' },
+            { t: '«Pick at least one language»', s: 'یکی از حرف‌های a تا j (یا x برای زبان دلخواه) را بزنید و Enter کنید.' },
+            { t: 'Git نصب نیست', s: 'Apply و Undo به Git نیاز دارند. آن را از git-scm.com نصب کنید و ترمینال را دوباره باز کنید.' },
+            { t: 'مک اجازه‌ی باز کردن برنامه را نمی‌دهد', s: 'در پوشه‌ی بازشده این دستور را بزنید: xattr -d com.apple.quarantine ./codebridge' },
+            { t: 'هشدار SmartScreen در ویندوز', s: 'More info و بعد Run anyway را بزنید. فایل اجرایی امضای دیجیتال ندارد.' },
+          ],
+        },
+      ],
+    },
+    help: {
+      title: 'کمک می‌خواهید؟',
+      sub: 'راهنما شما را از نصب تا Undo می‌برد، با صفحه‌هایی که می‌توانید با آنچه می‌بینید مقایسه کنید.',
+      items: [
+        { t: 'خروجی در یک صفحه', s: 'کدام کلیدها را بزنید و هر گزینه چه می‌کند.' },
+        { t: 'اعمال Diff پیشنهادی AI', s: 'کپی کنید، Enter بزنید، تمام. و اینکه چرا نباید Paste کنید.' },
+        { t: 'مشکلی پیش آمد؟', s: 'راه‌حل کوتاه برای رایج‌ترین پیام‌ها.' },
+      ],
+      cta: 'باز کردن راهنمای کامل',
+    },
   },
   ar: {
     metadata: {
@@ -208,7 +443,7 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'حوّل ملف ZIP للمشروع إلى ملف نصي منظم لأي ذكاء اصطناعي، داخل متصفحك مباشرة. مجاني وخاص ولا يُرفع شيء.',
     },
-    nav: { tryIt: 'جرّبه', privacy: 'الخصوصية', download: 'تحميل', theme: 'تبديل المظهر الفاتح أو الداكن', language: 'اللغة', skip: 'تخطَّ إلى المحتوى' },
+    nav: { tryIt: 'جرّبه', privacy: 'الخصوصية', download: 'تحميل', theme: 'تبديل المظهر الفاتح أو الداكن', language: 'اللغة', skip: 'تخطَّ إلى المحتوى', guide: 'الدليل' },
     hero: {
       eyebrow: 'مجاني · خاص · داخل المتصفح',
       title: 'حوّل مشروعك إلى نص جاهز للذكاء الاصطناعي. بخصوصية تامة.',
@@ -287,5 +522,117 @@ export const translations: Record<Locale, Dictionary> = {
       recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'أحدث إصدار: {v}', relPublished: 'نُشر في {date}',
     },
     footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'مجاني وخاص ومفتوح المصدر. يبقى كودك على جهازك.' },
+    guide: {
+      metadata: { title: 'دليل CodeBridge: استخدم تطبيق سطح المكتب خطوة بخطوة', description: 'تعلّم تطبيق CodeBridge لسطح المكتب: صدّر مشروعك للذكاء الاصطناعي، وطبّق تعديلاته بأمان، وتراجع عنها، وأصلح المشكلات الشائعة.' },
+      eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',
+      title: 'تعلّم CodeBridge في 5 دقائق',
+      sub: 'صدّر مشروعك للذكاء الاصطناعي، وطبّق رده بأمان، وتراجع عند الحاجة. الشاشات أدناه هي ما تراه فعلًا في التطبيق.',
+      toc: 'في هذه الصفحة',
+      home: 'العودة إلى الرئيسية',
+      shotLabel: 'مثال على ما تراه في الطرفية',
+      sections: [
+        {
+          id: 'install',
+          title: 'التثبيت والتشغيل',
+          intro: 'حمّل ملف ZIP المناسب لنظامك من صفحة Releases، وفك ضغطه وشغّل المُشغِّل. لا مثبّت ولا Python. يجب تثبيت Git لتطبيق التعديلات.',
+          steps: ['حمّل ملف ZIP المناسب لنظامك من صفحة Releases وفك ضغطه.', 'شغّل المُشغِّل: run.sh على لينكس، وrun_macos.command على ماك، وrun.ps1 على ويندوز.', 'تفتح القائمة. اكتب رقمًا ثم اضغط Enter.'],
+          notes: ['أول تشغيل على ماك: نفّذ سطر xattr مرة واحدة لأن التطبيق غير موقّع.', 'قد يعرض ويندوز تحذير SmartScreen: اختر More info ثم Run anyway.'],
+        },
+        {
+          id: 'menu',
+          title: 'القائمة الرئيسية',
+          intro: 'اكتب رقم ما تريده ثم اضغط Enter. اكتب 0 للخروج.',
+          keys: [
+            { t: '1', s: 'Export: ينشئ الملف النصي الذي تعطيه للذكاء الاصطناعي.' },
+            { t: '2', s: 'Apply: يطبّق تعديلات الذكاء الاصطناعي (diff) على مشروعك.' },
+            { t: '3', s: 'Undo: يستعيد ملفات آخر تطبيق.' },
+            { t: '4', s: 'Projects: يحفظ المجلدات لتختارها بالاسم.' },
+            { t: '5', s: 'Settings: يغيّر الإعدادات الافتراضية مثل المجلدات المستبعدة.' },
+            { t: '6', s: 'History: يعرض آخر عمليات التصدير والتطبيق.' },
+            { t: '0', s: 'خروج.' },
+          ],
+        },
+        {
+          id: 'export',
+          title: 'تصدير مشروعك في شاشة واحدة',
+          intro: 'كل شيء في صفحة واحدة. حدّد ما تريد ثم اضغط Enter. الضغط على Enter وحده يصدّر ما تراه تمامًا.',
+          steps: ['اختر المشروع أولًا: اكتب p ثم اختره من القائمة أو اكتب مجلده.', 'اكتب المفاتيح مفصولة بمسافات، مثل «3 s t»: مشروع Next.js مع محتوى SVG ومع ملفات الاختبار. كتابة المفتاح مرة أخرى تلغيه.', 'اقرأ سطر «Will export» فوق الإطار ثم اضغط Enter على سطر فارغ.'],
+          keys: [
+            { t: '1-6', s: 'نوع المشروع (واحد). تغييره يعيد اللغات إلى افتراضيات ذلك النوع.' },
+            { t: 'a-j', s: 'تشغيل اللغات أو إيقافها.' },
+            { t: 'x', s: 'إضافة لغة مخصصة، مثل lua.' },
+            { t: 's', s: 'تضمين محتوى ملفات SVG.' },
+            { t: 'l', s: 'استبعاد ملفات lock مثل package-lock.json وpubspec.lock.' },
+            { t: 't', s: 'استبعاد ملفات ومجلدات الاختبار.' },
+            { t: 'o', s: 'الملفات المتغيرة في git فقط.' },
+            { t: 'p', s: 'اختيار مشروع آخر.' },
+            { t: 'q', s: 'إلغاء والعودة.' },
+          ],
+          notes: ['الأسرار تُخفى دائمًا في التقرير. ومع ذلك راجعه قبل مشاركته.', 'يُحفظ التقرير باسم code_report_<project>.txt في المجلد الذي شغّلت منه التطبيق. أعطِ هذا الملف للذكاء الاصطناعي.', 'تُحفظ اختياراتك للتصدير التالي.'],
+        },
+        {
+          id: 'apply',
+          title: 'تطبيق تعديلات الذكاء الاصطناعي',
+          intro: 'اطلب من الذكاء الاصطناعي أن يرد بصيغة git diff. ثم يضعه CodeBridge في مشروعك بأمان: يفحص كل شيء أولًا ولا يغيّر شيئًا إذا فشل أي جزء.',
+          steps: ['انسخ الـ diff كاملًا من رد الذكاء الاصطناعي بـ Ctrl+C (أو بزر النسخ).', 'في CodeBridge اكتب 2 ثم Enter، واختر المستودع: Enter يختار أول عنصر في القائمة، أو اكتب رقمًا أو اسمًا أو مجلدًا.', 'عندما يطلب ذلك اضغط Enter. يُقرأ الـ diff من الحافظة. لا تلصقه في الطرفية: اللصق متعدد الأسطر يُقطع بعد السطر الأول.', 'راجع قائمة الملفات وأكّد، وانتهى الأمر.'],
+          notes: ['إذا لم يُطبَّق الـ diff لا يتغير شيء ويكتب التطبيق الملف codebridge-fix.txt (ويُنسخ إلى الحافظة). أرسله إلى الذكاء الاصطناعي.', 'يجب تثبيت Git. أعمالك غير المُثبَّتة (uncommitted) تبقى كما هي.'],
+        },
+        {
+          id: 'undo',
+          title: 'التراجع عن آخر تطبيق',
+          intro: 'غيّرت رأيك أو النتيجة خاطئة؟ اكتب 3 واختر المستودع وتعود الملفات كما كانت تمامًا.',
+          steps: ['اكتب 3 ثم Enter.', 'اختر المستودع بالطريقة نفسها كما في Apply.'],
+          notes: ['إذا عدّلت ملفًا بعد التطبيق يرفض التراجع الكتابة فوقه. في CLI استخدم --force فقط إذا كنت متأكدًا.'],
+        },
+        {
+          id: 'manage',
+          title: 'Projects وSettings وHistory',
+          intro: 'احفظ مجلداتك مرة واحدة ثم اخترها بالاسم في كل مكان.',
+          keys: [
+            { t: '4', s: 'Projects: الحرف a يضيف مجلدًا (مع preset اختياري: flutter أو node أو python) وd يحذف.' },
+            { t: '5', s: 'Settings: اكتب رقم العنصر لتغييره، مثل المجلدات المستبعدة أو الحد الأقصى لحجم الملف أو حجم التقسيم أو النسخ إلى الحافظة. الحرف r يعيد كل شيء للافتراضي.' },
+            { t: '6', s: 'History: آخر عمليات التصدير والتطبيق.' },
+          ],
+        },
+        {
+          id: 'cli',
+          title: 'للسكربتات والمستخدمين المتقدمين',
+          intro: 'كل إجراء في القائمة له أمر أيضًا. شغّل codebridge --help لرؤيتها كلها.',
+          keys: [
+            { t: 'codebridge context export --changed', s: 'تصدير الملفات المتغيرة فقط.' },
+            { t: 'codebridge patch apply fix.patch -r ./app', s: 'تطبيق ملف diff على مستودع.' },
+            { t: 'codebridge patch undo -r ./app', s: 'التراجع عن آخر تطبيق.' },
+            { t: 'codebridge history -n 10', s: 'عرض آخر 10 عمليات.' },
+          ],
+          notes: ['المزيد من الأوامر في docs/USAGE.md على GitHub.'],
+        },
+        {
+          id: 'trouble',
+          title: 'إصلاح المشكلات الشائعة',
+          intro: 'ابحث عن رسالتك أو مشكلتك أدناه.',
+          qa: [
+            { t: 'يُقطع الـ diff عند اللصق', s: 'لا تلصق. انسخ الـ diff (Ctrl+C) واختر 2 ثم اضغط Enter. يُقرأ من الحافظة.' },
+            { t: '«Clipboard has no diff»', s: 'انسخ رد الذكاء الاصطناعي كاملًا أو كتلة الـ diff كاملة مرة أخرى وأعد المحاولة. على لينكس ثبّت xclip أو xsel أو wl-clipboard.' },
+            { t: 'فشل تطبيق الـ diff', s: 'لم يتغير شيء. أرسل codebridge-fix.txt إلى الذكاء الاصطناعي وطبّق إجابته الجديدة.' },
+            { t: '«no terminal to confirm; re-run with -y»', s: 'تظهر فقط عندما لا يعمل التطبيق في طرفية حقيقية، مثل داخل سكربت. استخدم طرفية عادية أو أضف -y.' },
+            { t: '«Folder not found»', s: 'اكتب المسار الكامل، أو احفظ المشروع مرة في Projects (الخيار 4) واختره بالرقم.' },
+            { t: '«Pick at least one language»', s: 'اضغط حرفًا من a إلى j (أو x للغة مخصصة) ثم Enter.' },
+            { t: 'Git غير مثبّت', s: 'يحتاج Apply وUndo إلى Git. ثبّته من git-scm.com وأعد فتح الطرفية.' },
+            { t: 'ماك لا يفتح التطبيق', s: 'في المجلد بعد فك الضغط نفّذ: xattr -d com.apple.quarantine ./codebridge' },
+            { t: 'تحذير SmartScreen في ويندوز', s: 'اختر More info ثم Run anyway. الملف التنفيذي غير موقّع رقميًا.' },
+          ],
+        },
+      ],
+    },
+    help: {
+      title: 'تحتاج مساعدة؟',
+      sub: 'يأخذك الدليل من التثبيت حتى التراجع، مع شاشات يمكنك مقارنتها بما تراه.',
+      items: [
+        { t: 'التصدير في شاشة واحدة', s: 'أي المفاتيح تضغط وماذا يفعل كل خيار.' },
+        { t: 'تطبيق diff من الذكاء الاصطناعي', s: 'انسخ ثم اضغط Enter وانتهى. ولماذا لا يجب أن تلصق.' },
+        { t: 'حدثت مشكلة؟', s: 'حلول قصيرة لأكثر الرسائل شيوعًا.' },
+      ],
+      cta: 'افتح الدليل الكامل',
+    },
   },
 };

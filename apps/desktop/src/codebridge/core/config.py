@@ -216,7 +216,7 @@ OLD_BACKUP = {"enabled": "keep", "compress": "compress", "retention_days": "days
 
 def default_settings() -> dict:
     return {"version": VERSION, "defaults": copy.deepcopy(DEFAULTS),
-            "patch": copy.deepcopy(PATCH_DEFAULTS), "projects": [], "export": None}
+            "patch": copy.deepcopy(PATCH_DEFAULTS), "projects": [], "export": None, "last_project": ""}
 
 
 def _norm_opts(d) -> dict:
@@ -248,6 +248,8 @@ def migrate(raw: dict) -> dict:
     # Preserve export config block if present; otherwise absent (None = unanswered).
     if "export" in raw and isinstance(raw["export"], dict):
         s["export"] = raw["export"]
+    if isinstance(raw.get("last_project"), str):
+        s["last_project"] = raw["last_project"]
     s["patch"].update({k: v for k, v in (raw.get("patch") or {}).items() if k in PATCH_DEFAULTS})
     for p in raw.get("projects") or []:
         ov = {k: v for k, v in p.items() if k in OLD_KEYS or k in DEFAULTS}
