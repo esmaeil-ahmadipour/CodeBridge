@@ -13,7 +13,7 @@ import { isLocale } from '@/i18n/config';
 import { translations } from '@/i18n/translations';
 import { buildJsonLd, buildMetadata } from '@/lib/seo';
 
-// Re-generate hourly so the release version/date shown in the Download section stays current.
+// Re-generate hourly so release publication metadata shown in the Download section stays current.
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

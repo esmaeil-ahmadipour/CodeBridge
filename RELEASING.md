@@ -1,8 +1,11 @@
 # Releasing
 
 ## Version and tag
-- **Version** (`X.Y.Z`, SemVer) lives only in the root `package.json`. `scripts/sync_version.py` copies it into the
-  desktop package (`_version.py`); local source runs show `X.Y.Z-dev+<sha>`, release binaries never do.
+- **Application version** (`X.Y.Z`) lives only in the root `package.json`. `scripts/sync_version.py` generates the
+  desktop package's `_version.py`; local source runs show `X.Y.Z-dev+<sha>`, release binaries use the stable version.
+  The web build reads the same root manifest in `apps/web/next.config.ts` and injects it for the localized version label.
+- **Published release** is separate from the application version: the website uses GitHub Releases for publication
+  metadata such as the release date, while download buttons keep using GitHub's latest-release asset URLs.
 - **Tag** (`vX.Y.Z`) is created by the workflow, only after a successful release. Never create tags by hand and never
   reuse or delete a published tag.
 

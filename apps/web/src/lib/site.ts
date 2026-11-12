@@ -15,8 +15,14 @@ export const repoUrl = `https://github.com/${downloadConfig.owner}/${downloadCon
 export const releasesUrl = `${repoUrl}/releases`;
 export const latestReleaseUrl = `${releasesUrl}/latest`;
 export const releaseUrl = `${latestReleaseUrl}/download`;
-// Only used to show the version/date; downloads never depend on it.
+// Used for release publication metadata; the application version comes from the root package at build time.
 export const latestReleaseApi = `https://api.github.com/repos/${downloadConfig.owner}/${downloadConfig.repository}/releases/latest`;
+
+export function getApplicationVersion(): string {
+  const version = process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+  if (!version) throw new Error('The root application version was not injected into the web build.');
+  return version;
+}
 
 export type PlatformId = 'windows' | 'macos' | 'linux';
 

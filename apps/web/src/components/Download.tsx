@@ -2,7 +2,7 @@ import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
 import { flags } from '@/lib/flags';
 import { formatReleaseDate, getLatestRelease } from '@/lib/release';
-import { downloads, latestReleaseUrl, platforms } from '@/lib/site';
+import { downloads, getApplicationVersion, latestReleaseUrl, platforms } from '@/lib/site';
 import { Icon } from './Icons';
 import { InstallCard } from './InstallCard';
 import { PlatformCards, type PlatformItem } from './PlatformCards';
@@ -11,6 +11,7 @@ const fmt = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_
 
 export async function Download({ t, locale }: { t: Dictionary['download']; locale: Locale }) {
   if (!flags.downloads) return null; // the flag also guards this component, not only its call site
+  const applicationVersion = getApplicationVersion();
   const release = await getLatestRelease(); // never throws; null on any failure
   const date = formatReleaseDate(release?.publishedAt ?? null, locale);
   const names = { windows: t.win, macos: t.mac, linux: t.linux };
@@ -37,7 +38,7 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
           t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
         />
         <div className="row wrap8 dl-rel">
-          {release && <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: release.version })}</span>}
+          <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: applicationVersion })}</span>
           {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
           <a className="dl-notes" href={latestReleaseUrl}>
             {t.releaseChecksums}<Icon name="arrow" size={16} />

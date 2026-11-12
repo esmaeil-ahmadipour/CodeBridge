@@ -1,11 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { downloads, downloadConfig, latestReleaseApi, latestReleaseUrl, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
+import { readFileSync } from 'node:fs';
+import nextConfig from '../next.config.ts';
+import { downloads, downloadConfig, getApplicationVersion, latestReleaseApi, latestReleaseUrl, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
 import { detectPlatform } from '../src/lib/platform.ts';
 import { formatReleaseDate, getLatestRelease, parseRelease } from '../src/lib/release.ts';
 import { translations } from '../src/i18n/translations.ts';
 
 const BASE = 'https://github.com/esmaeil-ahmadipour/CodeBridge/releases';
+const rootPackage = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf8')) as { version: string };
+const webPackage = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as Record<string, unknown>;
+const injectedVersion = nextConfig.env?.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+
+test('Next build injects the root application version without a web package version', () => {
+  assert.equal(injectedVersion, rootPackage.version);
+  assert.equal('version' in webPackage, false);
+  const originalVersion = process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+  process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = injectedVersion;
+  try {
+    assert.equal(getApplicationVersion(), rootPackage.version);
+  } finally {
+    if (originalVersion === undefined) delete process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+    else process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = originalVersion;
+  }
+});
+
+test('application version is available when GitHub release metadata is unavailable', async () => {
+  const originalVersion = process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+  const originalFetch = globalThis.fetch;
+  process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = injectedVersion;
+  globalThis.fetch = (async () => { throw new Error('GitHub API unavailable'); }) as typeof fetch;
+  try {
+    assert.equal(await getLatestRelease(), null);
+    assert.equal(getApplicationVersion(), rootPackage.version);
+  } finally {
+    if (originalVersion === undefined) delete process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+    else process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = originalVersion;
+    globalThis.fetch = originalFetch;
+  }
+});
 
 test('platform -> asset -> latest-release URL mapping', () => {
   assert.equal(downloadConfig.owner, 'esmaeil-ahmadipour');

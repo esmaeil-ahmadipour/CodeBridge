@@ -23,6 +23,12 @@ class VersionMetadataTests(unittest.TestCase):
             pyproject,
         )
 
+    def test_web_package_does_not_define_an_independent_version(self):
+        web_package = json.loads(
+            (REPO / "apps" / "web" / "package.json").read_text(encoding="utf-8")
+        )
+        self.assertNotIn("version", web_package)
+
 
 if __name__ == "__main__":
     unittest.main()
