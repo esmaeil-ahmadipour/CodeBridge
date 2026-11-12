@@ -40,6 +40,7 @@ __pycache__/
 .pytest_cache/
 .venv/
 venv/
+/apps/desktop/src/codebridge/_version.py
 
 # CodeBridge local files
 settings.json

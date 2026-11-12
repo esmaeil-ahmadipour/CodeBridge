@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codebridge"
-version = "2.1.0"
+dynamic = ["version"]
 description = "AI-assisted code workflow: export context, apply AI diffs safely, undo."
 requires-python = ">=3.9"
 readme = "README.md"
@@ -20,3 +20,6 @@ codebridge = "codebridge.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "codebridge._version.__version__" }

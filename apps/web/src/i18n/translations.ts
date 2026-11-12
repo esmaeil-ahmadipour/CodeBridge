@@ -21,9 +21,10 @@ export interface Dictionary {
   download: {
     eyebrow: string; title: string; sub: string; pwaBadge: string; pwaTitle: string; pwaText: string;
     android: string; iphone: string; steps: string[]; install: string; installed: string; iosHint: string; noPrompt: string;
-    desktop: string; win: string; winSub: string; mac: string; macSub: string; linux: string; linuxSub: string; note: string;
+    desktop: string; win: string; mac: string; linux: string; appleSilicon: string; note: string;
+    winHint: string; macHint: string; linuxHint: string; releaseChecksums: string;
     recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
-    relVersion: string; relPublished: string; relNotes: string; relFallback: string;
+    relVersion: string; relPublished: string;
   };
   footer: { license: string; tagline: string };
 }
@@ -105,9 +106,13 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'Install on this phone', installed: 'Installed',
       iosHint: 'On iPhone use Safari: tap Share, then Add to Home Screen.',
       noPrompt: 'Use your browser menu and choose Install app or Add to Home Screen.',
-      desktop: 'Desktop apps', win: 'Windows', winSub: 'Windows 10 or later · unzip and run, no install', mac: 'macOS', macSub: 'Apple Silicon (M1 or newer) only', linux: 'Linux', linuxSub: 'Built on Ubuntu 22.04 · unzip and run',
-      note: 'Checksums and source on GitHub · Git needed for patch features',
-      recommended: 'Recommended for you', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Latest release: {v}', relPublished: 'Published {date}', relNotes: 'Release notes and all assets', relFallback: 'Release notes and all assets on GitHub',
+      desktop: 'Desktop apps', win: 'Windows', mac: 'macOS', linux: 'Linux', appleSilicon: 'Apple Silicon',
+      note: 'Git must be installed for patch features.',
+      winHint: 'First run: SmartScreen may warn because the binary is unsigned. Choose More info, then Run anyway.',
+      macHint: 'First run: right-click run_macos.command and choose Open, or run `xattr -d com.apple.quarantine ./codebridge`. Intel Macs are not supported.',
+      linuxHint: 'If needed, run `chmod +x codebridge run.sh` before launching.',
+      releaseChecksums: 'Checksums and source on GitHub',
+      recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Latest release: {v}', relPublished: 'Published {date}',
     },
     footer: { license: 'MIT licensed · Made by Esmaeil Ahmadipour', tagline: 'Free, private and open source. Your code stays on your device.' },
   },
@@ -187,9 +192,13 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'نصب روی این گوشی', installed: 'نصب شده',
       iosHint: 'در آیفون از Safari استفاده کنید: Share و سپس Add to Home Screen.',
       noPrompt: 'از منوی مرورگر، Install app یا Add to Home Screen را انتخاب کنید.',
-      desktop: 'اپ‌های دسکتاپ', win: 'ویندوز', winSub: 'ویندوز ۱۰ یا بالاتر · بازکردن ZIP و اجرا، بدون نصب', mac: 'مک', macSub: 'فقط Apple Silicon (M1 یا جدیدتر)', linux: 'لینوکس', linuxSub: 'ساخته‌شده روی Ubuntu 22.04 · بازکردن ZIP و اجرا',
-      note: 'Checksum و سورس در GitHub · قابلیت‌های Patch به Git نیاز دارند',
-      recommended: 'پیشنهاد برای شما', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'آخرین نسخه: {v}', relPublished: 'منتشرشده در {date}', relNotes: 'یادداشت‌های نسخه و همه‌ی فایل‌ها', relFallback: 'یادداشت‌های نسخه و همه‌ی فایل‌ها در GitHub',
+      desktop: 'اپ‌های دسکتاپ', win: 'ویندوز', mac: 'مک', linux: 'لینوکس', appleSilicon: 'Apple Silicon',
+      note: 'برای قابلیت‌های Patch باید Git نصب باشد.',
+      winHint: 'در نخستین اجرا، SmartScreen ممکن است دربارهٔ امضانشدن برنامه هشدار دهد. «More info» و سپس «Run anyway» را انتخاب کنید.',
+      macHint: 'در نخستین اجرا، روی run_macos.command راست‌کلیک و Open را انتخاب کنید، یا دستور `xattr -d com.apple.quarantine ./codebridge` را اجرا کنید. مک‌های Intel پشتیبانی نمی‌شوند.',
+      linuxHint: 'در صورت نیاز، پیش از اجرا `chmod +x codebridge run.sh` را اجرا کنید.',
+      releaseChecksums: 'Checksumها و کد منبع در GitHub',
+      recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'آخرین نسخه: {v}', relPublished: 'منتشرشده در {date}',
     },
     footer: { license: 'مجوز MIT · ساخته‌ی اسماعیل احمدی‌پور', tagline: 'رایگان، خصوصی و متن‌باز. کد شما روی دستگاه خودتان می‌ماند.' },
   },
@@ -269,9 +278,13 @@ export const translations: Record<Locale, Dictionary> = {
       install: 'ثبّت على هذا الهاتف', installed: 'تم التثبيت',
       iosHint: 'على الآيفون استخدم Safari: اضغط Share ثم Add to Home Screen.',
       noPrompt: 'من قائمة المتصفح اختر Install app أو Add to Home Screen.',
-      desktop: 'تطبيقات الحاسوب', win: 'ويندوز', winSub: 'ويندوز 10 أو أحدث · فك الضغط والتشغيل دون تثبيت', mac: 'ماك', macSub: 'لأجهزة Apple Silicon (M1 أو أحدث) فقط', linux: 'لينكس', linuxSub: 'مبني على Ubuntu 22.04 · فك الضغط والتشغيل',
-      note: 'المجاميع الاختبارية والمصدر على GitHub · ميزات التعديل تحتاج Git',
-      recommended: 'موصى به لك', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'أحدث إصدار: {v}', relPublished: 'نُشر في {date}', relNotes: 'ملاحظات الإصدار وكل الملفات', relFallback: 'ملاحظات الإصدار وكل الملفات على GitHub',
+      desktop: 'تطبيقات الحاسوب', win: 'ويندوز', mac: 'ماك', linux: 'لينكس', appleSilicon: 'Apple Silicon',
+      note: 'يجب تثبيت Git لاستخدام ميزات التعديلات.',
+      winHint: 'عند التشغيل أول مرة، قد يحذّر SmartScreen لأن الملف غير موقّع. اختر More info ثم Run anyway.',
+      macHint: 'عند التشغيل أول مرة، انقر بزر الفأرة الأيمن على run_macos.command واختر Open، أو نفّذ `xattr -d com.apple.quarantine ./codebridge`. أجهزة Intel Mac غير مدعومة.',
+      linuxHint: 'عند الحاجة، نفّذ `chmod +x codebridge run.sh` قبل التشغيل.',
+      releaseChecksums: 'المجاميع الاختبارية والمصدر على GitHub',
+      recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'أحدث إصدار: {v}', relPublished: 'نُشر في {date}',
     },
     footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'مجاني وخاص ومفتوح المصدر. يبقى كودك على جهازك.' },
   },

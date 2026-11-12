@@ -318,10 +318,10 @@ def projects_menu(cfg) -> None:
 
 
 def run_menu(cfg) -> int:
-    from .. import __version__
+    from .. import get_version
     try:
         while True:
-            print(f"\n=== CodeBridge {__version__} ===")
+            print(f"\n=== CodeBridge {get_version()} ===")
             print(" 1. Export project context for the AI")
             print(" 2. Apply the AI's diff (file or clipboard)")
             print(" 3. Undo the last applied diff")

@@ -13,11 +13,12 @@ Site: https://codebridge.tarvix.org
 ## Repository layout
 ```text
 apps/web/        Next.js site (pnpm workspace package; deployed on Vercel, Root Directory = apps/web)
-apps/desktop/    Python tool (binaries are built by GitHub Actions on tag v*)
+apps/desktop/    Python tool (binaries and releases are built from the root package.json version)
 docs/            architecture, privacy promise, report format, releasing
 .github/         one workflow set per app (path-filtered)
 ```
-The repository root owns the pnpm workspace and the single `pnpm-lock.yaml`; the Python desktop app is not a pnpm package. Start with the README inside the app you work on.
+The repository root owns the pnpm workspace and the single `pnpm-lock.yaml`; its `package.json` is also the only typed
+application version. The Python desktop app is not a pnpm package. Start with the README inside the app you work on.
 
 ## Quick start
 ```text

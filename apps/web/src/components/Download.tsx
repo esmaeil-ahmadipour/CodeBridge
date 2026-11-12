@@ -2,7 +2,7 @@ import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
 import { flags } from '@/lib/flags';
 import { formatReleaseDate, getLatestRelease } from '@/lib/release';
-import { downloads, platforms, releasesUrl } from '@/lib/site';
+import { downloads, latestReleaseUrl, platforms } from '@/lib/site';
 import { Icon } from './Icons';
 import { InstallCard } from './InstallCard';
 import { PlatformCards, type PlatformItem } from './PlatformCards';
@@ -14,9 +14,14 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
   const release = await getLatestRelease(); // never throws; null on any failure
   const date = formatReleaseDate(release?.publishedAt ?? null, locale);
   const names = { windows: t.win, macos: t.mac, linux: t.linux };
-  const descs = { windows: t.winSub, macos: t.macSub, linux: t.linuxSub };
+  const hints = { windows: t.winHint, macos: t.macHint, linux: t.linuxHint };
   const items: PlatformItem[] = platforms.map((p) => ({
-    id: p.id, name: names[p.id], desc: descs[p.id], arch: p.arch, format: p.format, href: downloads[p.id],
+    id: p.id,
+    name: names[p.id],
+    arch: p.id === 'macos' ? `${t.appleSilicon} · ${p.arch}` : p.arch,
+    format: p.format,
+    hint: hints[p.id],
+    href: downloads[p.id],
   }));
   return (
     <section id="download" className="wrap stack16">
@@ -27,17 +32,17 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
       </div>
       <div className="stack12">
         <h3>{t.desktop}</h3>
-        <div className="row wrap8 dl-rel">
-          {release && <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: release.version })}</span>}
-          {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
-          <a className="dl-notes" href={release?.url ?? releasesUrl} rel="noopener">
-            {release ? t.relNotes : t.relFallback}<Icon name="arrow" size={16} />
-          </a>
-        </div>
         <PlatformCards
           items={items}
           t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
         />
+        <div className="row wrap8 dl-rel">
+          {release && <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: release.version })}</span>}
+          {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
+          <a className="dl-notes" href={latestReleaseUrl}>
+            {t.releaseChecksums}<Icon name="arrow" size={16} />
+          </a>
+        </div>
         <p className="mut sm">{t.note}</p>
       </div>
       <InstallCard t={t} />

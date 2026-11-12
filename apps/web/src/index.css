@@ -83,18 +83,23 @@ main { display: flex; flex-direction: column; gap: 56px; padding-block: 24px 56p
 .chip.on { color: var(--ac); border-color: var(--ac); }
 .ico { width: 44px; height: 44px; border-radius: 12px; background: color-mix(in srgb, var(--ac) 16%, var(--sf)); display: flex; align-items: center; justify-content: center; color: var(--ac); flex: none; }
 .pill { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 12px; background: var(--bg); border: 1px solid var(--bd); font-weight: 600; font-size: 14px; font-family: inherit; flex: 1; }
-.dlgrid { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
-@media (min-width: 640px) { .dlgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.dl-card { display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--sf); border: 1px solid var(--bd); border-radius: 16px; }
-.dl-card.rec { border-color: var(--ac); box-shadow: 0 0 0 1px var(--ac); }
-.dl-top { align-items: flex-start; }
-.dl-meta { margin-top: auto; min-height: 28px; }
-.dl-rec { visibility: hidden; font-size: 12px; font-weight: 600; color: var(--ac); } .dl-rec.on { visibility: visible; }
-.dl-hint { min-height: 1.5em; }
+.dl-rows { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.dl-row { min-width: 0; }
+.dl-link { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto 20px; align-items: center; gap: 10px; min-height: 56px; padding: 8px 12px; border: 1px solid var(--bd); border-radius: 12px; background: var(--sf); color: var(--tx); text-decoration: none; box-sizing: border-box; }
+.dl-link:hover { border-color: var(--ac); }
+.dl-row.rec .dl-link { border-color: var(--ac); background: color-mix(in srgb, var(--ac) 7%, var(--sf)); }
+.dl-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.dl-spec { color: var(--mu); font-size: 12px; line-height: 1.4; overflow-wrap: anywhere; }
+.dl-recommended { visibility: hidden; border: 1px solid transparent; border-radius: 999px; padding: 3px 8px; color: var(--ac); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.dl-recommended.on { visibility: visible; border-color: var(--ac); }
+.dl-install-hint { margin-block: 4px 0; margin-inline: 56px 12px; color: var(--mu); font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
+.dl-install-hint code { font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 12px; unicode-bidi: isolate; overflow-wrap: anywhere; }
+.dl-detect-hint { min-height: 1.5em; }
 .dl-rel { min-height: 28px; row-gap: 6px; }
 .dl-ver { font-size: 13px; font-weight: 600; color: var(--ac); border: 1px solid var(--ac); border-radius: 999px; padding: 2px 10px; }
 .dl-notes { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; font-size: 14px; font-weight: 500; color: var(--ac); text-decoration: none; } .dl-notes:hover { text-decoration: underline; }
 [dir='rtl'] .dl-notes svg { transform: scaleX(-1); }
+@media (max-width: 420px) { .dl-link { grid-template-columns: 40px minmax(0, 1fr) auto 20px; gap: 7px; padding-inline: 10px; } .dl-install-hint { margin-inline-start: 50px; } }
 .steps { display: flex; flex-direction: column; gap: 12px; }
 .steps li { display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.45; }
 .num { width: 24px; height: 24px; border-radius: 50%; background: var(--ac); color: var(--on); font-weight: 700; font-size: 13px; font-family: inherit; display: flex; align-items: center; justify-content: center; flex: none; }

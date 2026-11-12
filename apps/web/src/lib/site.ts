@@ -1,20 +1,30 @@
 export const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://codebridge.tarvix.org';
 
-// Latest-release asset URLs are permanent: GitHub redirects them to the newest stable release,
-// so a new release never needs a website change or redeploy. Asset names come from desktop-release.yml.
-export const repoUrl = 'https://github.com/esmaeil-ahmadipour/codebridge';
+// Latest-release asset URLs are permanent; keep the repository and published filenames together.
+export const downloadConfig = {
+  owner: 'esmaeil-ahmadipour',
+  repository: 'CodeBridge',
+  assets: {
+    windows: 'codebridge-windows-x64.zip',
+    macos: 'codebridge-macos-arm64.zip',
+    linux: 'codebridge-linux-x64.zip',
+  },
+} as const;
+
+export const repoUrl = `https://github.com/${downloadConfig.owner}/${downloadConfig.repository}`;
 export const releasesUrl = `${repoUrl}/releases`;
-export const releaseUrl = `${releasesUrl}/latest/download`;
+export const latestReleaseUrl = `${releasesUrl}/latest`;
+export const releaseUrl = `${latestReleaseUrl}/download`;
 // Only used to show the version/date; downloads never depend on it.
-export const latestReleaseApi = 'https://api.github.com/repos/esmaeil-ahmadipour/codebridge/releases/latest';
+export const latestReleaseApi = `https://api.github.com/repos/${downloadConfig.owner}/${downloadConfig.repository}/releases/latest`;
 
 export type PlatformId = 'windows' | 'macos' | 'linux';
 
 // Order = display order. `asset` must match the ZIP names produced by desktop-release.yml.
 export const platforms = [
-  { id: 'windows', asset: 'codebridge-windows-x64.zip', arch: 'x64', format: 'ZIP' },
-  { id: 'macos', asset: 'codebridge-macos-arm64.zip', arch: 'ARM64', format: 'ZIP' },
-  { id: 'linux', asset: 'codebridge-linux-x64.zip', arch: 'x64', format: 'ZIP' },
+  { id: 'windows', asset: downloadConfig.assets.windows, arch: 'x64', format: 'ZIP' },
+  { id: 'macos', asset: downloadConfig.assets.macos, arch: 'ARM64', format: 'ZIP' },
+  { id: 'linux', asset: downloadConfig.assets.linux, arch: 'x64', format: 'ZIP' },
 ] as const;
 
 export const downloads = {
