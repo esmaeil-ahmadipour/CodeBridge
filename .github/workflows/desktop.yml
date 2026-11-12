@@ -2,15 +2,20 @@ name: Desktop
 on:
   push:
     branches: [main]
-    paths: ["apps/desktop/**", ".github/workflows/desktop.yml"]
+    paths: ["apps/desktop/**", "CHANGELOG.md", "package.json", "scripts/**", "tests/**", ".github/workflows/desktop.yml", ".github/workflows/metadata-check.yml"]
   pull_request:
-    paths: ["apps/desktop/**", ".github/workflows/desktop.yml"]
+    paths: ["apps/desktop/**", "CHANGELOG.md", "package.json", "scripts/**", "tests/**", ".github/workflows/desktop.yml", ".github/workflows/metadata-check.yml"]
 
 defaults:
   run:
     working-directory: apps/desktop
 
 jobs:
+  metadata:
+    uses: ./.github/workflows/metadata-check.yml
+    permissions:
+      contents: read
+
   test:
     strategy:
       fail-fast: false

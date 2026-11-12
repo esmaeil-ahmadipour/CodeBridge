@@ -38,7 +38,7 @@ you copied (Ctrl+C, then Enter; do not paste it into the terminal), **3** undoes
 If a diff cannot be applied, nothing is changed and `codebridge-fix.txt` is created (and copied to the
 clipboard): the errors plus the current content of the affected files, ready to send back to the AI.
 
-More: [docs/USAGE.md](docs/USAGE.md) · releasing: [docs/RELEASING.md](docs/RELEASING.md) · [CHANGELOG](CHANGELOG.md)
+More: [docs/USAGE.md](docs/USAGE.md) · releasing: [docs/RELEASING.md](docs/RELEASING.md) · [CHANGELOG](../../CHANGELOG.md)
 
 ## Develop
 

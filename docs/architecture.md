@@ -9,7 +9,8 @@ docs          cross-cutting documents
 ## Boundaries
 - **No shared code.** The two apps use different languages. What they share is a *contract*:
   the report format ([report-format.md](report-format.md)) and the privacy promise ([privacy.md](privacy.md)).
-- **Each app is self-contained**: own dependencies, lockfile, tests, README, changelog.
+- **Each app is self-contained**: own dependencies, lockfile, app-specific tests and README; shared version and release
+  metadata tests live in root `tests/`, and release history is in the root changelog.
 - **No monorepo tooling** (Turborepo, Nx, workspaces). Nothing needs to be built across apps.
   Add `packages/` only if real shared code appears.
 
