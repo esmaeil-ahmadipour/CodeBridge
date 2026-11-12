@@ -23,6 +23,7 @@ jobs:
       should_release: ${{ steps.check.outputs.should_release }}
     steps:
       - uses: actions/checkout@v4
+
       - name: Validate release version
         id: check
         working-directory: .
@@ -74,10 +75,19 @@ jobs:
           should_release = "false" if existing_tag else "true"
           if existing_tag:
               print(f"Tag v{version} already exists; skipping release.")
+
           with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
               output.write(f"version={version}\n")
               output.write(f"should_release={should_release}\n")
           PY
+
+
+      - name: Sync version and run tests
+        shell: bash
+        run: |
+          python ../../scripts/sync_version.py
+          PYTHONPATH=src python -m unittest discover -s tests -v
+
 
   test:
     needs: version
@@ -87,12 +97,16 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
+
       - name: Sync version and run tests
+        shell: bash
         run: |
           python ../../scripts/sync_version.py
-          python -m unittest discover -s tests
+          python -m unittest discover -s tests -v
 
   build:
     needs: [version, test]
@@ -101,25 +115,34 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { os: windows-latest, platform: windows-x64, bin: codebridge.exe }
-          - { os: ubuntu-22.04,   platform: linux-x64,   bin: codebridge }
-          - { os: macos-latest,   platform: macos-arm64, bin: codebridge }
+          - os: windows-latest
+            platform: windows-x64
+            bin: codebridge.exe
+          - os: ubuntu-22.04
+            platform: linux-x64
+            bin: codebridge
+          - os: macos-latest
+            platform: macos-arm64
+            bin: codebridge
     runs-on: ${{ matrix.os }}
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
+
       - name: Sync version and build binary
         shell: bash
         run: |
           python ../../scripts/sync_version.py
           python -m pip install --upgrade pip pyinstaller
           python -m pip install .
-          python ../../scripts/sync_version.py
           pyinstaller --onefile --clean --name codebridge --paths src \
             --hidden-import codebridge._version packaging/entry.py
+
       - name: Smoke test binary version
         shell: bash
         run: |
@@ -132,12 +155,23 @@ jobs:
           case "$actual" in
             *-dev*) echo "Release binary contains a development version: $actual"; exit 1 ;;
           esac
+
       - name: Package ZIP
         shell: bash
-        run: python packaging/make_zip.py build --platform ${{ matrix.platform }} --binary dist/${{ matrix.bin }} --out dist
-      - name: Verify ZIP (contents, then --version from the extracted copy)
+        run: |
+          python packaging/make_zip.py build \
+            --platform "${{ matrix.platform }}" \
+            --binary "dist/${{ matrix.bin }}" \
+            --out dist
+
+      - name: Verify ZIP (contents and extracted binary version)
         shell: bash
-        run: python packaging/make_zip.py verify dist/codebridge-${{ matrix.platform }}.zip --platform ${{ matrix.platform }} --run
+        run: |
+          python packaging/make_zip.py verify \
+            "dist/codebridge-${{ matrix.platform }}.zip" \
+            --platform "${{ matrix.platform }}" \
+            --run
+
       - uses: actions/upload-artifact@v4
         with:
           name: codebridge-${{ matrix.platform }}
@@ -152,28 +186,63 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-python@v5
-        with: { python-version: "3.12" }
+        with:
+          python-version: "3.12"
+
       - name: Sync version and build Python packages
+        shell: bash
         run: |
           python ../../scripts/sync_version.py
-          python -m pip install build
+          python -m pip install --upgrade pip build
           python -m build
+
       - uses: actions/download-artifact@v4
         with:
           path: apps/desktop/release
           merge-multiple: true
+
       - name: Collect, validate and checksum release assets
+        shell: bash
         run: |
+          mkdir -p release
           cp dist/* release/
-          for f in codebridge-windows-x64.zip codebridge-linux-x64.zip codebridge-macos-arm64.zip; do
-            test -s "release/$f" || { echo "missing or empty: $f"; exit 1; }
+
+          for file in \
+            codebridge-windows-x64.zip \
+            codebridge-linux-x64.zip \
+            codebridge-macos-arm64.zip; do
+            test -s "release/$file" || {
+              echo "::error::Missing or empty release asset: $file"
+              exit 1
+            }
           done
-          ls release/*.whl release/*.tar.gz >/dev/null
-          cd release && sha256sum * > SHA256SUMS.txt && sha256sum -c SHA256SUMS.txt
-          ls -l
+
+          compgen -G "release/*.whl" >/dev/null || {
+            echo "::error::No wheel package was built."
+            exit 1
+          }
+          compgen -G "release/*.tar.gz" >/dev/null || {
+            echo "::error::No source distribution was built."
+            exit 1
+          }
+
+          cd release
+          sha256sum * > SHA256SUMS.txt
+          sha256sum -c SHA256SUMS.txt
+          ls -lh
+
       - uses: actions/upload-artifact@v4
-        with: { name: release-files, path: apps/desktop/release/* }
+        with:
+          name: release-files
+          path: apps/desktop/release/*
+          if-no-files-found: error
+
+      - name: Extract release notes from CHANGELOG
+        shell: bash
+        run: python ../../scripts/changelog_section.py CHANGELOG.md "${{ needs.version.outputs.version }}" > release-notes.md
+
       - name: Ensure the version tag is still available
         shell: bash
         run: |
@@ -183,13 +252,15 @@ jobs:
             echo "::error::Remote tag $tag already exists; refusing to publish or overwrite the release."
             exit 1
           fi
+
       - name: Publish GitHub release and create version tag
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.version.outputs.version }}
           target_commitish: ${{ github.sha }}
           files: apps/desktop/release/*
-          generate_release_notes: true
+          body_path: apps/desktop/release-notes.md
+          generate_release_notes: false
           draft: false
           prerelease: false
           make_latest: "true"

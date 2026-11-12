@@ -1,5 +1,20 @@
 # Changelog
 
+## 3.0.0
+Faster interactive menu. Exporting and applying now take one screen each instead of many questions.
+
+- **Export on one screen:** project, type, languages and options (SVG, lock files, tests, changed only) are ticked
+  with keys (`1 a t`, then Enter). A "Will export: ..." summary shows the result before you press Enter.
+  Defaults come from the folder (type detection) and the last export.
+- **Apply from the clipboard:** the menu no longer asks you to paste a diff into the terminal (multi-line paste
+  does not work there). Copy the AI's diff, press Enter. `diff.patch` handling stays in the CLI only.
+- **Repo picker** for Export, Apply and Undo: saved projects listed one per line with their folder, Enter = the last
+  used one, or type a number, a name or a path. `settings.json` gains `last_project`.
+- Main menu redrawn as a box, one item per line; no more "Press Enter to continue" after an export.
+- Removed the 5-step export wizard (`run_wizard`) and its next/back/confirm questions.
+- Tests: the screen, repo picker and menu flows are covered; version consistency is checked.
+- Settings file format is still version 3 (old files load unchanged).
+
 ## 2.2.1
 Align desktop package metadata for the next stable release.
 

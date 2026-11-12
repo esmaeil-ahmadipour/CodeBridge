@@ -1,9 +1,45 @@
 # Usage
 
+## Interactive menu
+
+Run `codebridge` with no arguments. Type a number and press Enter.
+
+```text
+┌─ CodeBridge 3.0.0 ────────────────────────┐
+│  1  Export project for the AI             │
+│  2  Apply the AI's diff                   │
+│  3  Undo last applied diff                │
+│  4  Projects                              │
+│  5  Settings                              │
+│  6  History                               │
+│  0  Exit                                  │
+└───────────────────────────────────────────┘
+```
+
+**1 Export** shows one screen. Type keys (several at once, e.g. `1 a t`) and press Enter; Enter alone exports
+what you see. The "Will export: ..." line above the box always shows the current choice.
+
+| Key | Meaning |
+|---|---|
+| `1`-`6` | project type (one); changing it resets the languages to that type's defaults |
+| `a`-`j` | languages on/off (dart, javascript, typescript, python, go, rust, java, kotlin, swift, c#) |
+| `x` | add custom languages |
+| `s` `l` `t` `o` | include SVG contents · exclude lock files · exclude tests · only changed files |
+| `p` | choose another project (repo list) |
+| `q` | cancel |
+
+Secret redaction is always on. The type is detected from the folder (`pubspec.yaml`, `next.config.*`,
+`package.json`, `pyproject.toml`); other choices start from your last export.
+
+**2 Apply** and **3 Undo** first ask for the repo: saved projects are listed one per line with their folder
+(the last used one first). Enter picks the first; you can also type a number, a name or a folder path.
+For Apply, copy the AI's diff (Ctrl+C) and press Enter. **Do not paste it into the terminal**: a multi-line
+paste is cut at the first line. The diff is read from the clipboard; to apply a file use the CLI (below).
+
 ## Commands
 
 ```text
-codebridge                                  interactive menu
+codebridge                                  interactive menu (see above)
 codebridge context export [PATH]            write the report
 codebridge context preview [PATH]           list what would be exported (writes nothing)
     -p NAME | --all                         registered project(s)
@@ -19,7 +55,7 @@ codebridge history [-n N]
 codebridge settings show | path | reset
 ```
 
-The diff source for `patch` is: the file you name, `-` (stdin), `diff.patch` / `changes.patch` / `diff.txt`
+The diff source for `codebridge patch` is: the file you name, `-` (stdin), `diff.patch` / `changes.patch` / `diff.txt`
 in the current folder, or the clipboard (in that order). The repo is the current folder unless `-r` is given.
 
 Exit codes: `0` ok · `1` usage/environment error · `2` diff could not be applied · `3` undo refused/failed.
@@ -38,7 +74,8 @@ Exit codes: `0` ok · `1` usage/environment error · `2` diff could not be appli
 
 ## Settings
 
-`settings.json` is looked up as: `--config` → `$CODEBRIDGE_CONFIG` → `./settings.json` → the user config
+`export` and `last_project` are written by the menu (the last export choices and the last repo used) and are
+the defaults of the next export screen. `settings.json` is looked up as: `--config` → `$CODEBRIDGE_CONFIG` → `./settings.json` → the user config
 folder (`%APPDATA%\codebridge`, `~/Library/Application Support/codebridge`, `~/.config/codebridge`).
 Missing, empty or broken files are restored to defaults (a broken one is saved as `.bak`).
 CodeDump v1/v2 settings load unchanged and are upgraded to version 3.
@@ -50,7 +87,10 @@ CodeDump v1/v2 settings load unchanged and are upgraded to version 3.
                 "prompt_header": true, "redact_secrets": true, "anonymize_paths": true, "...": "..." },
   "patch":    { "strict": true, "confirm_before_apply": true, "auto_commit": false,
                 "create_branch": false, "archive_applied": true },
-  "projects": [ { "name": "app", "path": "/path/app", "active": true, "overrides": {} } ]
+  "projects": [ { "name": "app", "path": "/path/app", "active": true, "overrides": {} } ],
+  "export":  { "project_type": "flutter", "languages": ["dart"], "include_svg": false,
+                "exclude_lock_files": true, "exclude_test_files": true },
+  "last_project": "app"
 }
 ```
 

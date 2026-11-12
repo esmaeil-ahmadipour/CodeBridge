@@ -1,8 +1,11 @@
 """Interactive menu. It only collects answers and calls the same commands as the CLI."""
 from __future__ import annotations
-import copy
-from pathlib import Path
-from ..core.config import (PATCH_SPEC, PRESETS, SPEC, load_settings, save_settings)
+from ..core.config import (export_config_from_dict, export_config_to_dict,
+                           PATCH_SPEC, PRESETS,
+                           SPEC, load_settings, save_settings)
+from ..core.util import CBError
+from .repo import pick_repo, resolve_repo
+from .screen import run_screen, to_export_dict
 
 
 def ask(msg, default=""):
@@ -13,13 +16,14 @@ def ask(msg, default=""):
     return v or default
 
 
-def _call(cfg, *argv) -> None:
+def _call(cfg, *argv, pause: bool = True) -> None:
     from ..cli import main
     try:
         main(["--config", str(cfg), *argv])
     except SystemExit:
         pass
-    input("\nPress Enter to continue...")
+    if pause:
+        input("\nPress Enter to continue...")
 
 
 def _edit(spec, cur):
@@ -80,34 +84,59 @@ def projects_menu(cfg) -> None:
             _call(cfg, "project", "remove", ask("Project name"))
 
 
+MENU = [("1", "Export project for the AI"), ("2", "Apply the AI's diff"), ("3", "Undo last applied diff"),
+        ("4", "Projects"), ("5", "Settings"), ("6", "History"), ("0", "Exit")]
+
+
+def _menu_box(version: str) -> str:
+    w = 42
+    head = f"─ CodeBridge {version} "
+    rows = ["│" + f"  {k}  {t}".ljust(w) + "│" for k, t in MENU]
+    return "\n".join(["┌" + head + "─" * (w - len(head)) + "┐", *rows, "└" + "─" * w + "┘"])
+
+
+def _remember(cfg, target: str) -> None:
+    s = load_settings(cfg, quiet=True)
+    s["last_project"] = target
+    save_settings(s, cfg)
+
+
 def run_menu(cfg) -> int:
     from .. import get_version
     try:
         while True:
-            print(f"\n=== CodeBridge {get_version()} ===")
-            print(" 1. Export project context for the AI")
-            print(" 2. Apply the AI's diff (file or clipboard)")
-            print(" 3. Undo the last applied diff")
-            print(" 4. Projects")
-            print(" 5. Settings")
-            print(" 6. History")
-            print(" 0. Exit")
-            c = ask("Choose")
+            print("\n" + _menu_box(get_version()))
+            try:
+                c = input("Type a number, then Enter > ").strip()
+            except EOFError:
+                return 0
             if c in ("0", "q"):
                 return 0
+            s = load_settings(cfg, quiet=True)
             if c == "1":
-                t = ask("Project folder or registered name", ".")
-                changed = ask("Only changed files? (y/N)", "n").lower().startswith("y")
-                s = load_settings(cfg, quiet=True)
-                isname = any(p["name"] == t for p in s["projects"])
-                argv = ["context", "export"] + (["-p", t] if isname else [t]) + (["--changed"] if changed else [])
-                _call(cfg, *argv)
-            elif c == "2":
-                src = ask("Diff file (empty = diff.patch or clipboard)")
-                repo = ask("Target repo", ".")
-                _call(cfg, "patch", "apply", *([src] if src else []), "-r", repo)
-            elif c == "3":
-                _call(cfg, "patch", "undo", "-r", ask("Target repo", "."))
+                st = run_screen(s.get("last_project") or ".", s.get("export"), s["projects"])
+                if st is None:
+                    continue
+                target = st["project"]
+                isname = any(p["name"] == target for p in s["projects"])
+                s["export"] = export_config_to_dict(export_config_from_dict(to_export_dict(st)))
+                s["last_project"] = target
+                save_settings(s, cfg)
+                argv = ["context", "export"] + (["-p", target] if isname else [target]) + (["--changed"] if st["o"] else [])
+                _call(cfg, *argv, pause=False)
+            elif c in ("2", "3"):
+                target = pick_repo(s["projects"], s.get("last_project", ""))
+                if target is None:
+                    continue
+                _remember(cfg, target)
+                repo = resolve_repo(s["projects"], target)
+                if c == "2":
+                    print("\nCopy the AI's diff (Ctrl+C), then press Enter.")
+                    print("Do NOT paste it here - it is read from your clipboard.")
+                    input("Press Enter when copied (Ctrl+C to cancel) ")
+                    _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                else:
+                    _call(cfg, "patch", "undo", "-r", repo)
             elif c == "4":
                 projects_menu(cfg)
             elif c == "5":

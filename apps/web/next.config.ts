@@ -30,10 +30,18 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   experimental: { globalNotFound: true },
   async redirects() {
-    return [{ source: '/en', destination: '/', permanent: true }];
+    return [
+      { source: '/en', destination: '/', permanent: true },
+      { source: '/en/guide', destination: '/guide', permanent: true },
+    ];
   },
   async rewrites() {
-    return { beforeFiles: [{ source: '/', destination: '/en' }] };
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/en' },
+        { source: '/guide', destination: '/en/guide' },
+      ],
+    };
   },
   async headers() {
     return [

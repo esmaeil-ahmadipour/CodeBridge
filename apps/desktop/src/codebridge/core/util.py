@@ -31,15 +31,30 @@ def setup_console() -> None:
 
 
 def to_clipboard(text: str) -> bool:
+    """Best-effort clipboard write. Never block CLI execution."""
     cmds = {"win32": ["clip"], "darwin": ["pbcopy"]}.get(sys.platform)
-    cands = [cmds] if cmds else [["wl-copy"], ["xclip", "-selection", "clipboard"], ["xsel", "-ib"]]
+    cands = [cmds] if cmds else [
+        ["wl-copy"],
+        ["xclip", "-selection", "clipboard"],
+        ["xsel", "-ib"],
+    ]
+
     data = text.encode("utf-16" if sys.platform == "win32" else "utf-8")
+
     for c in cands:
         try:
-            subprocess.run(c, input=data, check=True, capture_output=True)
-            return True
-        except Exception:
+            result = subprocess.run(
+                c,
+                input=data,
+                capture_output=True,
+                check=False,
+                timeout=2,
+            )
+            if result.returncode == 0:
+                return True
+        except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
             continue
+
     return False
 
 

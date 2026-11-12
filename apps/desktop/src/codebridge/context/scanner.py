@@ -2,6 +2,8 @@
 from __future__ import annotations
 import fnmatch, os
 from pathlib import Path
+from typing import Optional
+from ..core.config import ExportConfig, LOCK_FILES_BY_PROJECT, TEST_RULES_BY_PROJECT
 from ..core.git import git, repo_root
 
 ALLOWED_HIDDEN = {".gitignore", ".gitattributes", ".gitkeep"}
@@ -23,6 +25,51 @@ def skip_path(rel: str, o: dict, is_dir: bool = False) -> bool:
         if any(p.startswith(".") and p not in ALLOWED_HIDDEN for p in parts):
             return True
     return False
+
+
+def _matches_any(name: str, patterns: list[str]) -> bool:
+    low = name.lower()
+    return any(p.lower() in low for p in patterns)
+
+
+def _is_test_file(rel: str, project_type: str) -> bool:
+    rules = TEST_RULES_BY_PROJECT.get(project_type)
+    if not rules:
+        return False
+    parts = rel.split("/")
+    dirs = parts[:-1]
+    name = parts[-1].lower()
+    if any(d.lower() in (d2.lower() for d2 in rules["dirs"]) for d in dirs):
+        return True
+    return _matches_any(name, rules["files"])
+
+
+def _is_lock_file(rel: str, project_type: str) -> bool:
+    rules = LOCK_FILES_BY_PROJECT.get(project_type)
+    if not rules:
+        return False
+    name = (rel.split("/")[-1] or "").lower()
+    return any(name == l.lower() for l in rules)
+
+
+def apply_project_filters(paths: list[str], cfg: ExportConfig) -> list[str]:
+    """Remove SVG / lock / test files according to user export choices.
+
+    Only applies when the corresponding `exclude_*` flag is explicitly True.
+    `None` (unanswered) means no filtering for that category.
+    Project type "other" has no default lock/test rules.
+    """
+    out: list[str] = []
+    for p in paths:
+        name = p.split("/")[-1].lower()
+        if cfg.include_svg is False and name.endswith(".svg"):
+            continue
+        if cfg.exclude_lock_files is True and _is_lock_file(p, cfg.project_type or ""):
+            continue
+        if cfg.exclude_test_files is True and _is_test_file(p, cfg.project_type or ""):
+            continue
+        out.append(p)
+    return out
 
 
 # ---- fallback .gitignore parser (used only outside git repos) ----
@@ -113,12 +160,17 @@ def _candidates(root, o) -> list:
     return found
 
 
-def collect(root, o, skip_abs=(), only=None) -> list:
+def collect(root, o, skip_abs=(), only=None, export_cfg: Optional[ExportConfig] = None) -> list:
     """-> list of (rel, size, text). `only` = explicit list of relative paths."""
     root = os.path.abspath(root)
     exts = [e.lower() for e in o["only_extensions"]]
     limit = o["max_file_mb"] * 1024 * 1024 if o["max_file_mb"] else 0
     cands = sorted(set(only)) if only is not None else _candidates(root, o)
+    # Project-type filtering (SVG / lock / test) runs after path filtering,
+    # before content reading. `only` (explicit files) is intentionally not
+    # filtered here so callers can force specific files.
+    if export_cfg is not None and only is None:
+        cands = apply_project_filters(cands, export_cfg)
     found = []
     for rel in cands:
         full = os.path.join(root, rel)

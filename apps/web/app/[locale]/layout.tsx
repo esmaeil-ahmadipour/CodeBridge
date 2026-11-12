@@ -1,6 +1,7 @@
 import type { Viewport } from 'next';
 import { notFound } from 'next/navigation';
 import '../globals.css';
+import '../../src/guide.css';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { themeInitialization } from '@/lib/theme-init';

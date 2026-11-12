@@ -1,6 +1,7 @@
 # Releasing
 
-1. Change only the root `package.json` `version` to a new `X.Y.Z` value in a pull request.
+1. In a pull request, change the root `package.json` `version` to a new `X.Y.Z` value and add a matching
+   `## X.Y.Z` section at the top of `apps/desktop/CHANGELOG.md` (it becomes the release notes).
 2. Merge the pull request to `main` and wait for the **Desktop release** workflow.
 3. The workflow tests and builds all desktop platforms, then creates the matching `vX.Y.Z` tag and GitHub release.
 

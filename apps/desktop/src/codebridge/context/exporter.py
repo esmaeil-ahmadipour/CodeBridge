@@ -3,7 +3,9 @@ from __future__ import annotations
 import os, re, shutil, time, zipfile
 from datetime import datetime
 from pathlib import Path
-from ..core.util import size_str, to_clipboard
+from typing import Optional
+from ..core.config import ExportConfig
+from ..core.util import size_str, to_clipboard, CBError
 from .scanner import collect
 
 PROMPT_HEADER = (
@@ -73,7 +75,10 @@ def build_report(name, root, files, o, extra_head: str = ""):
     prepared = []
     for rel, size, text in files:
         if o.get("redact_secrets", True):
-            text, n = redact(text)
+            try:
+                text, n = redact(text)
+            except Exception as exc:
+                raise CBError(f"secret redaction failed for {rel}: {exc}") from exc
             redacted += n
         if o.get("compact"):
             text = compact(text)
@@ -134,7 +139,8 @@ def do_backup(out_files, outdir, o) -> None:
 
 
 def export_project(name, root, o, outdir=".", output=None, dry=False, backup=True,
-                   only=None, clipboard=None, say=print):
+                   only=None, clipboard=None, say=print,
+                   export_cfg: Optional[ExportConfig] = None):
     """Export one project. Returns dict(files, outs, tokens) or None when nothing matched."""
     root = os.path.abspath(root)
     if not os.path.isdir(root):
@@ -143,7 +149,7 @@ def export_project(name, root, o, outdir=".", output=None, dry=False, backup=Tru
     outdir = Path(outdir) / o["output_dir"] if not os.path.isabs(o["output_dir"]) else Path(o["output_dir"])
     safe = "".join(c if c.isalnum() or c in "-_." else "_" for c in name)
     out = Path(output) if output else outdir / f"code_report_{safe}.txt"
-    files = collect(root, o, skip_abs={str(out.resolve())}, only=only)
+    files = collect(root, o, skip_abs={str(out.resolve())}, only=only, export_cfg=export_cfg)
     total = sum(s for _, s, _ in files)
     if dry:
         say(f"  [dry-run] {name}: {len(files)} files, {size_str(total)}")
@@ -154,6 +160,8 @@ def export_project(name, root, o, outdir=".", output=None, dry=False, backup=Tru
         say(f"  - {name}: no files matched")
         return None
     out.parent.mkdir(parents=True, exist_ok=True)
+    # Mandatory security: redaction cannot be disabled by any configuration.
+    o["redact_secrets"] = True
     parts = build_report(name, root, files, o)
     outs = []
     for i, p in enumerate(parts, 1):
