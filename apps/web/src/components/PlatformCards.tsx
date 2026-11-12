@@ -56,7 +56,7 @@ export function PlatformCards({ items, t }: { items: PlatformItem[]; t: Platform
           return (
             <li key={i.id} className={rec ? 'dl-row rec' : 'dl-row'} data-os={i.id}>
               <a className="dl-link" href={i.href} aria-label={fmt(t.dlAria, { label, arch: i.arch, format: i.format })}>
-                <span className="ico"><Icon name="desktop" /></span>
+                <span className="ico"><Icon name={i.id} fill={i.id === 'windows' ? 'currentColor' : 'none'} /></span>
                 <span className="dl-info">
                   <b>{i.name}</b>
                   <span className="dl-spec" dir="auto">{i.arch} · {i.format}</span>

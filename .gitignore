@@ -65,6 +65,7 @@ codebridge-fix.txt
 *.swp
 *.swo
 *~
+temp/*
 
 # Local databases
 *.sqlite
@@ -83,3 +84,4 @@ Desktop.ini
 !.vscode/settings.json
 !.vscode/launch.json
 !.vscode/tasks.json
+.kilo/*

@@ -94,37 +94,36 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
   );
 
   return (
-    <section id="try" className="wrap">
-      <div className="card narrow">
+    <section id="web" className="ref-wrap ref-web-tool">
+      <div className="ref-web-tool-card">
         <div className="stack6">
           <h2>{t.title}</h2>
           <p className="mut">{t.sub}</p>
         </div>
 
-        <label className="btn pri drop">
+        <label className="ref-button ref-button-secondary ref-upload">
           <input type="file" accept=".zip,application/zip,application/x-zip-compressed" onChange={onPick} className="vh" />
           <span>{t.choose}</span>
-          <span className="sm">{t.chooseHint}</span>
         </label>
 
-        <div className="row wrap8">
-          {chip(t.optGitignore, 'useGitignore')}{chip(t.optRedact, 'redact')}{chip(t.optCompact, 'compact')}
-          {chip(t.optHeader, 'header')}{chip(t.optTree, 'tree')}
-        </div>
-
-        <div className="selects">
-          <label className="sel"><span>{t.split}</span>
-            <select value={opts.splitBytes / 1024} onChange={(e) => set('splitBytes', Number(e.target.value) * 1024)}>
-              {SPLITS_KB.map((n) => <option key={n} value={n}>{n ? kbLabel(n) : t.splitOff}</option>)}
-            </select>
-          </label>
-        </div>
-        {opts.splitBytes > 0 && <p className="mut sm">{t.splitNote}</p>}
-
         {file && (
-          <button type="button" className="btn" disabled={!!busy} onClick={() => void convert(file)}>
-            {res || err ? t.convertAgain : t.convert}
-          </button>
+          <div className="ref-tool-options">
+            <div className="row wrap8">
+              {chip(t.optGitignore, 'useGitignore')}{chip(t.optRedact, 'redact')}{chip(t.optCompact, 'compact')}
+              {chip(t.optHeader, 'header')}{chip(t.optTree, 'tree')}
+            </div>
+            <div className="selects">
+              <label className="sel"><span>{t.split}</span>
+                <select value={opts.splitBytes / 1024} onChange={(e) => set('splitBytes', Number(e.target.value) * 1024)}>
+                  {SPLITS_KB.map((n) => <option key={n} value={n}>{n ? kbLabel(n) : t.splitOff}</option>)}
+                </select>
+              </label>
+            </div>
+            {opts.splitBytes > 0 && <p className="mut sm">{t.splitNote}</p>}
+            <button type="button" className="btn" disabled={!!busy} onClick={() => void convert(file)}>
+              {res || err ? t.convertAgain : t.convert}
+            </button>
+          </div>
         )}
 
         <div aria-live="polite">

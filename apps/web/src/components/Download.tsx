@@ -25,28 +25,40 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
     href: downloads[p.id],
   }));
   return (
-    <section id="download" className="wrap stack16">
-      <div className="stack8">
-        <div className="mono" dir="ltr">{t.eyebrow}</div>
-        <h2 className="big">{t.title}</h2>
-        <p className="mut">{t.sub}</p>
-      </div>
-      <div className="stack12">
-        <h3>{t.desktop}</h3>
-        <PlatformCards
-          items={items}
-          t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
-        />
-        <div className="row wrap8 dl-rel">
-          <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: applicationVersion })}</span>
-          {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
-          <a className="dl-notes" href={latestReleaseUrl}>
-            {t.releaseChecksums}<Icon name="arrow" size={16} />
-          </a>
+    <section id="dl" className="ref-download">
+      <div className="ref-wrap">
+        <div className="ref-download-card">
+          <div className="ref-download-heading">
+            <h2>{t.title}</h2>
+            <p>{t.sub}</p>
+          </div>
+          <p className="ref-download-prompt">{t.osPrompt}</p>
+          <div className="ref-download-grid">
+            <div className="ref-download-desktop">
+              <h3>{t.desktop}</h3>
+              <PlatformCards
+                items={items}
+                t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
+              />
+              <div className="row wrap8 dl-rel">
+                <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: applicationVersion })}</span>
+                {release && date && <span className="download-published">{fmt(t.relPublished, { date })}</span>}
+                <a className="dl-notes" href={latestReleaseUrl}>
+                  {t.releaseChecksums}<Icon name="arrow" size={16} />
+                </a>
+              </div>
+              <p className="download-note">{t.note}</p>
+              <p className="ref-download-note">{t.desktopNote} <a href="#mobile">{t.browserCta}</a></p>
+            </div>
+            <details className="ref-install-details">
+              <summary>{t.installMore}</summary>
+              <div className="ref-install-panel">
+                <InstallCard t={t} />
+              </div>
+            </details>
+          </div>
         </div>
-        <p className="mut sm">{t.note}</p>
       </div>
-      <InstallCard t={t} />
     </section>
   );
 }

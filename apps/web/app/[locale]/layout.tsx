@@ -30,7 +30,7 @@ export default async function RootLayout({ children, params }: { children: React
     <html lang={locale} dir={rtl ? 'rtl' : 'ltr'} className={fontVariables} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitialization }} />
-        {rtl && <link rel="preload" href="/fonts/vazirmatn-regular.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />}
+        {rtl && <link rel="preload" href="/fonts/vazirmatn-arabic.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />}
       </head>
       <body className={rtl ? 'rtl' : undefined}>
         <ThemeProvider>
