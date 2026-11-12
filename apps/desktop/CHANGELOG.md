@@ -14,6 +14,10 @@ Faster interactive menu. Exporting and applying now take one screen each instead
 - Removed the 5-step export wizard (`run_wizard`) and its next/back/confirm questions.
 - Tests: the screen, repo picker and menu flows are covered; version consistency is checked.
 - Settings file format is still version 3 (old files load unchanged).
+- Release process: the GitHub release notes now come from this changelog (`scripts/changelog_section.py`), and a
+  release fails if its version has no section here. Removed the temporary debug step from the release workflow.
+- Tests: `test_changelog.py` checks the current version has a section, newest first, no duplicates.
+- Docs: `RELEASING.md` explains version vs tag and the workflow checks.
 
 ## 2.2.1
 Align desktop package metadata for the next stable release.

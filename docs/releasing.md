@@ -1,6 +1,6 @@
 # Releasing
 
-For the desktop release steps and tag policy, see [RELEASING.md](../RELEASING.md).
+For the desktop release steps, version/tag rules and CHANGELOG requirement, see [RELEASING.md](../RELEASING.md).
 
 ## Website
 Merge to `main`. Vercel builds `apps/web` and deploys to https://codebridge.tarvix.org.
@@ -13,7 +13,7 @@ The `Desktop release` workflow:
 - builds a single-file PyInstaller binary on Windows x64, Linux x64 (Ubuntu 22.04) and macOS ARM64 (isolated matrix jobs),
 - smoke-tests each binary (`--version`), packages it into a ZIP, and re-runs `--version` from the extracted ZIP,
 - only if all three builds succeeded: builds the sdist/wheel, writes `SHA256SUMS.txt` and verifies it, and publishes a
-  stable GitHub Release (generated notes) with these assets:
+  stable GitHub Release (notes taken from the matching `CHANGELOG.md` section) with these assets:
 
 | Asset | Contents |
 |---|---|
