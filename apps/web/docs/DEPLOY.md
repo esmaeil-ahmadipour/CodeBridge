@@ -28,6 +28,8 @@ After deploying, set the project domain under **Settings -> Domains**. Bump `VER
 Notes
 - Pages are statically generated; Vercel serves them from its CDN. `rewrites`/`redirects`/headers in `next.config.ts`
   are handled by Vercel, so keep hosting on Vercel (GitHub Pages cannot run them).
+- The guide lives at `/guide`, `/fa/guide` and `/ar/guide`. When the desktop menu changes, update the screens in
+  `src/lib/guide.ts` and the texts in `src/i18n/translations.ts` (`guide`), then bump the version.
 - Changing the site later: push to GitHub; Vercel redeploys. Bump `VERSION` in `public/sw.js` when you want installed
   copies to drop their old cache.
 

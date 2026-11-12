@@ -1,6 +1,6 @@
 // Minimal offline support. Bump VERSION on each release so old caches are dropped.
-const VERSION = 'cb-v1';
-const SHELL = ['/', '/fa', '/ar'];
+const VERSION = 'cb-v3';
+const SHELL = ['/', '/fa', '/ar', '/guide', '/fa/guide', '/ar/guide'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));

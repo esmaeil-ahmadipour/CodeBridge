@@ -1,0 +1,29 @@
+/* Guide page and the landing "Need help?" cards. Colors come from the tokens in index.css. */
+.guide { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
+.ghead { align-items: flex-start; }
+.toc { display: flex; flex-wrap: wrap; gap: 8px; }
+.toc a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--bd); border-radius: 999px; color: var(--mu); text-decoration: none; font-size: 14px; font-weight: 500; }
+.toc a:hover { color: var(--ac); border-color: var(--ac); }
+.gsec { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 84px; min-width: 0; }
+.gsec h2 { display: flex; align-items: center; gap: 12px; }
+.gnum { width: 32px; height: 32px; border-radius: 10px; background: color-mix(in srgb, var(--ac) 16%, var(--sf)); color: var(--ac); font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.gsec .steps { margin: 0; padding: 0; list-style: none; }
+.gshot pre { font-size: 12px; line-height: 1.5; white-space: pre; }
+.gshot pre:focus-visible { outline: 2px solid var(--ac); outline-offset: -2px; }
+.keys { display: flex; flex-direction: column; gap: 8px; margin: 0; }
+.keys > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 14px; background: var(--sf); border: 1px solid var(--bd); border-radius: 12px; }
+.keys.stack > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+.keys dt, .keys dd { margin: 0; min-width: 0; }
+.kbd { display: inline-block; max-width: 100%; font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 13px; font-weight: 600; color: var(--ac); background: var(--bg); border: 1px solid var(--bd); border-radius: 8px; padding: 2px 8px; overflow-wrap: anywhere; }
+.qa { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.qa .card { gap: 6px; padding: 14px 16px; }
+.qa dt { font-weight: 600; margin: 0; } .qa dd { margin: 0; }
+.gnotes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.gnotes li { display: flex; gap: 8px; align-items: flex-start; }
+.hlist { margin: 0; padding: 0; list-style: none; }
+.hcard { height: 100%; box-sizing: border-box; color: inherit; text-decoration: none; }
+.hcard:hover, .hcard:focus-visible { border-color: var(--ac); }
+.hcard h3 { margin: 0; } .hcard p { margin: 0; flex: 1; }
+.hbtn { align-self: flex-start; }
+[dir='rtl'] .hcard .dl-notes svg { transform: scaleX(-1); }
+@media (max-width: 640px) { .keys > div { grid-template-columns: minmax(0, 1fr); gap: 6px; } .hbtn { align-self: stretch; } }

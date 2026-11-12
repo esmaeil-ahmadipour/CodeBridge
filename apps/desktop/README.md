@@ -24,13 +24,16 @@ Windows SmartScreen may warn about an unsigned binary: More info → Run anyway.
 ## Daily use
 
 ```text
-codebridge                         # interactive menu
+codebridge                         # interactive menu (export on one screen, apply from the clipboard)
 codebridge context export          # report of the current folder -> code_report_<name>.txt
 codebridge context export --changed
 # paste the report to the AI, copy its reply
-codebridge patch apply             # reads diff.patch, or the clipboard; preview -> confirm -> apply
+codebridge patch apply             # reads diff.patch, or the clipboard (the menu always uses the clipboard); preview -> confirm -> apply
 codebridge patch undo              # restore the files of the last run
 ```
+
+In the menu: **1** opens one screen where you tick everything (`1 a t`, Enter = export), **2** applies the diff
+you copied (Ctrl+C, then Enter; do not paste it into the terminal), **3** undoes. Details in [docs/USAGE.md](docs/USAGE.md).
 
 If a diff cannot be applied, nothing is changed and `codebridge-fix.txt` is created (and copied to the
 clipboard): the errors plus the current content of the affected files, ready to send back to the AI.
