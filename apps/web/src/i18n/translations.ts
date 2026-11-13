@@ -55,16 +55,16 @@ export interface Dictionary {
 export const translations: Record<Locale, Dictionary> = {
   en: {
     metadata: {
-      title: 'CodeBridge: turn any project into AI-ready text, privately',
+      title: 'CodeBridge: Codebase to Prompt & AI Diff Tool',
       description:
-        'Convert a project ZIP into one clean text file for any AI, right in your browser. Free, private, and nothing is uploaded.',
+        'Convert a project ZIP into clean, AI-ready code context in your browser. Apply AI-generated Git diffs with the desktop app. Free and private. Nothing is uploaded.',
     },
     nav: { how: 'How it works', mobile: 'Android & iOS', features: 'Features', trust: 'Privacy', web: 'Web tool', download: 'Download', theme: 'Switch light or dark theme', language: 'Language', skip: 'Skip to content', guide: 'Guide' },
     hero: {
       eyebrow: 'An AI-assisted tool for developers',
       title: 'Give AI clean code,',
       titleAccent: 'bring changes back without copy-paste.',
-      sub: 'CodeBridge safely turns your project into text without unnecessary files so tokens are not wasted, and applies the AI’s diff directly to your project. No more opening files, searching for lines, and copying one by one.',
+      sub: 'Turn a codebase ZIP into clean, AI-ready code context without unnecessary files or wasted tokens. Use the desktop app to apply AI-generated Git diffs directly to your project, then undo changes when needed.',
       ctaDownload: 'Download the desktop app',
       ctaMobile: 'Try it in your phone or desktop browser',
       proof: ['Your code is not uploaded', 'Android, iOS and desktop', 'Precise undo', 'Free and open source'],
@@ -111,7 +111,7 @@ export const translations: Record<Locale, Dictionary> = {
     },
     tool: {
       title: 'Only need an export? Right here, in your browser',
-      sub: 'Drop a ZIP and get ready-to-send text; no install, no upload, on phone and desktop. Apply diffs and undo in the desktop app.',
+      sub: 'Convert a project ZIP into an AI-ready code context file right in your browser. No installation or upload required. Apply AI-generated Git diffs and undo changes with the desktop app.',
       choose: 'Choose ZIP',
       chooseHint: 'from Files, Drive or Downloads',
       optGitignore: 'Respect .gitignore', optRedact: 'Hide secrets', optCompact: 'Compact', optHeader: 'AI instructions', optTree: 'File tree',
@@ -180,7 +180,7 @@ export const translations: Record<Locale, Dictionary> = {
     },
     footer: { license: 'MIT license', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
-      metadata: { title: 'CodeBridge guide: use the desktop app step by step', description: 'Learn the CodeBridge desktop app: export your project for an AI, apply its diff safely, undo, and fix common problems.' },
+      metadata: { title: 'CodeBridge Guide: Export Code & Apply AI Diffs', description: 'Learn how to export your codebase for AI, apply AI-generated Git diffs safely, undo changes, and troubleshoot the CodeBridge desktop app.' },
       eyebrow: 'Guide · Desktop app 3.0',
       title: 'Learn CodeBridge in 5 minutes',
       sub: 'Export your project for an AI, apply its reply safely, and undo if needed. The screens below are exactly what you see in the app.',
@@ -211,7 +211,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'export',
-          title: 'Export your project on one screen',
+          title: 'Export a Codebase for AI Context',
           intro: 'Everything is on one page. Tick what you want, then press Enter. Pressing Enter alone exports exactly what you see.',
           steps: ['Pick the project first: type p, then choose it from the list or type its folder.', 'Type keys separated by spaces, for example “3 s t”: a Next.js project, with SVG contents and with test files. Typing a key again undoes it.', 'Read the “Will export” line above the box, then press Enter on an empty line.'],
           keys: [
@@ -229,7 +229,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'apply',
-          title: 'Apply the AI’s diff',
+          title: 'Apply an AI-Generated Git Diff',
           intro: 'Ask the AI to answer with a git diff. CodeBridge then puts it into your project safely: it checks everything first and changes nothing if any part fails.',
           steps: ['In the AI’s reply, copy the whole diff with Ctrl+C (or its copy button).', 'In CodeBridge type 2 and press Enter, then choose the repo: Enter picks the first one in the list, or type a number, a name or a folder.', 'When asked, press Enter. The diff is read from your clipboard. Do not paste it into the terminal: a multi-line paste is cut after the first line.', 'Look at the list of files, confirm, and you are done.'],
           notes: ['If the diff does not apply, nothing changes and the app writes codebridge-fix.txt (also copied to the clipboard). Send it back to the AI.', 'Git must be installed. Your uncommitted work stays untouched.'],
@@ -294,9 +294,9 @@ export const translations: Record<Locale, Dictionary> = {
   },
   fa: {
     metadata: {
-      title: 'CodeBridge: هر پروژه را خصوصی به متن آماده‌ی هوش مصنوعی تبدیل کنید',
+      title: 'CodeBridge: تبدیل کد به متن AI و اعمال Git Diff',
       description:
-        'ZIP پروژه را همین‌جا در مرورگر به یک فایل متنی مرتب برای هر هوش مصنوعی تبدیل کنید. رایگان و خصوصی است و هیچ‌چیز آپلود نمی‌شود.',
+        'فایل ZIP پروژه را در مرورگر به متن آماده‌ی هوش مصنوعی تبدیل کنید. تغییرات Git Diff تولیدشده توسط AI را با اپ دسکتاپ اعمال کنید. رایگان و خصوصی، بدون آپلود کد.',
     },
     nav: { how: 'چطور کار می‌کند', mobile: 'اندروید و iOS', features: 'امکانات', trust: 'حریم خصوصی', web: 'ابزار وب', download: 'دانلود', theme: 'تغییر تم روشن یا تاریک', language: 'زبان', skip: 'رفتن به محتوا', guide: 'راهنما' },
     hero: {
@@ -419,7 +419,7 @@ export const translations: Record<Locale, Dictionary> = {
     },
     footer: { license: 'مجوز MIT', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
-      metadata: { title: 'راهنمای CodeBridge: کار با اپ دسکتاپ قدم‌به‌قدم', description: 'کار با اپ دسکتاپ CodeBridge را یاد بگیرید: خروجی پروژه برای AI، اعمال امن Diff، Undo و رفع مشکل‌های رایج.' },
+      metadata: { title: 'راهنمای CodeBridge: خروجی کد و اعمال Git Diff', description: 'یاد بگیرید چطور از کد پروژه برای هوش مصنوعی خروجی بگیرید، Git Diff تولیدشده توسط AI را امن اعمال کنید، تغییرات را برگردانید و مشکلات رایج را رفع کنید.' },
       eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
       title: 'CodeBridge را در ۵ دقیقه یاد بگیرید',
       sub: 'پروژه‌تان را برای AI خروجی بگیرید، پاسخ آن را امن اعمال کنید و در صورت نیاز Undo بزنید. صفحه‌های زیر دقیقاً همان چیزی است که در برنامه می‌بینید.',
@@ -450,7 +450,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'export',
-          title: 'خروجی پروژه در یک صفحه',
+          title: 'خروجی گرفتن از کدبیس برای AI',
           intro: 'همه‌چیز در یک صفحه است. موارد را تیک بزنید و Enter بزنید. Enter خالی دقیقاً همان چیزی را خروجی می‌گیرد که می‌بینید.',
           steps: ['اول پروژه را انتخاب کنید: p را بزنید و از لیست انتخاب کنید یا پوشه را بنویسید.', 'کلیدها را با فاصله بنویسید؛ مثلاً «3 s t» یعنی پروژه‌ی Next.js، با محتوای SVG و با فایل‌های تست. زدن دوباره‌ی یک کلید آن را برمی‌گرداند.', 'خط «Will export» بالای کادر را بخوانید و روی یک خط خالی Enter بزنید.'],
           keys: [
@@ -468,7 +468,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'apply',
-          title: 'اعمال Diff پیشنهادی AI',
+          title: 'اعمال Git Diff تولیدشده توسط AI',
           intro: 'از AI بخواهید پاسخ را به‌صورت git diff بدهد. بعد CodeBridge آن را امن در پروژه می‌گذارد: اول همه‌چیز را بررسی می‌کند و اگر بخشی شکست بخورد هیچ چیز را عوض نمی‌کند.',
           steps: ['در پاسخ AI کل Diff را با Ctrl+C کپی کنید (یا با دکمه‌ی کپی).', 'در CodeBridge عدد 2 را بزنید و ریپو را انتخاب کنید: Enter اولین مورد لیست را برمی‌دارد، یا شماره، نام یا پوشه را بنویسید.', 'وقتی خواست، Enter بزنید. Diff از کلیپ‌بورد خوانده می‌شود. آن را در ترمینال Paste نکنید؛ Paste چندخطی بعد از خط اول بریده می‌شود.', 'فهرست فایل‌ها را ببینید و تأیید کنید؛ تمام.'],
           notes: ['اگر Diff اعمال نشود هیچ چیز عوض نمی‌شود و فایل codebridge-fix.txt ساخته (و کپی) می‌شود. آن را برای AI بفرستید.', 'Git باید نصب باشد. کارهای Commit‌نشده‌ی شما دست‌نخورده می‌ماند.'],
@@ -533,9 +533,9 @@ export const translations: Record<Locale, Dictionary> = {
   },
   ar: {
     metadata: {
-      title: 'CodeBridge: حوّل أي مشروع إلى نص جاهز للذكاء الاصطناعي بخصوصية تامة',
+      title: 'CodeBridge: تحويل الكود إلى سياق AI وأداة Git Diff',
       description:
-        'حوّل ملف ZIP للمشروع إلى ملف نصي منظم لأي ذكاء اصطناعي، داخل متصفحك مباشرة. مجاني وخاص ولا يُرفع شيء.',
+        'حوّل ملف ZIP لمشروعك إلى سياق برمجي جاهز للذكاء الاصطناعي في المتصفح. طبّق تغييرات Git Diff التي ينشئها AI باستخدام تطبيق سطح المكتب. مجاني وخاص دون رفع ملفاتك.',
     },
     nav: { how: 'كيف يعمل', mobile: 'أندرويد وiOS', features: 'المزايا', trust: 'الخصوصية', web: 'أداة الويب', download: 'تحميل', theme: 'تبديل المظهر الفاتح أو الداكن', language: 'اللغة', skip: 'تخطَّ إلى المحتوى', guide: 'الدليل' },
     hero: {
@@ -658,7 +658,7 @@ export const translations: Record<Locale, Dictionary> = {
     },
     footer: { license: 'رخصة MIT', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {
-      metadata: { title: 'دليل CodeBridge: استخدم تطبيق سطح المكتب خطوة بخطوة', description: 'تعلّم تطبيق CodeBridge لسطح المكتب: صدّر مشروعك للذكاء الاصطناعي، وطبّق تعديلاته بأمان، وتراجع عنها، وأصلح المشكلات الشائعة.' },
+      metadata: { title: 'دليل CodeBridge: تصدير الكود وتطبيق Git Diff', description: 'تعلّم كيفية تصدير مشروعك للذكاء الاصطناعي، وتطبيق تغييرات Git Diff بأمان، والتراجع عنها، وحل المشكلات الشائعة في تطبيق CodeBridge.' },
       eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',
       title: 'تعلّم CodeBridge في 5 دقائق',
       sub: 'صدّر مشروعك للذكاء الاصطناعي، وطبّق رده بأمان، وتراجع عند الحاجة. الشاشات أدناه هي ما تراه فعلًا في التطبيق.',
@@ -689,7 +689,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'export',
-          title: 'تصدير مشروعك في شاشة واحدة',
+          title: 'تصدير قاعدة الشيفرة كسياق للذكاء الاصطناعي',
           intro: 'كل شيء في صفحة واحدة. حدّد ما تريد ثم اضغط Enter. الضغط على Enter وحده يصدّر ما تراه تمامًا.',
           steps: ['اختر المشروع أولًا: اكتب p ثم اختره من القائمة أو اكتب مجلده.', 'اكتب المفاتيح مفصولة بمسافات، مثل «3 s t»: مشروع Next.js مع محتوى SVG ومع ملفات الاختبار. كتابة المفتاح مرة أخرى تلغيه.', 'اقرأ سطر «Will export» فوق الإطار ثم اضغط Enter على سطر فارغ.'],
           keys: [
@@ -707,7 +707,7 @@ export const translations: Record<Locale, Dictionary> = {
         },
         {
           id: 'apply',
-          title: 'تطبيق تعديلات الذكاء الاصطناعي',
+          title: 'تطبيق Git Diff مُنشأ بواسطة الذكاء الاصطناعي',
           intro: 'اطلب من الذكاء الاصطناعي أن يرد بصيغة git diff. ثم يضعه CodeBridge في مشروعك بأمان: يفحص كل شيء أولًا ولا يغيّر شيئًا إذا فشل أي جزء.',
           steps: ['انسخ الـ diff كاملًا من رد الذكاء الاصطناعي بـ Ctrl+C (أو بزر النسخ).', 'في CodeBridge اكتب 2 ثم Enter، واختر المستودع: Enter يختار أول عنصر في القائمة، أو اكتب رقمًا أو اسمًا أو مجلدًا.', 'عندما يطلب ذلك اضغط Enter. يُقرأ الـ diff من الحافظة. لا تلصقه في الطرفية: اللصق متعدد الأسطر يُقطع بعد السطر الأول.', 'راجع قائمة الملفات وأكّد، وانتهى الأمر.'],
           notes: ['إذا لم يُطبَّق الـ diff لا يتغير شيء ويكتب التطبيق الملف codebridge-fix.txt (ويُنسخ إلى الحافظة). أرسله إلى الذكاء الاصطناعي.', 'يجب تثبيت Git. أعمالك غير المُثبَّتة (uncommitted) تبقى كما هي.'],
