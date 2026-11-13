@@ -40,7 +40,11 @@ export function buildJsonLd(locale: Locale) {
     description,
     url: urlFor(locale),
     applicationCategory: 'DeveloperApplication',
-    operatingSystem: flags.downloads ? 'Windows, macOS, Linux, Android, iOS' : 'Any (web browser)',
+        operatingSystem: flags.downloads
+          ? 'Any modern web browser; Windows; macOS; Linux'
+          : 'Any modern web browser',
+        browserRequirements: 'Requires a modern web browser to use the browser-based ZIP-to-text tool.',
+        isAccessibleForFree: true,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     author: { '@type': 'Person', name: 'Esmaeil Ahmadipour' },
     codeRepository: repoUrl,
