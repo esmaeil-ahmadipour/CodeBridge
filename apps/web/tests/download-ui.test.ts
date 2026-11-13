@@ -5,34 +5,33 @@ import { translations } from '../src/i18n/translations.ts';
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), 'utf8');
 
-test('bottom of the landing page is split into hero, download, install, support', () => {
+test('landing page keeps the hero, download, tool and support sections in order', () => {
   const page = read('../app/[locale]/page.tsx');
-  const order = ['<DownloadHero', '<Download ', '<Install ', '<Help '].map((tag) => page.indexOf(tag));
+  const order = ['<Hero ', '<Download ', '<Tool ', '<Help '].map((tag) => page.indexOf(tag));
   assert.ok(order.every((i) => i > 0), 'a section is missing from the page');
   assert.deepEqual([...order].sort((a, b) => a - b), order, 'sections are out of order');
-  assert.ok(page.indexOf('<Tool ') < order[0], 'the web tool stays above the download area');
 });
 
-test('hero shows the version; download keeps OS detection and release info; install has both cards', () => {
-  assert.match(read('../src/components/DownloadHero.tsx'), /className="ref-badge"[^>]*>\{fmt\(t\.relVersion/);
+test('hero CTA and download section retain the version, platform choices and release info', () => {
+  const hero = read('../src/components/Hero.tsx');
+  assert.match(hero, /downloads && <a className="ref-button ref-button-primary" href="#dl">\{t\.ctaDownload\}/);
   const dl = read('../src/components/Download.tsx');
   assert.match(dl, /<PlatformCards/);
   assert.match(dl, /latestReleaseUrl/);
   assert.match(dl, /t\.relPublished/);
-  const inst = read('../src/components/Install.tsx');
-  assert.match(inst, /t\.installSteps\.map/);
-  assert.match(inst, /<InstallCard/);
-  for (const src of [dl, inst, read('../src/components/DownloadHero.tsx')]) assert.doesNotMatch(src, /<details/);
+  assert.match(dl, /getApplicationVersion/);
+  assert.doesNotMatch(dl, /<details/);
   for (const l of ['en', 'fa', 'ar'] as const) {
-    assert.equal(translations[l].download.installSteps.length, 3, l);
-    assert.match(translations[l].download.relVersion, /\{v\}/, l);
+    assert.ok(translations[l].download.osPrompt.trim().length > 0, l);
+    assert.ok(translations[l].download.relPublished.includes('{date}'), l);
   }
 });
 
-test('install cards are stacked on phones, two columns from 900px; the phone card keeps its dark palette', () => {
+test('mobile showcase stacks on narrow screens and download rows remain responsive', () => {
   const css = read('../src/index.css');
-  assert.match(css, /\.ref-install-grid \{[^}]*grid-template-columns: minmax\(0, 1fr\)/);
-  assert.match(css, /@media \(min-width: 900px\) \{ \.ref-install-grid \{ grid-template-columns: repeat\(2/);
-  assert.match(css, /\.ref-install-panel \.feat \{[^}]*--ac: #2dd4bf[^}]*--bg: #0c1117/);
+  assert.match(css, /\.ref-mobile-grid \{[^}]*grid-template-columns: repeat\(auto-fit/);
+  assert.match(css, /@media \(max-width: 600px\)/);
+  assert.match(css, /\.ref-mobile-grid \{ grid-template-columns: minmax\(0, 1fr\);/);
+  assert.match(css, /@media \(max-width: 760px\) \{ \.ref-downloads \.dl-rows \{ grid-template-columns: minmax\(0, 1fr\); \} \}/);
   assert.doesNotMatch(css, /\.ref-download \.dl-/, 'old teal overrides for download rows must be gone');
 });

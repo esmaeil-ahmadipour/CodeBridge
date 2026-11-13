@@ -9,7 +9,7 @@ export function Help({ t, locale }: { t: Dictionary['help']; locale: Locale }) {
   return (
     <section id="help" className="ref-wrap ref-support stack16" aria-labelledby="help-title">
       <div className="stack8">
-        <h2 id="help-title" className="big">{t.title}</h2>
+        <h2 id="help-title">{t.title}</h2>
         <p className="mut">{t.sub}</p>
       </div>
       <ul className="cols3 hlist">

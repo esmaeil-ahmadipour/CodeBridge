@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.1.0
+Desktop export parity with the web tool, plus web UX and accessibility improvements.
+
+- **Desktop configuration wizard:** interactive 5-step flow (project type, languages, SVG, lock files, test files) before export, with back/next/cancel navigation and a confirmation summary.
+- **Project-type-aware filtering:** SVG, lock files (`pubspec.lock`, `package-lock.json`, `poetry.lock`, `Cargo.lock`, etc.) and test files (`*_test.*`, `test_*.py`, `conftest.py`, `__tests__/`, etc.) are excluded per project type (Flutter, React, Next.js, Node.js, Python, Rust, Other) when the user opts in.
+- **Mandatory secret redaction:** API keys, AWS/GitHub tokens, passwords, private keys, DB credentials and `.env`/`.npmrc`/`.pypirc` contents are automatically redacted before token estimation, splitting and export. Redaction cannot be disabled by any configuration; failure aborts the export (fail-closed).
+- **ExportConfig model:** strongly typed dataclass in `core/config.py` distinguishing unanswered (`None`) from explicit `True`/`False`, with validation, JSON serialization and legacy settings migration (`redact_secrets` forced to `True`).
+- **Web UX:** reduced top whitespace on the "How it works" section; Help section title (`کمک می‌خواهید؟`) now matches other section titles (22px `h2` instead of oversized `big`).
+- **Web accessibility:** footer redesign with improved RTL support, Navbar and layout adjustments across all locales (en, fa, ar).
+- **Release:** version synchronized across web root `package.json` and desktop; CI release metadata checks gating the desktop release workflow.
+- Tests: 27 new desktop tests (config validation, scanner filters) added; all 58 desktop tests pass. Web tests have 4 pre-existing failures unrelated to this branch.
+
 ## 3.0.1
 Improved release version and changelog consistency.
 

@@ -132,10 +132,10 @@ test('formatReleaseDate: locale formatting and fallback', () => {
   assert.equal(formatReleaseDate('garbage', 'en'), null);
 });
 
-test('feature flag: downloads are off unless NEXT_PUBLIC_ENABLE_DOWNLOADS === "true"', async () => {
+test('feature flag: downloads are on by default and only "false" disables them', async () => {
   const prev = process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS;
   try {
-    for (const [value, expected] of [[undefined, false], ['false', false], ['1', false], ['true', true]] as const) {
+    for (const [value, expected] of [[undefined, true], ['false', false], ['1', true], ['true', true]] as const) {
       if (value === undefined) delete process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS; else process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS = value;
       const { flags } = await import(`../src/lib/flags.ts?v=${String(value)}`);
       assert.equal(flags.downloads, expected, `value=${String(value)}`);

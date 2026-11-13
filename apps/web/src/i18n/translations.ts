@@ -178,7 +178,7 @@ export const translations: Record<Locale, Dictionary> = {
       installNotes: 'Install notes',
       recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Application version: {v}', relPublished: 'Published {date}',
     },
-    footer: { license: 'MIT licensed · Developed by Esmaeil Ahmadipour', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
+    footer: { license: 'MIT license', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
       metadata: { title: 'CodeBridge guide: use the desktop app step by step', description: 'Learn the CodeBridge desktop app: export your project for an AI, apply its diff safely, undo, and fix common problems.' },
       eyebrow: 'Guide · Desktop app 3.0',
@@ -417,7 +417,7 @@ export const translations: Record<Locale, Dictionary> = {
       installNotes: 'نکات اجرا',
       recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'نسخه‌ی برنامه: {v}', relPublished: 'منتشرشده در {date}',
     },
-    footer: { license: 'مجوز MIT · توسعه دهنده اسماعیل احمدی‌پور', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
+    footer: { license: 'مجوز MIT', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
       metadata: { title: 'راهنمای CodeBridge: کار با اپ دسکتاپ قدم‌به‌قدم', description: 'کار با اپ دسکتاپ CodeBridge را یاد بگیرید: خروجی پروژه برای AI، اعمال امن Diff، Undo و رفع مشکل‌های رایج.' },
       eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
@@ -656,7 +656,7 @@ export const translations: Record<Locale, Dictionary> = {
       installNotes: 'ملاحظات التشغيل',
       recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'إصدار التطبيق: {v}', relPublished: 'نُشر في {date}',
     },
-    footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
+    footer: { license: 'رخصة MIT', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {
       metadata: { title: 'دليل CodeBridge: استخدم تطبيق سطح المكتب خطوة بخطوة', description: 'تعلّم تطبيق CodeBridge لسطح المكتب: صدّر مشروعك للذكاء الاصطناعي، وطبّق تعديلاته بأمان، وتراجع عنها، وأصلح المشكلات الشائعة.' },
       eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',
