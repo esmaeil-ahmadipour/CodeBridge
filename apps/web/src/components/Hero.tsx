@@ -1,44 +1,37 @@
 import type { Dictionary } from '@/i18n/translations';
-import { Icon } from './Icons';
 
-function Preview({ label }: { label: string }) {
+function Preview({ label, lines, result, undo }: { label: string; lines: Dictionary['hero']['previewLines']; result: string; undo: string }) {
   return (
-    <div className="prev" role="img" aria-label={label} dir="ltr">
-      <div className="prev-h">
-        <span className="dots" aria-hidden="true"><i /><i /><i /></span>
-        <span className="mono">project.zip → code_report.txt</span>
+    <div className="ref-preview" role="img" aria-label={label}>
+      <div className="ref-preview-title">{label}</div>
+      <div className="ref-code" dir="ltr">
+        {lines.map((line, index) => (
+          <div className={`ref-diff-line ref-diff-${line.kind}`} key={`${line.text}-${index}`}>{line.text}</div>
+        ))}
       </div>
-      <pre aria-hidden="true">
-        <span className="ac"># PROJECT: my-app{'\n'}# FILES: 128   ~TOKENS: 41,320{'\n'}# REDACTED: 3 secret(s) hidden{'\n'}</span>
-        {'\n## TREE\n|-- src/\n|   |-- app.ts\n|   `-- utils.ts\n`-- package.json\n\n'}
-        <span className="ac">{'/* FILE: src/app.ts */'}</span>
-        {'\nexport function main() {\n  …\n}'}
-      </pre>
+      <div className="ref-preview-result">
+        <span>{result}</span><span className="ref-undo">{undo}</span>
+      </div>
     </div>
   );
 }
 
 export function Hero({ t, downloads }: { t: Dictionary['hero']; downloads: boolean }) {
+  const previewLines = t.previewLines;
+  const { previewResult, undo } = t;
   return (
-    <section id="top" className="wrap hero">
-      <div className="hero-copy">
-        <span className="chip on hero-eb">{t.eyebrow}</span>
-        <h1>{t.title}</h1>
-        <p className="mut lead">{t.sub}</p>
-        <div className="cta">
-          <a className="btn pri" href="#try">{t.ctaTry}</a>
-          <a className="btn" href={downloads ? '#download' : '#privacy'}>{downloads ? t.ctaDownload : t.ctaPrivacy}</a>
+    <section id="top" className="ref-hero">
+      <div className="ref-hero-copy">
+        <span className="ref-badge">{t.eyebrow}</span>
+        <h1>{t.title}<br /><span>{t.titleAccent}</span></h1>
+        <p>{t.sub}</p>
+        <div className="ref-hero-actions">
+          {downloads && <a className="ref-button ref-button-primary" href="#dl">{t.ctaDownload}</a>}
+          <a className="ref-button ref-button-secondary" href="#mobile">{t.ctaMobile}</a>
         </div>
-        <ul className="proof">
-          {t.proof.map((p) => (
-            <li key={p}><Icon name="check" size={16} style={{ color: 'var(--ac)', flex: 'none' }} />{p}</li>
-          ))}
-        </ul>
-        {!downloads && (
-          <p className="soon mut sm"><Icon name="desktop" size={16} style={{ flex: 'none' }} />{t.soon}</p>
-        )}
+        <div className="ref-proof">{t.proof.map((item) => <span key={item}>{item}</span>)}</div>
       </div>
-      <Preview label={t.previewLabel} />
+      <Preview label={t.previewTitle} lines={t.previewLines} result={t.previewResult} undo={t.undo} />
     </section>
   );
 }

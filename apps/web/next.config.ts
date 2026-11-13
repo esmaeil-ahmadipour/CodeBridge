@@ -1,4 +1,14 @@
+import { readFileSync } from 'node:fs';
 import type { NextConfig } from 'next';
+
+const rootPackage = JSON.parse(
+  readFileSync(new URL('../../package.json', import.meta.url), 'utf8'),
+) as { version?: unknown };
+const applicationVersion = rootPackage.version;
+
+if (typeof applicationVersion !== 'string' || !/^[0-9]+\.[0-9]+\.[0-9]+$/.test(applicationVersion)) {
+  throw new Error('Root package.json must define the application version as X.Y.Z.');
+}
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -28,6 +38,9 @@ const securityHeaders = [
 // English is served unprefixed ("/") and rewritten to the shared `app/[locale]` tree;
 // "/en" redirects to "/" so there is a single canonical URL.
 const nextConfig: NextConfig = {
+  env: {
+    NEXT_PUBLIC_CODEBRIDGE_VERSION: applicationVersion,
+  },
   experimental: { globalNotFound: true },
   async redirects() {
     return [

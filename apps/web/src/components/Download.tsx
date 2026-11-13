@@ -1,18 +1,10 @@
-import type { Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
 import { flags } from '@/lib/flags';
-import { formatReleaseDate, getLatestRelease } from '@/lib/release';
-import { downloads, latestReleaseUrl, platforms } from '@/lib/site';
-import { Icon } from './Icons';
-import { InstallCard } from './InstallCard';
+import { downloads, platforms } from '@/lib/site';
 import { PlatformCards, type PlatformItem } from './PlatformCards';
 
-const fmt = (s: string, v: Record<string, string>) => s.replace(/\{(\w+)\}/g, (_, k: string) => v[k] ?? '');
-
-export async function Download({ t, locale }: { t: Dictionary['download']; locale: Locale }) {
+export function Download({ t }: { t: Dictionary['download'] }) {
   if (!flags.downloads) return null; // the flag also guards this component, not only its call site
-  const release = await getLatestRelease(); // never throws; null on any failure
-  const date = formatReleaseDate(release?.publishedAt ?? null, locale);
   const names = { windows: t.win, macos: t.mac, linux: t.linux };
   const hints = { windows: t.winHint, macos: t.macHint, linux: t.linuxHint };
   const items: PlatformItem[] = platforms.map((p) => ({
@@ -24,28 +16,22 @@ export async function Download({ t, locale }: { t: Dictionary['download']; local
     href: downloads[p.id],
   }));
   return (
-    <section id="download" className="wrap stack16">
-      <div className="stack8">
-        <div className="mono" dir="ltr">{t.eyebrow}</div>
-        <h2 className="big">{t.title}</h2>
-        <p className="mut">{t.sub}</p>
-      </div>
-      <div className="stack12">
-        <h3>{t.desktop}</h3>
+    <section id="dl" className="ref-downloads" aria-labelledby="download-title">
+      <div className="ref-wrap ref-downloads-card">
+        <div className="ref-downloads-head">
+          <h2 id="download-title">{t.osPrompt}</h2>
+        </div>
         <PlatformCards
           items={items}
-          t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintDetected: t.hintDetected, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria }}
+          t={{ recommended: t.recommended, hintDefault: t.hintDefault, hintMobile: t.hintMobile, downloadFor: t.downloadFor, dlAria: t.dlAria, installNotes: t.installNotes }}
         />
-        <div className="row wrap8 dl-rel">
-          {release && <span className="dl-ver" dir="ltr">{fmt(t.relVersion, { v: release.version })}</span>}
-          {release && date && <span className="mut sm">{fmt(t.relPublished, { date })}</span>}
-          <a className="dl-notes" href={latestReleaseUrl}>
-            {t.releaseChecksums}<Icon name="arrow" size={16} />
-          </a>
+        <div className="ref-downloads-foot">
+          <div className="ref-downloads-info">
+            <p className="sm">{t.note}</p>
+            <p className="sm">{t.desktopNote}</p>
+          </div>
         </div>
-        <p className="mut sm">{t.note}</p>
       </div>
-      <InstallCard t={t} />
     </section>
   );
 }

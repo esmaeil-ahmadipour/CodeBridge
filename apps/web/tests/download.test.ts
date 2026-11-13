@@ -1,11 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { downloads, downloadConfig, latestReleaseApi, latestReleaseUrl, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
+import { readFileSync } from 'node:fs';
+import nextConfig from '../next.config.ts';
+import { downloads, downloadConfig, getApplicationVersion, latestReleaseApi, latestReleaseUrl, platforms, releasesUrl, releaseUrl } from '../src/lib/site.ts';
 import { detectPlatform } from '../src/lib/platform.ts';
 import { formatReleaseDate, getLatestRelease, parseRelease } from '../src/lib/release.ts';
 import { translations } from '../src/i18n/translations.ts';
 
 const BASE = 'https://github.com/esmaeil-ahmadipour/CodeBridge/releases';
+const rootPackage = JSON.parse(readFileSync(new URL('../../../package.json', import.meta.url), 'utf8')) as { version: string };
+const webPackage = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as Record<string, unknown>;
+const injectedVersion = nextConfig.env?.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+
+test('Next build injects the root application version without a web package version', () => {
+  assert.equal(injectedVersion, rootPackage.version);
+  assert.equal('version' in webPackage, false);
+  const originalVersion = process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+  process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = injectedVersion;
+  try {
+    assert.equal(getApplicationVersion(), rootPackage.version);
+  } finally {
+    if (originalVersion === undefined) delete process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+    else process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = originalVersion;
+  }
+});
+
+test('application version is available when GitHub release metadata is unavailable', async () => {
+  const originalVersion = process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+  const originalFetch = globalThis.fetch;
+  process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = injectedVersion;
+  globalThis.fetch = (async () => { throw new Error('GitHub API unavailable'); }) as typeof fetch;
+  try {
+    assert.equal(await getLatestRelease(), null);
+    assert.equal(getApplicationVersion(), rootPackage.version);
+  } finally {
+    if (originalVersion === undefined) delete process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION;
+    else process.env.NEXT_PUBLIC_CODEBRIDGE_VERSION = originalVersion;
+    globalThis.fetch = originalFetch;
+  }
+});
 
 test('platform -> asset -> latest-release URL mapping', () => {
   assert.equal(downloadConfig.owner, 'esmaeil-ahmadipour');
@@ -99,10 +132,10 @@ test('formatReleaseDate: locale formatting and fallback', () => {
   assert.equal(formatReleaseDate('garbage', 'en'), null);
 });
 
-test('feature flag: downloads are off unless NEXT_PUBLIC_ENABLE_DOWNLOADS === "true"', async () => {
+test('feature flag: downloads are on by default and only "false" disables them', async () => {
   const prev = process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS;
   try {
-    for (const [value, expected] of [[undefined, false], ['false', false], ['1', false], ['true', true]] as const) {
+    for (const [value, expected] of [[undefined, true], ['false', false], ['1', true], ['true', true]] as const) {
       if (value === undefined) delete process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS; else process.env.NEXT_PUBLIC_ENABLE_DOWNLOADS = value;
       const { flags } = await import(`../src/lib/flags.ts?v=${String(value)}`);
       assert.equal(flags.downloads, expected, `value=${String(value)}`);
@@ -114,11 +147,10 @@ test('feature flag: downloads are off unless NEXT_PUBLIC_ENABLE_DOWNLOADS === "t
 
 test('download UI strings exist and are non-empty in en, fa and ar', () => {
   const keys = ['desktop', 'win', 'mac', 'linux', 'appleSilicon', 'note', 'winHint', 'macHint', 'linuxHint', 'releaseChecksums',
-    'recommended', 'hintDefault', 'hintDetected', 'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished'] as const;
+    'recommended', 'hintDefault', 'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished'] as const;
   for (const l of ['en', 'fa', 'ar'] as const) {
     for (const k of keys) assert.ok(translations[l].download[k].trim().length > 0, `${l}.download.${k}`);
     assert.match(translations[l].download.downloadFor, /\{os\}/);
-    assert.match(translations[l].download.hintDetected, /\{os\}/);
     assert.match(translations[l].download.relVersion, /\{v\}/);
     assert.match(translations[l].download.dlAria, /\{label\}.*\{arch\}.*\{format\}/);
   }

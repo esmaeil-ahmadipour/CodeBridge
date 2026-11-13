@@ -1,6 +1,8 @@
 import type { Locale } from './config';
 
 interface Pair { t: string; s: string }
+interface DiffLine { text: string; kind: 'plain' | 'removed' | 'added' }
+interface PhoneFile { path: string; status: string; kind: 'removed' | 'secret' | 'included' }
 
 export interface GuideSection {
   id: string; title: string; intro: string;
@@ -9,8 +11,16 @@ export interface GuideSection {
 
 export interface Dictionary {
   metadata: { title: string; description: string };
-  nav: { tryIt: string; privacy: string; download: string; theme: string; language: string; skip: string; guide: string };
-  hero: { eyebrow: string; title: string; sub: string; ctaTry: string; ctaPrivacy: string; ctaDownload: string; proof: string[]; soon: string; previewLabel: string };
+  nav: { how: string; mobile: string; features: string; trust: string; web: string; download: string; theme: string; language: string; skip: string; guide: string };
+  hero: {
+    eyebrow: string; title: string; titleAccent: string; sub: string; ctaDownload: string; ctaMobile: string;
+    proof: string[]; previewLabel: string; previewTitle: string; previewLines: DiffLine[]; previewResult: string; undo: string;
+  };
+  mobile: {
+    eyebrow: string; title: string; text: string; benefits: string[]; android: string; iphone: string; note: string;
+    project: string; files: PhoneFile[]; ready: string;
+  };
+  how: { title: string; steps: Pair[] };
   tool: {
     title: string; sub: string; choose: string; chooseHint: string;
     optGitignore: string; optRedact: string; optCompact: string; optHeader: string; optTree: string;
@@ -21,17 +31,19 @@ export interface Dictionary {
     download: string; downloadPart: string; copy: string; copyPart: string; copied: string;
     errNotZip: string; errEmpty: string; errRead: string; errBig: string;
   };
-  privacy: { badge: string; title: string; text: string; flowLabel: string; flow: string[]; deviceLabel: string; blocked: string; points: Pair[]; note: string };
-  features: { title: string; sub: string; example: string; items: Pair[]; itemsWeb: Pair[] };
+  privacy: { title: string; items: Pair[] };
+  features: { title: string; beforeTitle: string; beforeItems: string[]; afterTitle: string; afterItems: string[] };
   download: {
-    eyebrow: string; title: string; sub: string; pwaBadge: string; pwaTitle: string; pwaText: string;
+    eyebrow: string; title: string; sub: string; osPrompt: string; desktopNote: string; browserCta: string; installMore: string; installTitle: string; installSteps: string[]; guideLink: string;
+    pwaBadge: string; pwaTitle: string; pwaText: string;
     android: string; iphone: string; steps: string[]; install: string; installed: string; iosHint: string; noPrompt: string;
     desktop: string; win: string; mac: string; linux: string; appleSilicon: string; note: string;
     winHint: string; macHint: string; linuxHint: string; releaseChecksums: string;
-    recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
+    installNotes: string;
+    recommended: string; hintDefault: string; hintMobile: string; downloadFor: string; dlAria: string;
     relVersion: string; relPublished: string;
   };
-  footer: { license: string; tagline: string };
+  footer: { license: string; tagline: string; developer: string; developerName: string };
   guide: {
     metadata: { title: string; description: string };
     eyebrow: string; title: string; sub: string; toc: string; home: string; shotLabel: string;
@@ -47,22 +59,60 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'Convert a project ZIP into one clean text file for any AI, right in your browser. Free, private, and nothing is uploaded.',
     },
-    nav: { tryIt: 'Try it', privacy: 'Privacy', download: 'Download', theme: 'Switch light or dark theme', language: 'Language', skip: 'Skip to content', guide: 'Guide' },
+    nav: { how: 'How it works', mobile: 'Android & iOS', features: 'Features', trust: 'Privacy', web: 'Web tool', download: 'Download', theme: 'Switch light or dark theme', language: 'Language', skip: 'Skip to content', guide: 'Guide' },
     hero: {
-      eyebrow: 'Free · Private · In your browser',
-      title: 'Turn your project into AI-ready text. Privately.',
-      sub: 'Drop a ZIP, choose what to include, and get one clean text file for any AI. Everything runs on your device, so your code is never uploaded.',
-      ctaTry: 'Try it now: choose a ZIP',
-      ctaPrivacy: 'How it stays private',
-      ctaDownload: 'Get the desktop app',
-      proof: ['Nothing uploaded', 'Works offline', 'Free & open source'],
-      soon: 'Desktop app with safe apply and undo: coming soon.',
-      previewLabel: 'Example of a generated report',
+      eyebrow: 'An AI-assisted tool for developers',
+      title: 'Give AI clean code,',
+      titleAccent: 'bring changes back without copy-paste.',
+      sub: 'CodeBridge safely turns your project into text without unnecessary files so tokens are not wasted, and applies the AI’s diff directly to your project. No more opening files, searching for lines, and copying one by one.',
+      ctaDownload: 'Download the desktop app',
+      ctaMobile: 'Try it in your phone or desktop browser',
+      proof: ['Your code is not uploaded', 'Android, iOS and desktop', 'Precise undo', 'Free and open source'],
+      previewLabel: 'An example of applying an AI diff',
+      previewTitle: 'Copy the AI diff, press Enter',
+      previewLines: [
+        { text: '--- a/src/auth.py', kind: 'plain' },
+        { text: '+++ b/src/auth.py', kind: 'plain' },
+        { text: '- if token == None:', kind: 'removed' },
+        { text: '+ if not token:', kind: 'added' },
+        { text: '+ raise AuthError("missing token")', kind: 'added' },
+      ],
+      previewResult: 'Applied: 3 files, without opening a folder',
+      undo: 'Undo',
+    },
+    mobile: {
+      eyebrow: 'Android & iOS',
+      title: 'Send your project source to AI from your phone, too',
+      text: 'Choose your project ZIP in your phone’s browser and get text ready to send to AI. No install, no upload, and no searching through files yourself. The less AI receives, the fewer tokens it uses.',
+      benefits: [
+        'Unneeded files and dependencies are removed automatically',
+        'Keys and passwords are masked before sharing',
+        'No security setup and no manual file search',
+      ],
+      android: 'Start on Android',
+      iphone: 'Start on iPhone (iOS)',
+      note: 'No install; straight from your phone browser',
+      project: 'Your project',
+      files: [
+        { path: 'node_modules/', status: 'Removed', kind: 'removed' },
+        { path: 'package-lock.json', status: 'Removed', kind: 'removed' },
+        { path: '.env', status: 'Masked', kind: 'secret' },
+        { path: 'src/', status: 'Included', kind: 'included' },
+      ],
+      ready: 'Ready to send to AI',
+    },
+    how: {
+      title: 'Three steps, without the hassle',
+      steps: [
+        { t: 'Export', s: 'Ignores, dependencies, SVGs, lockfiles and tests are removed automatically; only what AI needs remains.' },
+        { t: 'Ask for a diff', s: 'Give the text to AI and ask it to return only the changes as a diff.' },
+        { t: 'Apply', s: 'Copy the diff and press Enter. Changes are applied to the project, with a snapshot and precise undo.' },
+      ],
     },
     tool: {
-      title: 'ZIP to AI-ready text',
-      sub: 'Runs on your device. Your files are never uploaded.',
-      choose: 'Choose a project ZIP',
+      title: 'Only need an export? Right here, in your browser',
+      sub: 'Drop a ZIP and get ready-to-send text; no install, no upload, on phone and desktop. Apply diffs and undo in the desktop app.',
+      choose: 'Choose ZIP',
       chooseHint: 'from Files, Drive or Downloads',
       optGitignore: 'Respect .gitignore', optRedact: 'Hide secrets', optCompact: 'Compact', optHeader: 'AI instructions', optTree: 'File tree',
       split: 'Split report', splitOff: 'No split',       pick: 'Choose files and folders', pickCount: '{a} of {b} files selected', dlgTitle: 'Choose what to include', dlgHint: 'Untick a folder or a file to leave it out of the report.', selAll: 'Select all', selNone: 'Unselect all', done: 'Done', cancel: 'Cancel', applyChanges: 'Apply changes', pendChanges: 'Pending: {r} to remove from the report, {a} to add back', pendNone: 'No pending changes', hideTitle: 'Hide file contents from the report (the path stays)', hideImages: 'Hide the contents of image files (e.g. SVG)', hideLocks: 'Hide the contents of lock files', projNone: 'Not selected', lockHint: 'Pick your project type to enable the lock and test options.', projLabel: 'Project type', hideTests: 'Hide the contents of test files', applying: 'Applying…', applied: 'Done', pendOpts: 'display options changed', resSize: 'Report size: {size}', splitNote: 'Each part stays within the chosen size. A very large file continues in the next part.',
@@ -74,41 +124,43 @@ export const translations: Record<Locale, Dictionary> = {
       errRead: 'Could not read this ZIP: {msg}',
       errBig: 'Large ZIP ({mb} MB): it may be slow on this device.',
     },
-    privacy: {
-      badge: 'Private by design',
-      title: 'Your code never leaves your device',
-      text: 'There is no upload step and no server that could receive, store or leak your files. The whole conversion runs inside your browser.',
-      flowLabel: 'Your ZIP is processed on your device and never reaches a server',
-      flow: ['Your ZIP', 'Your browser', 'Your TXT', 'Server'],
-      deviceLabel: 'On your device',
-      blocked: 'No connection',
-      points: [
-        { t: 'Nothing is uploaded', s: 'Your browser blocks this page from contacting other servers. Open DevTools → Network and watch.' },
-        { t: 'Works offline', s: 'Load the page once, switch to airplane mode, and it still converts.' },
-        { t: 'No account, no file tracking', s: 'We never see the names, contents or sizes of your files.' },
-        { t: 'Open source', s: 'Read every line yourself and verify these claims.' },
-      ],
-      note: 'Secret masking is best-effort. Skim a report before you share it.',
-    },
     features: {
-      title: 'Send the AI only what matters',
-      sub: 'Smaller, safer reports that fit any AI.',
-      example: 'Example',
-      items: [
-        { t: 'Safe apply', s: 'All-or-nothing patches, tolerant of AI mistakes, with exact undo.' },
-        { t: 'Fewer tokens', s: 'Send only changed files and skip lockfiles and generated code.' },
-        { t: 'Fix loop', s: 'If a patch fails, get a ready prompt with the errors and current code.' },
+      title: 'Why does manual code copying waste your time and tokens?',
+      beforeTitle: 'Without CodeBridge',
+      beforeItems: [
+        'AI says “change line 42”.',
+        'You open the folder and find the file.',
+        'You find the line and copy it manually, now for 10 files.',
+        'To share the project, you also manually remove node_modules, lockfiles and SVGs, or waste tokens.',
       ],
-      itemsWeb: [
-        { t: 'Fewer tokens, sharper answers', s: 'Skip lockfiles, tests, images and anything you untick, so the AI sees only what matters.' },
-        { t: 'Secrets masked', s: 'Common keys and tokens are hidden automatically. Still skim a report before sharing it.' },
-        { t: 'Fits any AI', s: 'Split the report into parts from 200 KB to 10 MB to match your AI’s limit.' },
+      afterTitle: 'With CodeBridge',
+      afterItems: [
+        'Convert the project to text in one click, without extra files.',
+        'Ask AI only for a diff.',
+        'Give it the diff and CodeBridge applies it to the project.',
+        'Wrong? Undo everything with one click.',
+      ],
+    },
+    privacy: {
+      title: 'Why trust CodeBridge?',
+      items: [
+        { t: 'Safe apply', s: 'Changes are applied atomically and only touch files in that patch.' },
+        { t: 'Precise undo', s: 'Every run gets a snapshot and can be fully reverted.' },
+        { t: 'Secret removal', s: 'Keys and passwords are masked before being sent to AI.' },
+        { t: 'Fully local', s: 'Nothing is uploaded, and it works offline.' },
       ],
     },
     download: {
       eyebrow: 'Free · Open source · Works everywhere',
-      title: 'Take it anywhere',
-      sub: 'Phone, tablet or desktop. Pick how you like to work.',
+      title: 'Spend your time on valuable decisions, not digging through files',
+      sub: 'Leave repetitive code preparation and application to CodeBridge; free your mind for architecture, quality and the decisions that truly add value to your product.',
+      osPrompt: 'Choose your operating system to get the right version',
+      desktopNote: 'The desktop app applies diffs and supports undo. Only need an export?',
+      browserCta: 'Try the browser version on your phone or desktop',
+      installMore: 'Install the web app',
+      installTitle: 'How to install the desktop app',
+      installSteps: ['Download the ZIP for your system and unzip it. No installer is needed.', 'Open the launcher inside: run.ps1 on Windows, run_macos.command on macOS, run.sh on Linux.', 'The menu opens in a terminal. Type 1 to export a project or 2 to apply an AI diff.'],
+      guideLink: 'Read the full guide',
       pwaBadge: 'PWA · No store needed',
       pwaTitle: 'Android & iPhone, installed in 10 seconds',
       pwaText: 'Add it to your Home Screen. It opens like an app, works offline, and your files never leave your phone.',
@@ -123,9 +175,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'First run: right-click run_macos.command and choose Open, or run `xattr -d com.apple.quarantine ./codebridge`. Intel Macs are not supported.',
       linuxHint: 'If needed, run `chmod +x codebridge run.sh` before launching.',
       releaseChecksums: 'Checksums and source on GitHub',
-      recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Latest release: {v}', relPublished: 'Published {date}',
+      installNotes: 'Install notes',
+      recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Application version: {v}', relPublished: 'Published {date}',
     },
-    footer: { license: 'MIT licensed · Developed by Esmaeil Ahmadipour', tagline: 'Free, private and open source. Your code stays on your device.' },
+    footer: { license: 'MIT license', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
       metadata: { title: 'CodeBridge guide: use the desktop app step by step', description: 'Learn the CodeBridge desktop app: export your project for an AI, apply its diff safely, undo, and fix common problems.' },
       eyebrow: 'Guide · Desktop app 3.0',
@@ -245,22 +298,60 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'ZIP پروژه را همین‌جا در مرورگر به یک فایل متنی مرتب برای هر هوش مصنوعی تبدیل کنید. رایگان و خصوصی است و هیچ‌چیز آپلود نمی‌شود.',
     },
-    nav: { tryIt: 'امتحان کنید', privacy: 'حریم خصوصی', download: 'دانلود', theme: 'تغییر تم روشن یا تاریک', language: 'زبان', skip: 'رفتن به محتوا', guide: 'راهنما' },
+    nav: { how: 'چطور کار می‌کند', mobile: 'اندروید و iOS', features: 'امکانات', trust: 'حریم خصوصی', web: 'ابزار وب', download: 'دانلود', theme: 'تغییر تم روشن یا تاریک', language: 'زبان', skip: 'رفتن به محتوا', guide: 'راهنما' },
     hero: {
-      eyebrow: 'رایگان · خصوصی · داخل مرورگر',
-      title: 'پروژه‌تان را به متن آماده‌ی هوش مصنوعی تبدیل کنید. کاملاً خصوصی.',
-      sub: 'ZIP پروژه را بیندازید، انتخاب کنید چه چیزی وارد شود و یک فایل متنی مرتب برای هر هوش مصنوعی بگیرید. همه‌چیز روی دستگاه شما اجرا می‌شود و کدتان هرگز آپلود نمی‌شود.',
-      ctaTry: 'همین حالا امتحان کنید: انتخاب ZIP',
-      ctaPrivacy: 'چطور خصوصی می‌ماند',
-      ctaDownload: 'دریافت اپ دسکتاپ',
-      proof: ['چیزی آپلود نمی‌شود', 'آفلاین هم کار می‌کند', 'رایگان و متن‌باز'],
-      soon: 'اپ دسکتاپ با اعمال امن و Undo: به‌زودی.',
-      previewLabel: 'نمونه‌ای از گزارش ساخته‌شده',
+      eyebrow: 'ابزار برنامه‌نویسانِ همراه با هوش مصنوعی',
+      title: 'کدت را تمیز به AI بده،',
+      titleAccent: 'تغییرات را بدون کپی‌پیست برگردان.',
+      sub: 'CodeBridge پروژه‌ات را امن و بدون فایل‌های اضافه به متن تبدیل می‌کند تا توکن هدر نرود، و diff جواب هوش مصنوعی را خودش روی پروژه اعمال می‌کند. دیگر لازم نیست فایل باز کنی، دنبال خط بگردی و یکی‌یکی کپی کنی.',
+      ctaDownload: 'دانلود اپ دسکتاپ',
+      ctaMobile: 'امتحان در مرورگر گوشی یا دسکتاپ',
+      proof: ['کد آپلود نمی‌شود', 'اندروید، iOS و دسکتاپ', 'Undo دقیق', 'رایگان و متن‌باز'],
+      previewLabel: 'نمونه‌ی اعمال diff جواب هوش مصنوعی',
+      previewTitle: 'جواب AI (diff) را کپی کن، Enter بزن',
+      previewLines: [
+        { text: '--- a/src/auth.py', kind: 'plain' },
+        { text: '+++ b/src/auth.py', kind: 'plain' },
+        { text: '- if token == None:', kind: 'removed' },
+        { text: '+ if not token:', kind: 'added' },
+        { text: '+ raise AuthError("missing token")', kind: 'added' },
+      ],
+      previewResult: 'اعمال شد: ۳ فایل، بدون باز کردن پوشه',
+      undo: 'Undo',
+    },
+    mobile: {
+      eyebrow: 'اندروید و iOS',
+      title: 'سورس پروژه را از گوشی هم برای AI بفرست',
+      text: 'ZIP پروژه را در مرورگر گوشی انتخاب کن و متنِ آماده‌ی ارسال به هوش مصنوعی را بگیر. بدون نصب، بدون آپلود و بدون اینکه خودت دنبال فایل‌ها بگردی. هرچه کمتر به AI برسد، توکن کمتری مصرف می‌شود.',
+      benefits: [
+        'فایل‌های بی‌مصرف و وابستگی‌ها خودکار کنار می‌روند',
+        'کلیدها و رمزها پیش از ارسال پوشانده می‌شوند',
+        'بدون تنظیم امنیتی و بدون جست‌وجوی دستی فایل',
+      ],
+      android: 'شروع از گوشی اندروید',
+      iphone: 'شروع از آیفون (iOS)',
+      note: 'بدون نصب؛ مستقیم در مرورگر گوشی',
+      project: 'پروژه‌ی شما',
+      files: [
+        { path: 'node_modules/', status: 'حذف شد', kind: 'removed' },
+        { path: 'package-lock.json', status: 'حذف شد', kind: 'removed' },
+        { path: '.env', status: 'پوشانده شد', kind: 'secret' },
+        { path: 'src/', status: 'ارسال می‌شود', kind: 'included' },
+      ],
+      ready: 'آماده‌ی ارسال به AI',
+    },
+    how: {
+      title: 'در سه قدم، بدون درگیری',
+      steps: [
+        { t: 'خروجی بگیر', s: 'ignoreها، وابستگی‌ها، SVG، فایل‌های lock و تست‌ها خودکار کنار می‌روند؛ فقط چیزی که AI لازم دارد باقی می‌ماند.' },
+        { t: 'diff بخواه', s: 'متن را به AI بده و بخواه فقط تغییرات را به‌صورت diff برگرداند.' },
+        { t: 'اعمال کن', s: 'diff را کپی کن و Enter بزن. تغییرات روی پروژه اعمال می‌شود، همراه با snapshot و Undo دقیق.' },
+      ],
     },
     tool: {
-      title: 'ZIP به متن آماده‌ی AI',
-      sub: 'روی دستگاه خودتان اجرا می‌شود. فایل‌هایتان هرگز آپلود نمی‌شوند.',
-      choose: 'انتخاب ZIP پروژه',
+      title: 'فقط خروجی می‌خواهی؟ همین‌جا، در مرورگر',
+      sub: 'ZIP را بینداز و متن آماده بگیر؛ بدون نصب و بدون آپلود، روی گوشی و دسکتاپ. اعمال diff و Undo در اپ دسکتاپ انجام می‌شود.',
+      choose: 'انتخاب ZIP',
       chooseHint: 'از Files، Drive یا Downloads',
       optGitignore: 'رعایت .gitignore', optRedact: 'پنهان‌کردن رمزها', optCompact: 'فشرده', optHeader: 'دستور برای AI', optTree: 'درخت فایل',
       split: 'تقسیم گزارش', splitOff: 'بدون تقسیم',       pick: 'انتخاب فایل‌ها و پوشه‌ها', pickCount: '{a} از {b} فایل انتخاب شده', dlgTitle: 'انتخاب آنچه وارد گزارش شود', dlgHint: 'تیک پوشه یا فایلی را که نمی‌خواهید در گزارش باشد بردارید.', selAll: 'انتخاب همه', selNone: 'برداشتن همه', done: 'تأیید', cancel: 'انصراف', applyChanges: 'تأیید و اعمال تغییرات', pendChanges: 'در انتظار تأیید: {r} فایل حذف از گزارش، {a} فایل بازگردانی', pendNone: 'تغییری در انتظار نیست', hideTitle: 'حذف محتوای فایل‌ها از گزارش (مسیر فایل می‌ماند)', hideImages: 'محتوای فایل‌های تصویری (مثل SVG) نمایش داده نشود', hideLocks: 'محتوای فایل‌های lock نمایش داده نشود', projNone: 'انتخاب نشده', lockHint: 'برای فعال شدن گزینه‌های lock و تست، نوع پروژه را انتخاب کنید.', projLabel: 'نوع پروژه', hideTests: 'محتوای فایل‌های تست (test) نمایش داده نشود', applying: 'در حال اعمال…', applied: 'انجام شد', pendOpts: 'تنظیمات نمایش تغییر کرده', resSize: 'حجم گزارش: {size}', splitNote: 'هر بخش از حجم انتخابی بیشتر نمی‌شود. فایل خیلی بزرگ در بخش بعدی ادامه پیدا می‌کند.',
@@ -272,41 +363,43 @@ export const translations: Record<Locale, Dictionary> = {
       errRead: 'خواندن این ZIP ممکن نشد: {msg}',
       errBig: 'ZIP بزرگ ({mb} مگابایت): ممکن است روی این دستگاه کند باشد.',
     },
-    privacy: {
-      badge: 'حریم خصوصی از پایه',
-      title: 'کد شما هرگز از دستگاهتان بیرون نمی‌رود',
-      text: 'مرحله‌ی آپلود وجود ندارد و سروری هم نیست که فایل‌هایتان را دریافت، ذخیره یا فاش کند. کل تبدیل داخل مرورگر شما انجام می‌شود.',
-      flowLabel: 'ZIP شما روی دستگاهتان پردازش می‌شود و هرگز به سرور نمی‌رسد',
-      flow: ['ZIP شما', 'مرورگر شما', 'TXT شما', 'سرور'],
-      deviceLabel: 'روی دستگاه شما',
-      blocked: 'بدون ارتباط',
-      points: [
-        { t: 'چیزی آپلود نمی‌شود', s: 'مرورگر اجازه نمی‌دهد این صفحه با سرور دیگری ارتباط بگیرد. DevTools را باز کنید، به تب Network بروید و خودتان ببینید.' },
-        { t: 'آفلاین هم کار می‌کند', s: 'صفحه را یک‌بار باز کنید و حالت پرواز را روشن کنید؛ باز هم تبدیل می‌کند.' },
-        { t: 'بدون حساب، بدون ردیابی فایل', s: 'نام، محتوا و حجم فایل‌های شما را هرگز نمی‌بینیم.' },
-        { t: 'متن‌باز', s: 'کد را خودتان بخوانید و این ادعاها را بسنجید.' },
-      ],
-      note: 'پنهان‌سازی رمزها در حد توان است؛ پیش از اشتراک‌گذاری، گزارش را مرور کنید.',
-    },
     features: {
-      title: 'فقط آنچه مهم است را برای AI بفرستید',
-      sub: 'گزارش‌های کوچک‌تر و امن‌تر که در هر AI جا می‌شوند.',
-      example: 'نمونه',
-      items: [
-        { t: 'اعمال امن', s: 'Patch یا کامل اعمال می‌شود یا هیچ؛ در برابر اشتباه AI مقاوم است و Undo دقیق دارد.' },
-        { t: 'توکن کمتر', s: 'فقط فایل‌های تغییرکرده را بفرستید و lockfile و کد تولیدشده را کنار بگذارید.' },
-        { t: 'حلقه‌ی رفع خطا', s: 'اگر Patch شکست خورد، پرامپت آماده با خطاها و کد فعلی می‌گیرید.' },
+      title: 'چرا کپی دستیِ کد، وقت و توکنت را می‌سوزاند؟',
+      beforeTitle: 'بدون CodeBridge',
+      beforeItems: [
+        'AI می‌گوید «خط ۴۲ را عوض کن»',
+        'پوشه را باز می‌کنی و فایل را پیدا می‌کنی',
+        'خط را پیدا و دستی کپی می‌کنی، این بار برای ۱۰ فایل',
+        'برای ارسال پروژه هم node_modules، فایل‌های lock و SVG را دستی کنار می‌گذاری، وگرنه توکن‌هایت هدر می‌رود',
       ],
-      itemsWeb: [
-        { t: 'توکن کمتر، پاسخ دقیق‌تر', s: 'فایل‌های lock، تست، تصویر و هر چیزی که تیکش را بردارید کنار می‌رود؛ AI فقط همان را می‌بیند که مهم است.' },
-        { t: 'رمزها پنهان می‌شوند', s: 'کلیدها و توکن‌های رایج خودکار پوشانده می‌شوند. باز هم پیش از اشتراک‌گذاری گزارش را مرور کنید.' },
-        { t: 'در هر AI جا می‌شود', s: 'گزارش را به بخش‌های ۲۰۰ کیلوبایت تا ۱۰ مگابایت تقسیم کنید تا با محدودیت AI شما جور شود.' },
+      afterTitle: 'با CodeBridge',
+      afterItems: [
+        'پروژه با یک کلیک و بدون فایل اضافه به متن تبدیل می‌شود',
+        'از AI فقط diff می‌خواهی',
+        'diff را می‌دهی و CodeBridge خودش روی پروژه اعمال می‌کند',
+        'اشتباه بود؟ با یک Undo همه‌چیز برمی‌گردد',
+      ],
+    },
+    privacy: {
+      title: 'چرا می‌توان به CodeBridge اعتماد کرد؟',
+      items: [
+        { t: 'اعمال امن', s: 'اعمال تغییرات اتمیک است و فقط فایل‌های همان پچ را لمس می‌کند.' },
+        { t: 'Undo دقیق', s: 'از هر اجرا snapshot گرفته می‌شود و برگشت کامل است.' },
+        { t: 'حذف اسرار', s: 'کلیدها و رمزها پیش از ارسال به AI پوشانده می‌شوند.' },
+        { t: 'کاملاً محلی', s: 'چیزی آپلود نمی‌شود و آفلاین هم کار می‌کند.' },
       ],
     },
     download: {
       eyebrow: 'رایگان · متن‌باز · همه‌جا',
-      title: 'همه‌جا همراه شما',
-      sub: 'گوشی، تبلت یا دسکتاپ. هر طور راحت‌ترید کار کنید.',
+      title: 'زمانت را صرف تصمیم‌های ارزشمند کن، نه زیر و رو کردن فایل‌ها',
+      sub: 'کارهای تکراری آماده‌سازی و اعمال کد را به CodeBridge بسپار؛ ذهنت برای معماری، کیفیت و تصمیم‌هایی آزاد می‌ماند که واقعاً به ارزش محصول اضافه می‌کنند.',
+      osPrompt: 'سیستم‌عامل خودت را انتخاب کن تا نسخه‌ی مناسب دانلود شود',
+      desktopNote: 'اپ دسکتاپ برای اعمال diff و Undo است. فقط خروجی می‌خواهی؟',
+      browserCta: 'نسخه‌ی مرورگر را روی گوشی یا دسکتاپ امتحان کن',
+      installMore: 'نصب اپ وب',
+      installTitle: 'نصب اپ دسکتاپ',
+      installSteps: ['ZIP مخصوص سیستم‌تان را دانلود و باز کنید. نصب‌کننده لازم نیست.', 'فایل اجرا را داخل پوشه بزنید: در ویندوز run.ps1، در مک run_macos.command و در لینوکس run.sh.', 'منو در ترمینال باز می‌شود. عدد 1 را برای خروجی گرفتن از پروژه و 2 را برای اعمال Diff بزنید.'],
+      guideLink: 'خواندن راهنمای کامل',
       pwaBadge: 'PWA · بدون نیاز به استور',
       pwaTitle: 'اندروید و آیفون، نصب در ۱۰ ثانیه',
       pwaText: 'آن را به صفحه‌ی اصلی اضافه کنید. مثل اپ باز می‌شود، آفلاین کار می‌کند و فایل‌هایتان از گوشی بیرون نمی‌رود.',
@@ -321,9 +414,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'در نخستین اجرا، روی run_macos.command راست‌کلیک و Open را انتخاب کنید، یا دستور `xattr -d com.apple.quarantine ./codebridge` را اجرا کنید. مک‌های Intel پشتیبانی نمی‌شوند.',
       linuxHint: 'در صورت نیاز، پیش از اجرا `chmod +x codebridge run.sh` را اجرا کنید.',
       releaseChecksums: 'Checksumها و کد منبع در GitHub',
-      recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'آخرین نسخه: {v}', relPublished: 'منتشرشده در {date}',
+      installNotes: 'نکات اجرا',
+      recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'نسخه‌ی برنامه: {v}', relPublished: 'منتشرشده در {date}',
     },
-    footer: { license: 'مجوز MIT · توسعه دهنده اسماعیل احمدی‌پور', tagline: 'رایگان، خصوصی و متن‌باز. کد شما روی دستگاه خودتان می‌ماند.' },
+    footer: { license: 'مجوز MIT', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
       metadata: { title: 'راهنمای CodeBridge: کار با اپ دسکتاپ قدم‌به‌قدم', description: 'کار با اپ دسکتاپ CodeBridge را یاد بگیرید: خروجی پروژه برای AI، اعمال امن Diff، Undo و رفع مشکل‌های رایج.' },
       eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
@@ -443,22 +537,60 @@ export const translations: Record<Locale, Dictionary> = {
       description:
         'حوّل ملف ZIP للمشروع إلى ملف نصي منظم لأي ذكاء اصطناعي، داخل متصفحك مباشرة. مجاني وخاص ولا يُرفع شيء.',
     },
-    nav: { tryIt: 'جرّبه', privacy: 'الخصوصية', download: 'تحميل', theme: 'تبديل المظهر الفاتح أو الداكن', language: 'اللغة', skip: 'تخطَّ إلى المحتوى', guide: 'الدليل' },
+    nav: { how: 'كيف يعمل', mobile: 'أندرويد وiOS', features: 'المزايا', trust: 'الخصوصية', web: 'أداة الويب', download: 'تحميل', theme: 'تبديل المظهر الفاتح أو الداكن', language: 'اللغة', skip: 'تخطَّ إلى المحتوى', guide: 'الدليل' },
     hero: {
-      eyebrow: 'مجاني · خاص · داخل المتصفح',
-      title: 'حوّل مشروعك إلى نص جاهز للذكاء الاصطناعي. بخصوصية تامة.',
-      sub: 'أسقط ملف ZIP، واختر ما يُضمَّن، واحصل على ملف نصي منظم لأي ذكاء اصطناعي. كل شيء يعمل على جهازك، فلا يُرفع كودك أبدًا.',
-      ctaTry: 'جرّبه الآن: اختر ملف ZIP',
-      ctaPrivacy: 'كيف تبقى بياناتك خاصة',
-      ctaDownload: 'احصل على تطبيق سطح المكتب',
-      proof: ['لا شيء يُرفع', 'يعمل دون اتصال', 'مجاني ومفتوح المصدر'],
-      soon: 'تطبيق سطح المكتب مع التطبيق الآمن والتراجع: قريبًا.',
-      previewLabel: 'مثال على تقرير مُنشأ',
+      eyebrow: 'أداة للمطورين بمساعدة الذكاء الاصطناعي',
+      title: 'أرسل للذكاء الاصطناعي كودًا نظيفًا،',
+      titleAccent: 'وأعِد التغييرات دون نسخ ولصق.',
+      sub: 'يحوّل CodeBridge مشروعك بأمان إلى نص من دون ملفات زائدة كي لا تُهدر الرموز، ويطبّق diff إجابة الذكاء الاصطناعي على مشروعك مباشرة. لن تحتاج بعد الآن إلى فتح الملفات والبحث عن الأسطر ونسخها واحدًا تلو الآخر.',
+      ctaDownload: 'تحميل تطبيق سطح المكتب',
+      ctaMobile: 'جرّبه في متصفح الهاتف أو الحاسوب',
+      proof: ['لا يُرفع كودك', 'أندرويد وiOS والحاسوب', 'تراجع دقيق', 'مجاني ومفتوح المصدر'],
+      previewLabel: 'مثال على تطبيق diff من إجابة الذكاء الاصطناعي',
+      previewTitle: 'انسخ diff إجابة الذكاء الاصطناعي واضغط Enter',
+      previewLines: [
+        { text: '--- a/src/auth.py', kind: 'plain' },
+        { text: '+++ b/src/auth.py', kind: 'plain' },
+        { text: '- if token == None:', kind: 'removed' },
+        { text: '+ if not token:', kind: 'added' },
+        { text: '+ raise AuthError("missing token")', kind: 'added' },
+      ],
+      previewResult: 'طُبّقت التغييرات على 3 ملفات، من دون فتح مجلد',
+      undo: 'تراجع',
+    },
+    mobile: {
+      eyebrow: 'أندرويد وiOS',
+      title: 'أرسل مصدر مشروعك إلى الذكاء الاصطناعي من هاتفك أيضًا',
+      text: 'اختر ملف ZIP لمشروعك في متصفح الهاتف واحصل على نص جاهز للإرسال إلى الذكاء الاصطناعي. بلا تثبيت أو رفع أو بحث يدوي عن الملفات. كلما قلّ ما يصل إلى الذكاء الاصطناعي، قلّ استهلاك الرموز.',
+      benefits: [
+        'تُستبعد الملفات غير الضرورية والاعتماديات تلقائيًا',
+        'تُحجب المفاتيح وكلمات المرور قبل الإرسال',
+        'بلا إعدادات أمنية وبلا بحث يدوي عن الملفات',
+      ],
+      android: 'ابدأ من هاتف أندرويد',
+      iphone: 'ابدأ من آيفون (iOS)',
+      note: 'من دون تثبيت؛ مباشرة في متصفح الهاتف',
+      project: 'مشروعك',
+      files: [
+        { path: 'node_modules/', status: 'حُذف', kind: 'removed' },
+        { path: 'package-lock.json', status: 'حُذف', kind: 'removed' },
+        { path: '.env', status: 'حُجب', kind: 'secret' },
+        { path: 'src/', status: 'سيُرسل', kind: 'included' },
+      ],
+      ready: 'جاهز للإرسال إلى الذكاء الاصطناعي',
+    },
+    how: {
+      title: 'في ثلاث خطوات، بلا تعقيد',
+      steps: [
+        { t: 'صدّر', s: 'تُستبعد ملفات ignore والاعتماديات وSVG وملفات lock والاختبارات تلقائيًا؛ ويبقى فقط ما يحتاجه الذكاء الاصطناعي.' },
+        { t: 'اطلب diff', s: 'أرسل النص إلى الذكاء الاصطناعي واطلب منه إعادة التغييرات بصيغة diff فقط.' },
+        { t: 'طبّق', s: 'انسخ diff واضغط Enter. تُطبّق التغييرات على المشروع مع snapshot وإمكانية تراجع دقيقة.' },
+      ],
     },
     tool: {
-      title: 'من ZIP إلى نص جاهز للذكاء الاصطناعي',
-      sub: 'يعمل على جهازك. ملفاتك لا تُرفع أبدًا.',
-      choose: 'اختر ملف ZIP للمشروع',
+      title: 'تحتاج إلى التصدير فقط؟ هنا، في المتصفح',
+      sub: 'أسقط ملف ZIP واحصل على نص جاهز؛ بلا تثبيت أو رفع، على الهاتف والحاسوب. تطبيق diff والتراجع متاحان في تطبيق سطح المكتب.',
+      choose: 'اختيار ZIP',
       chooseHint: 'من Files أو Drive أو Downloads',
       optGitignore: 'احترام .gitignore', optRedact: 'إخفاء الأسرار', optCompact: 'مضغوط', optHeader: 'تعليمات للذكاء الاصطناعي', optTree: 'شجرة الملفات',
       split: 'تقسيم التقرير', splitOff: 'من دون تقسيم',       pick: 'اختيار الملفات والمجلدات', pickCount: 'تم تحديد {a} من {b} ملف', dlgTitle: 'اختر ما يُضمَّن في التقرير', dlgHint: 'ألغِ تحديد مجلد أو ملف لاستبعاده من التقرير.', selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل', done: 'تم', cancel: 'إلغاء', applyChanges: 'تأكيد وتطبيق التغييرات', pendChanges: 'بانتظار التأكيد: حذف {r} من التقرير، وإعادة {a}', pendNone: 'لا توجد تغييرات معلقة', hideTitle: 'إخفاء محتوى الملفات من التقرير (يبقى المسار)', hideImages: 'عدم عرض محتوى ملفات الصور (مثل SVG)', hideLocks: 'عدم عرض محتوى ملفات lock', projNone: 'غير محدد', lockHint: 'اختر نوع المشروع لتفعيل خياري lock والاختبارات.', projLabel: 'نوع المشروع', hideTests: 'عدم عرض محتوى ملفات الاختبار (test)', applying: 'جارٍ التطبيق…', applied: 'تم', pendOpts: 'تغيرت خيارات العرض', resSize: 'حجم التقرير: {size}', splitNote: 'لا يتجاوز كل جزء الحجم المختار. الملف الكبير جدًا يتابع في الجزء التالي.',
@@ -470,41 +602,43 @@ export const translations: Record<Locale, Dictionary> = {
       errRead: 'تعذّرت قراءة هذا الـ ZIP: {msg}',
       errBig: 'ملف ZIP كبير ({mb} ميغابايت): قد يكون بطيئًا على هذا الجهاز.',
     },
-    privacy: {
-      badge: 'خصوصية بالتصميم',
-      title: 'كودك لا يغادر جهازك أبدًا',
-      text: 'لا توجد خطوة رفع ولا خادم يمكنه استلام ملفاتك أو تخزينها أو تسريبها. التحويل كله يتم داخل متصفحك.',
-      flowLabel: 'تتم معالجة ملف ZIP على جهازك ولا يصل إلى أي خادم',
-      flow: ['ملف ZIP الخاص بك', 'متصفحك', 'ملف TXT الخاص بك', 'الخادم'],
-      deviceLabel: 'على جهازك',
-      blocked: 'لا اتصال',
-      points: [
-        { t: 'لا شيء يُرفع', s: 'يمنع المتصفح هذه الصفحة من الاتصال بأي خادم آخر. افتح DevTools ثم تبويب Network وشاهد بنفسك.' },
-        { t: 'يعمل دون اتصال', s: 'حمّل الصفحة مرة واحدة ثم فعّل وضع الطيران، وسيظل التحويل يعمل.' },
-        { t: 'بلا حساب ولا تتبّع للملفات', s: 'لا نرى أبدًا أسماء ملفاتك أو محتواها أو أحجامها.' },
-        { t: 'مفتوح المصدر', s: 'اقرأ الكود بنفسك وتحقق من هذه الادعاءات.' },
-      ],
-      note: 'إخفاء الأسرار بأفضل جهد؛ راجع التقرير قبل مشاركته.',
-    },
     features: {
-      title: 'أرسل للذكاء الاصطناعي ما يهم فقط',
-      sub: 'تقارير أصغر وأكثر أمانًا تناسب أي ذكاء اصطناعي.',
-      example: 'مثال',
-      items: [
-        { t: 'تطبيق آمن', s: 'تُطبَّق التعديلات كاملة أو لا تُطبَّق، مع تسامح مع أخطاء الذكاء الاصطناعي وتراجع دقيق.' },
-        { t: 'رموز أقل', s: 'أرسل الملفات المتغيرة فقط وتجاهل ملفات القفل والشيفرة المولَّدة.' },
-        { t: 'حلقة الإصلاح', s: 'إذا فشل التطبيق، تحصل على مطالبة جاهزة بالأخطاء والشيفرة الحالية.' },
+      title: 'لماذا يهدر نسخ الكود يدويًا وقتك ورموزك؟',
+      beforeTitle: 'من دون CodeBridge',
+      beforeItems: [
+        'يقول الذكاء الاصطناعي: «غيّر السطر 42».',
+        'تفتح المجلد وتبحث عن الملف.',
+        'تبحث عن السطر وتنسخه يدويًا، وهذه المرة في 10 ملفات.',
+        'ولإرسال المشروع، تستبعد يدويًا node_modules وملفات lock وSVG، وإلا أُهدرت رموزك.',
       ],
-      itemsWeb: [
-        { t: 'رموز أقل، إجابات أدق', s: 'تُستبعد ملفات lock والاختبارات والصور وكل ما تلغي تحديده، فيرى الذكاء الاصطناعي ما يهم فقط.' },
-        { t: 'إخفاء الأسرار', s: 'تُحجب المفاتيح والرموز الشائعة تلقائيًا. ومع ذلك راجع التقرير قبل مشاركته.' },
-        { t: 'يناسب أي ذكاء اصطناعي', s: 'قسّم التقرير إلى أجزاء من 200 كيلوبايت إلى 10 ميغابايت لتناسب حدود الذكاء الاصطناعي لديك.' },
+      afterTitle: 'مع CodeBridge',
+      afterItems: [
+        'حوّل المشروع إلى نص بنقرة واحدة ومن دون ملفات زائدة',
+        'اطلب من الذكاء الاصطناعي diff فقط',
+        'أرسل diff ويطبّقه CodeBridge على المشروع',
+        'هل أخطأت؟ أعد كل شيء بتراجع واحد',
+      ],
+    },
+    privacy: {
+      title: 'لماذا يمكن الوثوق بـ CodeBridge؟',
+      items: [
+        { t: 'تطبيق آمن', s: 'تُطبّق التغييرات ذريًا ولا تمس إلا ملفات التعديل نفسه.' },
+        { t: 'تراجع دقيق', s: 'يُحفظ snapshot لكل عملية ويمكن التراجع عنها بالكامل.' },
+        { t: 'إزالة الأسرار', s: 'تُحجب المفاتيح وكلمات المرور قبل إرسالها إلى الذكاء الاصطناعي.' },
+        { t: 'محلي بالكامل', s: 'لا يُرفع شيء، ويعمل دون اتصال.' },
       ],
     },
     download: {
       eyebrow: 'مجاني · مفتوح المصدر · يعمل في كل مكان',
-      title: 'خذه معك أينما ذهبت',
-      sub: 'هاتف أو لوحي أو حاسوب. اختر ما يناسبك.',
+      title: 'اقضِ وقتك في القرارات القيّمة، لا في البحث بين الملفات',
+      sub: 'فوّض CodeBridge الأعمال المتكررة في تجهيز الكود وتطبيقه؛ لتتفرغ للهندسة المعمارية والجودة والقرارات التي تضيف قيمة حقيقية إلى منتجك.',
+      osPrompt: 'اختر نظام التشغيل للحصول على الإصدار المناسب',
+      desktopNote: 'تطبيق سطح المكتب لتطبيق diff والتراجع. أتحتاج إلى التصدير فقط؟',
+      browserCta: 'جرّب إصدار المتصفح على هاتفك أو حاسوبك',
+      installMore: 'تثبيت تطبيق الويب',
+      installTitle: 'تثبيت تطبيق سطح المكتب',
+      installSteps: ['حمّل ملف ZIP المناسب لنظامك وفك ضغطه. لا حاجة إلى مثبّت.', 'شغّل الملف داخل المجلد: run.ps1 على ويندوز، وrun_macos.command على ماك، وrun.sh على لينكس.', 'تفتح القائمة في الطرفية. اكتب 1 لتصدير مشروع أو 2 لتطبيق diff.'],
+      guideLink: 'اقرأ الدليل الكامل',
       pwaBadge: 'PWA · بلا متجر',
       pwaTitle: 'أندرويد وآيفون، تثبيت في ١٠ ثوانٍ',
       pwaText: 'أضفه إلى الشاشة الرئيسية. يفتح كتطبيق ويعمل دون إنترنت، وملفاتك لا تغادر هاتفك.',
@@ -519,9 +653,10 @@ export const translations: Record<Locale, Dictionary> = {
       macHint: 'عند التشغيل أول مرة، انقر بزر الفأرة الأيمن على run_macos.command واختر Open، أو نفّذ `xattr -d com.apple.quarantine ./codebridge`. أجهزة Intel Mac غير مدعومة.',
       linuxHint: 'عند الحاجة، نفّذ `chmod +x codebridge run.sh` قبل التشغيل.',
       releaseChecksums: 'المجاميع الاختبارية والمصدر على GitHub',
-      recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'أحدث إصدار: {v}', relPublished: 'نُشر في {date}',
+      installNotes: 'ملاحظات التشغيل',
+      recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'إصدار التطبيق: {v}', relPublished: 'نُشر في {date}',
     },
-    footer: { license: 'رخصة MIT · من تطوير إسماعيل أحمدي‌پور', tagline: 'مجاني وخاص ومفتوح المصدر. يبقى كودك على جهازك.' },
+    footer: { license: 'رخصة MIT', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {
       metadata: { title: 'دليل CodeBridge: استخدم تطبيق سطح المكتب خطوة بخطوة', description: 'تعلّم تطبيق CodeBridge لسطح المكتب: صدّر مشروعك للذكاء الاصطناعي، وطبّق تعديلاته بأمان، وتراجع عنها، وأصلح المشكلات الشائعة.' },
       eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',

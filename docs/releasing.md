@@ -4,8 +4,8 @@ For the desktop release steps, version/tag rules and CHANGELOG requirement, see 
 
 ## Website
 Merge to `main`. Vercel builds `apps/web` and deploys to https://codebridge.tarvix.org.
-Optional switch: `NEXT_PUBLIC_ENABLE_DOWNLOADS=true` (Vercel -> Environment Variables) shows the desktop downloads and
-PWA install section; turn it on after the first desktop release exists, then redeploy once.
+Optional switch: `NEXT_PUBLIC_ENABLE_DOWNLOADS=false` (Vercel -> Environment Variables) hides the desktop downloads and
+PWA install section; they are shown by default. Redeploy after changing it.
 
 ## Desktop assets
 The `Desktop release` workflow:

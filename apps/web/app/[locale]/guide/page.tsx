@@ -27,7 +27,7 @@ export default async function GuidePage({ params }: { params: Promise<{ locale: 
       <main id="main">
         <Guide t={t.guide} locale={locale} />
       </main>
-      <Footer t={t.footer} nav={t.nav} locale={locale} home={false} />
+      <Footer t={t.footer} nav={t.nav} locale={locale} dir={locale === 'en' ? 'ltr' : 'rtl'} />
     </>
   );
 }

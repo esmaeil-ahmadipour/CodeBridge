@@ -5,7 +5,7 @@
 Run `codebridge` with no arguments. Type a number and press Enter.
 
 ```text
-┌─ CodeBridge 3.0.0 ────────────────────────┐
+┌─ CodeBridge X.Y.Z ────────────────────────┐
 │  1  Export project for the AI             │
 │  2  Apply the AI's diff                   │
 │  3  Undo last applied diff                │

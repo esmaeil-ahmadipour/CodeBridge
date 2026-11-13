@@ -1,5 +1,5 @@
 // Language-neutral terminal screens for the guide: they show the app's own English UI exactly as it appears.
-// Keep them in sync with apps/desktop (menu, export screen, repo picker). tests/guide.test.ts guards the version.
+// Keep them in sync with apps/desktop (menu, export screen, repo picker). The menu version is injected at render time.
 
 export interface Shot { title: string; text: string }
 
@@ -8,7 +8,7 @@ export const guideIds = ['install', 'menu', 'export', 'apply', 'undo', 'manage',
 // Landing "Need help?" cards, in order: export, apply, trouble.
 export const helpTargets = ['export', 'apply', 'trouble'] as const;
 
-const MENU = String.raw`┌─ CodeBridge 3.0.0 ──────────────┐
+const MENU = String.raw`┌─ CodeBridge {version} ──────────────┐
 │  1  Export project for the AI            
 │  2  Apply the AI's diff                  
 │  3  Undo last applied diff               

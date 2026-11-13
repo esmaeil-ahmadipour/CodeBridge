@@ -5,7 +5,6 @@ import { translations } from '../src/i18n/translations.ts';
 import { guideIds, guideShots, helpTargets } from '../src/lib/guide.ts';
 
 const locales = ['en', 'fa', 'ar'] as const;
-const pkg = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
 
 test('guide has the same sections in every language', () => {
   for (const l of locales) {
@@ -45,11 +44,10 @@ test('terminal screens belong to real sections, fit a phone scroll area and matc
       for (const line of s.text.split('\n')) assert.ok(line.length <= 80, `${id}: line too long: ${line}`);
     }
   }
-  assert.match(guideShots.menu[0].text, new RegExp(`CodeBridge ${pkg.version.replace(/\./g, '\\.')} `));
+  assert.match(guideShots.menu[0].text, /CodeBridge \{version\} /);
 });
 
-test('site version is 3.x and the service worker cache was bumped', () => {
-  assert.equal(pkg.version, '3.0.0');
+test('service worker cache is versioned and includes the guide route', () => {
   const sw = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
   assert.match(sw, /VERSION = 'cb-v3'/);
   assert.match(sw, /'\/guide'/);

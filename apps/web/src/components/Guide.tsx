@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { localePrefix, type Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
 import { guideShots, type Shot } from '@/lib/guide';
+import { getApplicationVersion } from '@/lib/site';
 import { Icon } from './Icons';
 
 function Terminal({ shot, label }: { shot: Shot; label: string }) {
@@ -17,6 +18,7 @@ function Terminal({ shot, label }: { shot: Shot; label: string }) {
 }
 
 export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale }) {
+  const applicationVersion = getApplicationVersion();
   return (
     <div className="wrap guide">
       <header className="stack12 ghead">
@@ -40,7 +42,13 @@ export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale })
             </ol>
           )}
 
-          {guideShots[s.id]?.map((shot) => <Terminal key={shot.title} shot={shot} label={t.shotLabel} />)}
+          {guideShots[s.id]?.map((shot) => (
+            <Terminal
+              key={shot.title}
+              shot={{ ...shot, text: shot.text.replace('{version}', applicationVersion) }}
+              label={t.shotLabel}
+            />
+          ))}
 
           {s.keys && (
             <dl className={s.id === 'cli' ? 'keys stack' : 'keys'}>
