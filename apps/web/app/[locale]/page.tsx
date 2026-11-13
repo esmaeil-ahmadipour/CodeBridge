@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         <Privacy t={t.privacy} />
         <Help t={t.help} locale={locale} />
       </main>
-      <Footer t={t.footer} nav={t.nav} locale={locale} />
+      <Footer t={t.footer} nav={t.nav} locale={locale} dir={locale === 'en' ? 'ltr' : 'rtl'} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(buildJsonLd(locale)) }} />
     </>
   );
