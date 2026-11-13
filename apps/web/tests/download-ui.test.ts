@@ -12,19 +12,23 @@ test('landing page keeps the hero, download, tool and support sections in order'
   assert.deepEqual([...order].sort((a, b) => a - b), order, 'sections are out of order');
 });
 
-test('hero CTA and download section retain the version, platform choices and release info', () => {
+test('hero CTA remains and download section retains platform choices without release extras', () => {
   const hero = read('../src/components/Hero.tsx');
   assert.match(hero, /downloads && <a className="ref-button ref-button-primary" href="#dl">\{t\.ctaDownload\}/);
   const dl = read('../src/components/Download.tsx');
   assert.match(dl, /<PlatformCards/);
-  assert.match(dl, /latestReleaseUrl/);
-  assert.match(dl, /t\.relPublished/);
-  assert.match(dl, /getApplicationVersion/);
+  assert.doesNotMatch(dl, /latestReleaseUrl|t\.relPublished|getApplicationVersion|browserCta/);
   assert.doesNotMatch(dl, /<details/);
   for (const l of ['en', 'fa', 'ar'] as const) {
     assert.ok(translations[l].download.osPrompt.trim().length > 0, l);
-    assert.ok(translations[l].download.relPublished.includes('{date}'), l);
   }
+});
+
+test('detected platform stays highlighted without a detection message', () => {
+  const cards = read('../src/components/PlatformCards.tsx');
+  assert.match(cards, /found \? '' : t\.hintDefault/);
+  assert.match(cards, /const rec = det === i\.id/);
+  assert.doesNotMatch(cards, /hintDetected/);
 });
 
 test('mobile showcase stacks on narrow screens and download rows remain responsive', () => {

@@ -6,7 +6,7 @@ import { Icon } from './Icons';
 
 export interface PlatformItem { id: 'windows' | 'macos' | 'linux'; name: string; arch: string; format: string; hint: string; href: string }
 export interface PlatformLabels {
-  recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string; installNotes: string;
+  recommended: string; hintDefault: string; hintMobile: string; downloadFor: string; dlAria: string; installNotes: string;
 }
 
 interface ArchitectureHints { architecture?: string; bitness?: string }
@@ -45,7 +45,7 @@ export function PlatformCards({ items, t }: { items: PlatformItem[]; t: Platform
     return () => { active = false; };
   }, []);
   const found = items.find((i) => i.id === det);
-  const hint = det === 'mobile' ? t.hintMobile : found ? fmt(t.hintDetected, { os: found.name }) : t.hintDefault;
+  const hint = det === 'mobile' ? t.hintMobile : found ? '' : t.hintDefault;
   return (
     <div className="stack12">
       <p className="mut sm dl-detect-hint" aria-live="polite">{hint}</p>

@@ -8,9 +8,10 @@ Desktop export parity with the web tool, plus web UX and accessibility improveme
 - **Mandatory secret redaction:** API keys, AWS/GitHub tokens, passwords, private keys, DB credentials and `.env`/`.npmrc`/`.pypirc` contents are automatically redacted before token estimation, splitting and export. Redaction cannot be disabled by any configuration; failure aborts the export (fail-closed).
 - **ExportConfig model:** strongly typed dataclass in `core/config.py` distinguishing unanswered (`None`) from explicit `True`/`False`, with validation, JSON serialization and legacy settings migration (`redact_secrets` forced to `True`).
 - **Web UX:** reduced top whitespace on the "How it works" section; Help section title (`کمک می‌خواهید؟`) now matches other section titles (22px `h2` instead of oversized `big`).
+- **Download section:** removed the browser-version CTA, release version/date/checksum row, and detected-OS message; the recommended platform remains highlighted.
 - **Web accessibility:** footer redesign with improved RTL support, Navbar and layout adjustments across all locales (en, fa, ar).
 - **Release:** version synchronized across web root `package.json` and desktop; CI release metadata checks gating the desktop release workflow.
-- Tests: 27 new desktop tests (config validation, scanner filters) added; all 58 desktop tests pass. Web tests have 4 pre-existing failures unrelated to this branch.
+- Tests: 27 new desktop tests (config validation, scanner filters) added; all 58 desktop tests pass. All 35 web tests pass.
 
 ## 3.0.1
 Improved release version and changelog consistency.

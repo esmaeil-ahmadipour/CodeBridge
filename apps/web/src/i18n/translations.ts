@@ -40,7 +40,7 @@ export interface Dictionary {
     desktop: string; win: string; mac: string; linux: string; appleSilicon: string; note: string;
     winHint: string; macHint: string; linuxHint: string; releaseChecksums: string;
     installNotes: string;
-    recommended: string; hintDefault: string; hintDetected: string; hintMobile: string; downloadFor: string; dlAria: string;
+    recommended: string; hintDefault: string; hintMobile: string; downloadFor: string; dlAria: string;
     relVersion: string; relPublished: string;
   };
   footer: { license: string; tagline: string; developer: string; developerName: string };
@@ -176,7 +176,7 @@ export const translations: Record<Locale, Dictionary> = {
       linuxHint: 'If needed, run `chmod +x codebridge run.sh` before launching.',
       releaseChecksums: 'Checksums and source on GitHub',
       installNotes: 'Install notes',
-      recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintDetected: '{os} detected. Your recommended download is highlighted.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Application version: {v}', relPublished: 'Published {date}',
+      recommended: 'Recommended', hintDefault: 'Choose the package for your system.', hintMobile: 'Desktop apps are for computers. On a phone, install the web app below.', downloadFor: 'Download for {os}', dlAria: '{label}, {arch}, {format}', relVersion: 'Application version: {v}', relPublished: 'Published {date}',
     },
     footer: { license: 'MIT license', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
@@ -415,7 +415,7 @@ export const translations: Record<Locale, Dictionary> = {
       linuxHint: 'در صورت نیاز، پیش از اجرا `chmod +x codebridge run.sh` را اجرا کنید.',
       releaseChecksums: 'Checksumها و کد منبع در GitHub',
       installNotes: 'نکات اجرا',
-      recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintDetected: '{os} شناسایی شد. دانلود پیشنهادی شما مشخص شده است.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'نسخه‌ی برنامه: {v}', relPublished: 'منتشرشده در {date}',
+      recommended: 'پیشنهادی', hintDefault: 'بسته‌ی مناسب سیستم خود را انتخاب کنید.', hintMobile: 'اپ‌های دسکتاپ برای کامپیوتر هستند. روی گوشی، نسخه‌ی وب را در پایین نصب کنید.', downloadFor: 'دانلود برای {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'نسخه‌ی برنامه: {v}', relPublished: 'منتشرشده در {date}',
     },
     footer: { license: 'مجوز MIT', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
@@ -654,7 +654,7 @@ export const translations: Record<Locale, Dictionary> = {
       linuxHint: 'عند الحاجة، نفّذ `chmod +x codebridge run.sh` قبل التشغيل.',
       releaseChecksums: 'المجاميع الاختبارية والمصدر على GitHub',
       installNotes: 'ملاحظات التشغيل',
-      recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintDetected: 'تم اكتشاف {os}. التنزيل الموصى به مميّز.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'إصدار التطبيق: {v}', relPublished: 'نُشر في {date}',
+      recommended: 'موصى به', hintDefault: 'اختر الحزمة المناسبة لنظامك.', hintMobile: 'تطبيقات سطح المكتب مخصصة للحواسيب. على الهاتف ثبّت تطبيق الويب في الأسفل.', downloadFor: 'تحميل لنظام {os}', dlAria: '{label}، {arch}، {format}', relVersion: 'إصدار التطبيق: {v}', relPublished: 'نُشر في {date}',
     },
     footer: { license: 'رخصة MIT', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {

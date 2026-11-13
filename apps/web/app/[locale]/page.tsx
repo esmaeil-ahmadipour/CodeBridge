@@ -15,7 +15,7 @@ import { isLocale } from '@/i18n/config';
 import { translations } from '@/i18n/translations';
 import { buildJsonLd, buildMetadata } from '@/lib/seo';
 
-// Re-generate hourly so release publication metadata shown in the Download section stays current.
+// Re-generate hourly so release publication metadata shown in the footer stays current.
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -36,7 +36,7 @@ export default async function Page({ params }: { params: Promise<{ locale: strin
         <Hero t={t.hero} downloads={flags.downloads} />
         <Features t={t.features} />
         <MobileShowcase mobile={t.mobile} />
-        {flags.downloads && <Download t={t.download} locale={locale} />}
+        {flags.downloads && <Download t={t.download} />}
         <Tool t={t.tool} />
         <HowItWorks t={t.how} locale={locale} />
         <Privacy t={t.privacy} />

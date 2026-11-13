@@ -147,11 +147,10 @@ test('feature flag: downloads are on by default and only "false" disables them',
 
 test('download UI strings exist and are non-empty in en, fa and ar', () => {
   const keys = ['desktop', 'win', 'mac', 'linux', 'appleSilicon', 'note', 'winHint', 'macHint', 'linuxHint', 'releaseChecksums',
-    'recommended', 'hintDefault', 'hintDetected', 'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished'] as const;
+    'recommended', 'hintDefault', 'hintMobile', 'downloadFor', 'dlAria', 'relVersion', 'relPublished'] as const;
   for (const l of ['en', 'fa', 'ar'] as const) {
     for (const k of keys) assert.ok(translations[l].download[k].trim().length > 0, `${l}.download.${k}`);
     assert.match(translations[l].download.downloadFor, /\{os\}/);
-    assert.match(translations[l].download.hintDetected, /\{os\}/);
     assert.match(translations[l].download.relVersion, /\{v\}/);
     assert.match(translations[l].download.dlAria, /\{label\}.*\{arch\}.*\{format\}/);
   }
