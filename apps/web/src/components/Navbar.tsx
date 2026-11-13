@@ -36,9 +36,10 @@ export function Navbar() {
   return (
     <header className="ref-header" ref={headerRef}>
       <div className="ref-wrap ref-nav">
+        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand">CodeBridge<span>.</span></a>
         <button
           type="button"
-          className="ref-theme"
+          className="ref-menu-toggle"
           aria-expanded={open}
           aria-controls="site-menu"
           aria-label={t.guide.toc}
@@ -46,7 +47,6 @@ export function Navbar() {
         >
           <Icon name={open ? 'close' : 'menu'} size={20} />
         </button>
-        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand">CodeBridge<span>.</span></a>
         {open && (
           <div
             id="site-menu"
@@ -60,26 +60,28 @@ export function Navbar() {
               <a href={`${home}#trust`}>{t.nav.trust}</a>
               <a href={`${home}#web`}>{t.nav.web}</a>
             </nav>
-            <div className="ref-controls">
-              <label className="visually-hidden" htmlFor="site-language">{t.nav.language}</label>
-              <select
-                id="site-language"
-                className="ref-language"
-                value={locale}
-                onChange={(event) => {
-                  const nextLocale = event.currentTarget.value;
-                  if (isLocale(nextLocale)) { setLocale(nextLocale); setOpen(false); }
-                }}
-              >
-                {locales.map((l) => <option key={l} value={l}>{LABEL[l]}</option>)}
-              </select>
-              <button type="button" className="ref-theme" onClick={toggleTheme} aria-label={t.nav.theme}>
-                <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
-              </button>
+            <div className="ref-menu-actions">
               {flags.downloads && <a className="ref-button ref-button-primary ref-nav-download" href={`${home}#dl`}>{t.nav.download}</a>}
             </div>
           </div>
         )}
+        <div className="ref-controls">
+          <label className="visually-hidden" htmlFor="site-language">{t.nav.language}</label>
+          <select
+            id="site-language"
+            className="ref-language"
+            value={locale}
+            onChange={(event) => {
+              const nextLocale = event.currentTarget.value;
+              if (isLocale(nextLocale)) { setLocale(nextLocale); setOpen(false); }
+            }}
+          >
+            {locales.map((l) => <option key={l} value={l}>{LABEL[l]}</option>)}
+          </select>
+          <button type="button" className="ref-theme" onClick={toggleTheme} aria-label={t.nav.theme}>
+            <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={20} />
+          </button>
+        </div>
       </div>
     </header>
   );

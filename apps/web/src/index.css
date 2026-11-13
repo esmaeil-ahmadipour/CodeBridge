@@ -251,11 +251,13 @@ main.landing > section { scroll-margin-top: 88px; }
 .ref-links { display: flex; align-items: center; justify-content: center; flex: 1; flex-wrap: wrap; gap: 8px 28px; }
 .ref-links a, .ref-footer-links a { min-height: 36px; display: inline-flex; align-items: center; color: var(--mu); font-size: 15px; font-weight: 500; text-decoration: none; transition: color .18s ease; }
 .ref-links a:hover, .ref-footer-links a:hover { color: var(--ac); }
-.ref-controls { display: flex; align-items: center; gap: 10px; }
+.ref-controls { display: flex; align-items: center; gap: 10px; margin-inline-start: auto; }
 .ref-language, .ref-theme { min-height: 42px; border: 1px solid var(--bd); border-radius: 10px; background: var(--sf); color: var(--tx); font: inherit; }
 .ref-language { padding-inline: 10px; }
 .ref-theme { width: 42px; display: grid; place-items: center; cursor: pointer; }
 .ref-theme:hover, .ref-language:hover { border-color: var(--ac); }
+.ref-menu-toggle { width: 42px; min-height: 42px; display: grid; flex: none; place-items: center; border: 1px solid var(--bd); border-radius: 10px; background: var(--sf); color: var(--tx); cursor: pointer; }
+.ref-menu-toggle:hover { border-color: var(--ac); }
 .ref-button { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 9px; padding: 0 24px; border: 1px solid var(--bd); border-radius: 12px; background: var(--sf); color: var(--tx); font: inherit; font-size: 16px; font-weight: 600; text-align: center; text-decoration: none; transition: transform .18s ease, border-color .18s ease, background .18s ease; }
 .ref-button:hover { transform: translateY(-2px); border-color: var(--ac); }
 .ref-button:active { transform: translateY(0); }
@@ -392,7 +394,6 @@ main.landing > section { scroll-margin-top: 88px; }
   .ref-nav { min-height: 64px; gap: 16px 18px; padding-block: 20px; }
   .ref-links { overflow: visible; flex-wrap: wrap; }
   .ref-links a { min-height: 40px; white-space: nowrap; }
-  .ref-controls { order: 4; flex-basis: 100%; justify-content: flex-start; margin-inline-start: 0; }
   .ref-nav-download { min-height: 38px; padding-inline: 12px; font-size: 13px; }
   .ref-mobile-grid { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 24px; }
   .ref-download-card { padding: 56px 32px; }
@@ -408,8 +409,8 @@ main.landing > section { scroll-margin-top: 88px; }
 .ref-menu .ref-links { flex: none; order: 0; flex-direction: column; align-items: stretch; justify-content: flex-start; gap: 0; overflow: visible; }
 .ref-menu .ref-links a { min-height: 44px; padding-inline: 10px; border-radius: 8px; white-space: normal; }
 .ref-menu .ref-links a:hover { background: var(--bg); }
-.ref-menu .ref-controls { flex: none; order: 0; margin-inline-start: 0; flex-wrap: wrap; justify-content: flex-start; padding-top: 12px; border-top: 1px solid var(--bd); }
-.ref-menu .ref-nav-download { flex: 1; }
+.ref-menu-actions { display: flex; padding-block-start: 12px; border-block-start: 1px solid var(--bd); }
+.ref-menu-actions .ref-nav-download { flex: 1; }
 
 /* Footer */
 .ref-footer {
