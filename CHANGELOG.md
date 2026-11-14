@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.3
+Fix Google Search Console site verification.
+
+- Move the Google verification HTML file into the web app's public directory so it is served at the expected URL.
+
 ## 3.1.2
 Web UX polish and guide page fixes.
 
