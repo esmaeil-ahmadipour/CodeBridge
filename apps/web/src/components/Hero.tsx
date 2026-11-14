@@ -27,7 +27,7 @@ export function Hero({ t, downloads }: { t: Dictionary['hero']; downloads: boole
         <p>{t.sub}</p>
         <div className="ref-hero-actions">
           {downloads && <a className="ref-button ref-button-primary" href="#dl">{t.ctaDownload}</a>}
-          <a className="ref-button ref-button-secondary" href="#mobile">{t.ctaMobile}</a>
+          <a className="ref-button ref-button-secondary" href="#web">{t.ctaMobile}</a>
         </div>
         <div className="ref-proof">{t.proof.map((item) => <span key={item}>{item}</span>)}</div>
       </div>

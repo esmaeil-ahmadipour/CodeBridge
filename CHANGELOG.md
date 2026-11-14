@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.1.2
+Web UX polish and guide page fixes.
+
+- **Navbar:** the hamburger menu button now comes first, before the logo (RTL-aware).
+- **Hero:** the "Try it in your phone or desktop browser" button now scrolls to the web tool ("Only need an export?") instead of the mobile showcase.
+- **Web tool result:** after conversion, the ZIP name and file count fly in from the progress check mark into the result card (hero animation), with a green check on the name and a green file count; respects `prefers-reduced-motion`.
+- **Copy button:** shows a loading spinner while the text is being written to the clipboard, then a green check that disappears after 2 seconds.
+- **Convert / Convert again:** restyled as real buttons with accent fill (Convert) or accent outline (Convert again), hover lift and shadow, focus ring and a clear disabled state.
+- **Guide:** added "Back to home" buttons at the top and bottom of the page.
+- **Guide:** the version in the eyebrow is no longer hardcoded; it is injected from the root `package.json` like the footer (all locales).
+
 ## 3.1.1
 Desktop export parity with the web tool, plus minor web UX fixes.
 

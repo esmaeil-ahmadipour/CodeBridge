@@ -181,7 +181,7 @@ export const translations: Record<Locale, Dictionary> = {
     footer: { license: 'MIT license', tagline: 'CodeBridge · Free and open-source tool for working with AI', developer: 'Developer', developerName: 'Esmaeil Ahmadipour' },
     guide: {
       metadata: { title: 'CodeBridge Guide: Export Code & Apply AI Diffs', description: 'Learn how to export your codebase for AI, apply AI-generated Git diffs safely, undo changes, and troubleshoot the CodeBridge desktop app.' },
-      eyebrow: 'Guide · Desktop app 3.0',
+      eyebrow: 'Guide · Desktop app {version}',
       title: 'Learn CodeBridge in 5 minutes',
       sub: 'Export your project for an AI, apply its reply safely, and undo if needed. The screens below are exactly what you see in the app.',
       toc: 'On this page',
@@ -420,7 +420,7 @@ export const translations: Record<Locale, Dictionary> = {
     footer: { license: 'مجوز MIT', tagline: 'CodeBridge · ابزار رایگان و متن‌باز برای کار با هوش مصنوعی', developer: 'توسعه‌دهنده', developerName: 'اسماعیل احمدی‌پور' },
     guide: {
       metadata: { title: 'راهنمای CodeBridge: خروجی کد و اعمال Git Diff', description: 'یاد بگیرید چطور از کد پروژه برای هوش مصنوعی خروجی بگیرید، Git Diff تولیدشده توسط AI را امن اعمال کنید، تغییرات را برگردانید و مشکلات رایج را رفع کنید.' },
-      eyebrow: 'راهنما · اپ دسکتاپ ۳.۰',
+      eyebrow: 'راهنما · اپ دسکتاپ {version}',
       title: 'CodeBridge را در ۵ دقیقه یاد بگیرید',
       sub: 'پروژه‌تان را برای AI خروجی بگیرید، پاسخ آن را امن اعمال کنید و در صورت نیاز Undo بزنید. صفحه‌های زیر دقیقاً همان چیزی است که در برنامه می‌بینید.',
       toc: 'در این صفحه',
@@ -659,7 +659,7 @@ export const translations: Record<Locale, Dictionary> = {
     footer: { license: 'رخصة MIT', tagline: 'CodeBridge · أداة مجانية ومفتوحة المصدر للعمل مع الذكاء الاصطناعي', developer: 'المطوّر', developerName: 'إسماعيل أحمدي‌پور' },
     guide: {
       metadata: { title: 'دليل CodeBridge: تصدير الكود وتطبيق Git Diff', description: 'تعلّم كيفية تصدير مشروعك للذكاء الاصطناعي، وتطبيق تغييرات Git Diff بأمان، والتراجع عنها، وحل المشكلات الشائعة في تطبيق CodeBridge.' },
-      eyebrow: 'الدليل · تطبيق سطح المكتب 3.0',
+      eyebrow: 'الدليل · تطبيق سطح المكتب {version}',
       title: 'تعلّم CodeBridge في 5 دقائق',
       sub: 'صدّر مشروعك للذكاء الاصطناعي، وطبّق رده بأمان، وتراجع عند الحاجة. الشاشات أدناه هي ما تراه فعلًا في التطبيق.',
       toc: 'في هذه الصفحة',
