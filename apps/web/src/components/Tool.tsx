@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, type ChangeEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import {
   buildReport, defaultOptions, loadFiles, sizeStr,
   type InFile, type LoadStats, type Options,
@@ -53,8 +53,39 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
   const [res, setRes] = useState<Result | null>(null);
   const [off, setOff] = useState<Set<string>>(new Set());
   const [copied, setCopied] = useState(-1);
+  const [copying, setCopying] = useState(-1);
   const [dlg, setDlg] = useState(false);
   const [fin, setFin] = useState(false);
+  const srcRef = useRef<HTMLDivElement>(null);
+  const okRef = useRef<HTMLSpanElement>(null);
+  const nameRef = useRef<HTMLElement>(null);
+  const countRef = useRef<HTMLSpanElement>(null);
+  const flyFrom = useRef<DOMRect | null>(null);
+
+  // Hero animation: when the result card appears, the ZIP name and file count fly in from where the progress check mark was.
+  useLayoutEffect(() => {
+    const from = flyFrom.current;
+    flyFrom.current = null;
+    if (!res || !from || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const cx = from.left + from.width / 2;
+    const cy = from.top + from.height / 2;
+    const fly = (el: HTMLElement | null, delay: number) => {
+      if (!el || !el.animate) return;
+      const r = el.getBoundingClientRect();
+      const dx = cx - (r.left + r.width / 2);
+      const dy = cy - (r.top + r.height / 2);
+      el.animate(
+        [
+          { transform: `translate(${dx}px, ${dy}px) scale(1.6)`, opacity: 0 },
+          { opacity: 1, offset: 0.25 },
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+        ],
+        { duration: 800, delay, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' },
+      );
+    };
+    fly(nameRef.current, 0);
+    fly(countRef.current, 120);
+  }, [res]);
 
   const set = <K extends keyof Options>(k: K, v: Options[K]) => setOpts((o) => ({ ...o, [k]: v }));
 
@@ -78,7 +109,10 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
         await new Promise<void>((x) => setTimeout(x, 500));
       }
       if (!r.files.length) setErr(t.errEmpty);
-      else setRes({ files: r.files, stats: r.stats, name: f.name.replace(/\.zip$/i, '') || 'project' });
+      else {
+        flyFrom.current = (okRef.current ?? srcRef.current)?.getBoundingClientRect() ?? null;
+        setRes({ files: r.files, stats: r.stats, name: f.name.replace(/\.zip$/i, '') || 'project' });
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       setErr(/zip|central directory|corrupt/i.test(msg) ? t.errNotZip : fmt(t.errRead, { msg }));
@@ -109,6 +143,10 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
   }
 
   async function copy(text: string, i: number) {
+    if (copying !== -1) return;
+    setCopied(-1);
+    setCopying(i);
+    const minimum = new Promise<void>((x) => setTimeout(x, 350)); // keep the spinner visible long enough to notice
     try {
       await navigator.clipboard.writeText(text);
     } catch {
@@ -116,8 +154,10 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
       ta.value = text; document.body.appendChild(ta); ta.select();
       document.execCommand('copy'); ta.remove();
     }
+    await minimum;
+    setCopying(-1);
     setCopied(i);
-    setTimeout(() => setCopied(-1), 1800);
+    setTimeout(() => setCopied((c) => (c === i ? -1 : c)), 2000);
   }
 
   const chip = (label: string, key: keyof Options) => (
@@ -153,7 +193,12 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
               </label>
             </div>
             {opts.splitBytes > 0 && <p className="mut sm">{t.splitNote}</p>}
-            <button type="button" className="btn" disabled={!!busy} onClick={() => void convert(file)}>
+            <button
+              type="button"
+              className={`ref-button ref-convert ${res || err ? 'ref-button-secondary' : 'ref-button-primary'}`}
+              disabled={!!busy}
+              onClick={() => void convert(file)}
+            >
               {res || err ? t.convertAgain : t.convert}
             </button>
           </div>
@@ -162,10 +207,10 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
         <div aria-live="polite">
           {busy && (
             <div className="odo-wrap" aria-hidden="true">
-              <div className="row gap8" dir="ltr">
+              <div className="row gap8" dir="ltr" ref={srcRef}>
                 <Odometer value={busy.done} digits={String(busy.total || 1).length} />
                 {busy.total > 0 && <span className="mut odo-total" dir="ltr">/ {busy.total}</span>}
-                {fin && <span className="odo-ok"><Icon name="check" size={30} /></span>}
+                {fin && <span className="odo-ok" ref={okRef}><Icon name="check" size={30} /></span>}
               </div>
               <div className="odo-bar"><span style={{ width: busy.total ? `${(busy.done / busy.total) * 100}%` : '0%' }} /></div>
               {busy.total > 0 && <p className="mut sm">{fmt(t.working, { done: busy.done, total: busy.total })}</p>}
@@ -178,9 +223,12 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
         {res && report && (
           <>
             <div className="result">
-              <b>{file?.name}</b>
+              <b className="res-name" ref={nameRef}>
+                <span className="res-ok" aria-hidden="true"><Icon name="check" size={14} /></span>
+                {file?.name}
+              </b>
               <span className="mut sm">
-                {fmt(t.resFiles, { n: selected.length })} · {fmt(t.resSize, { size: sizeStr(report.bytes) })} · {fmt(t.resTokens, { n: report.tokens.toLocaleString('en-US') })}
+                <span className="res-count" ref={countRef}>{fmt(t.resFiles, { n: selected.length })}</span> · {fmt(t.resSize, { size: sizeStr(report.bytes) })} · {fmt(t.resTokens, { n: report.tokens.toLocaleString('en-US') })}
                 {report.redacted > 0 && ` · ${fmt(t.resRedacted, { n: report.redacted })}`}
               </span>
               {res.stats.skipped + res.stats.binary + res.stats.large > 0 && (
@@ -203,7 +251,9 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
                   <button type="button" className="btn pri grow" onClick={() => save(p, nameFor(i, report.parts.length))}>
                     {report.parts.length === 1 ? t.download : fmt(t.downloadPart, { n: i + 1 })}
                   </button>
-                  <button type="button" className="btn grow" onClick={() => void copy(p, i)}>
+                  <button type="button" className="btn grow" disabled={copying !== -1} aria-busy={copying === i} onClick={() => void copy(p, i)}>
+                    {copying === i && <span className="spin" aria-hidden="true" />}
+                    {copied === i && <span className="copy-ok" aria-hidden="true"><Icon name="check" size={18} /></span>}
                     {copied === i ? t.copied : report.parts.length === 1 ? t.copy : fmt(t.copyPart, { n: i + 1 })}
                   </button>
                 </div>

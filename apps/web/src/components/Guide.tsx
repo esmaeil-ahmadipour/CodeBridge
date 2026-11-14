@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { localePrefix, type Locale } from '@/i18n/config';
 import type { Dictionary } from '@/i18n/translations';
+import { fmt } from '@/lib/fmt';
 import { guideShots, type Shot } from '@/lib/guide';
 import { getApplicationVersion } from '@/lib/site';
 import { Icon } from './Icons';
@@ -17,13 +18,22 @@ function Terminal({ shot, label }: { shot: Shot; label: string }) {
   );
 }
 
+function BackButton({ href, label }: { href: string; label: string }) {
+  return (
+    <Link className="btn gback" href={href}>
+      <Icon name="arrow" size={18} />{label}
+    </Link>
+  );
+}
+
 export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale }) {
   const applicationVersion = getApplicationVersion();
+  const home = localePrefix(locale) || '/';
   return (
     <div className="wrap guide">
       <header className="stack12 ghead">
-        <Link className="dl-notes" href={localePrefix(locale) || '/'}>{t.home}</Link>
-        <span className="chip on hero-eb">{t.eyebrow}</span>
+        <BackButton href={home} label={t.home} />
+        <span className="chip on hero-eb">{fmt(t.eyebrow, { version: applicationVersion })}</span>
         <h1>{t.title}</h1>
         <p className="mut lead">{t.sub}</p>
         <nav className="toc" aria-label={t.toc}>
@@ -75,6 +85,9 @@ export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale })
           )}
         </section>
       ))}
+      <div className="gfoot">
+        <BackButton href={home} label={t.home} />
+      </div>
     </div>
   );
 }

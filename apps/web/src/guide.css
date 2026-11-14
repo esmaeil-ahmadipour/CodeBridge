@@ -26,4 +26,8 @@
 .hcard h3 { margin: 0; } .hcard p { margin: 0; flex: 1; }
 .hbtn { align-self: flex-start; }
 [dir='rtl'] .hcard .dl-notes svg { transform: scaleX(-1); }
+.gback { width: fit-content; gap: 8px; text-decoration: none; }
+.gback svg { transform: scaleX(-1); }
+[dir='rtl'] .gback svg { transform: none; }
+.gfoot { display: flex; }
 @media (max-width: 640px) { .keys > div { grid-template-columns: minmax(0, 1fr); gap: 6px; } .hbtn { align-self: stretch; } }

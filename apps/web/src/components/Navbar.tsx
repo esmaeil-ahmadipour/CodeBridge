@@ -36,7 +36,6 @@ export function Navbar() {
   return (
     <header className="ref-header" ref={headerRef}>
       <div className="ref-wrap ref-nav">
-        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand">CodeBridge<span>.</span></a>
         <button
           type="button"
           className="ref-menu-toggle"
@@ -47,6 +46,7 @@ export function Navbar() {
         >
           <Icon name={open ? 'close' : 'menu'} size={20} />
         </button>
+        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand">CodeBridge<span>.</span></a>
         {open && (
           <div
             id="site-menu"
