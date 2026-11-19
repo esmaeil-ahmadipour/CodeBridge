@@ -201,11 +201,11 @@ def cmd_patch(a, cfg, s) -> int:
         if not sys.stdin.isatty():
             raise CBError("tolerant patch requires interactive confirmation")
         answer = input("Apply tolerant patch? [Enter/c] ").strip().lower()
-        if answer not in ("", "c"):
-            print("Cancelled. Nothing was changed.")
-            return 0
         if answer == "c":
             print("Cancelled. Nothing was changed.")
+            return 0
+        if answer != "":
+            print("Invalid choice. Cancelled. Nothing was changed.")
             return 0
     if ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():

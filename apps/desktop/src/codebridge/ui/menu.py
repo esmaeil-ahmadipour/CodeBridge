@@ -1,5 +1,6 @@
 """Interactive menu. It only collects answers and calls the same commands as the CLI."""
 from __future__ import annotations
+import sys
 import tempfile
 from ..core.config import (export_config_from_dict, export_config_to_dict,
                            PATCH_SPEC, PRESETS,
@@ -142,7 +143,7 @@ def run_menu(cfg) -> int:
                         print("Finish by entering CODEBRIDGE_END on a line by itself.")
                         lines = []
                         while True:
-                            line = __import__("sys").stdin.readline()
+                            line = sys.stdin.readline()
                             if not line:
                                 break
                             if line.rstrip("\r\n") == "CODEBRIDGE_END":
@@ -156,9 +157,10 @@ def run_menu(cfg) -> int:
 
                         preview = diff.splitlines()
                         print(f"\nReceived {len(preview)} lines.")
-                        print("First: " + preview[0][:160])
+                        print("First: " + preview[0][:120])
                         if len(preview) > 1:
-                            print("Last : " + preview[-1][:160])
+                            print("Last : " + preview[-1][:120])
+                        print("Full diff is hidden to keep the terminal clean.")
 
                         with tempfile.NamedTemporaryFile(
                             mode="w", encoding="utf-8", suffix=".diff",
