@@ -6,14 +6,32 @@ import { guideShots, type Shot } from '@/lib/guide';
 import { getApplicationVersion } from '@/lib/site';
 import { Icon } from './Icons';
 
-function Terminal({ shot, label }: { shot: Shot; label: string }) {
+function Terminal({ shot, label, head = true }: { shot: Shot; label: string; head?: boolean }) {
   return (
     <div className="prev gshot" role="group" aria-label={`${label}: ${shot.title}`} dir="ltr">
-      <div className="prev-h">
-        <span className="dots" aria-hidden="true"><i /><i /><i /></span>
-        <span className="mono">{shot.title}</span>
-      </div>
+      {head && (
+        <div className="prev-h">
+          <span className="dots" aria-hidden="true"><i /><i /><i /></span>
+          <span className="mono">{shot.title}</span>
+        </div>
+      )}
       <pre tabIndex={0}>{shot.text}</pre>
+    </div>
+  );
+}
+
+// The first screen is always visible; the others open on demand so a section stays short.
+function Shots({ shots, label }: { shots: Shot[]; label: string }) {
+  const [first, ...rest] = shots;
+  return (
+    <div className="gshots">
+      <Terminal shot={first} label={label} />
+      {rest.map((shot) => (
+        <details key={shot.title} className="gdet">
+          <summary dir="ltr"><span className="mono">{shot.title}</span></summary>
+          <Terminal shot={shot} label={label} head={false} />
+        </details>
+      ))}
     </div>
   );
 }
@@ -52,13 +70,12 @@ export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale })
             </ol>
           )}
 
-          {guideShots[s.id]?.map((shot) => (
-            <Terminal
-              key={shot.title}
-              shot={{ ...shot, text: shot.text.replace('{version}', applicationVersion) }}
+          {guideShots[s.id] && (
+            <Shots
+              shots={guideShots[s.id].map((shot) => ({ ...shot, text: shot.text.replace('{version}', applicationVersion) }))}
               label={t.shotLabel}
             />
-          ))}
+          )}
 
           {s.keys && (
             <dl className={s.id === 'cli' ? 'keys stack' : 'keys'}>
@@ -69,19 +86,28 @@ export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale })
           )}
 
           {s.qa && (
-            <dl className="qa">
+            <div className="qa">
               {s.qa.map((q) => (
-                <div key={q.t} className="card"><dt>{q.t}</dt><dd className="mut">{q.s}</dd></div>
+                <details key={q.t} className="qa-item">
+                  <summary>{q.t}</summary>
+                  <p className="mut">{q.s}</p>
+                </details>
               ))}
-            </dl>
+            </div>
           )}
 
           {s.notes && (
             <ul className="gnotes">
               {s.notes.map((x) => (
-                <li key={x} className="mut sm"><Icon name="info" size={16} style={{ flex: 'none', marginTop: 2 }} />{x}</li>
+                <li key={x} className="mut"><Icon name="info" size={16} style={{ flex: 'none', marginTop: 2 }} />{x}</li>
               ))}
             </ul>
+          )}
+
+          {t.sections[n + 1] && (
+            <a className="btn gnext" href={`#${t.sections[n + 1].id}`}>
+              {t.sections[n + 1].title}<Icon name="arrow" size={16} />
+            </a>
           )}
         </section>
       ))}

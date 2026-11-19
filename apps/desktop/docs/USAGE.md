@@ -50,7 +50,7 @@ codebridge context preview [PATH]           list what would be exported (writes 
 codebridge patch check   [FILE|-]           can this diff be applied?
 codebridge patch preview [FILE|-] [--diff]  file list with +/- counts
 codebridge patch apply   [FILE|-]           apply (asks first)
-    -y  --partial  -b BRANCH  -c "message"  --no-archive  --no-fix  -r REPO
+    -y  --allow-tolerant  --partial  -b BRANCH  -c "message"  --no-archive  --no-fix  -r REPO
 codebridge patch undo [RUN_ID] [--force] [-r REPO]
 codebridge project list | add PATH [-n NAME] [--preset flutter|node|python|all] | remove NAME
 codebridge history [-n N]
@@ -68,7 +68,10 @@ Exit codes: `0` ok · `1` usage/environment error · `2` diff could not be appli
    lines whose leading space was stripped are all tolerated.
 2. The whole diff is checked at once. If plain `git apply` rejects it, tolerant modes are tried in order
    (`--recount`, ignore whitespace, reduced context, then zero context with `--unidiff-zero`).
-   Tolerant application always requires explicit confirmation: type `y` to apply, Enter cancels, even with `-y`.
+   A tolerant application is confirmed with **one** question, `Apply with tolerant mode? [y/N]`: type `y` to apply
+   (no second question follows), Enter cancels. `-y` alone does not skip it; scripts must add `--allow-tolerant`
+   (`-y --allow-tolerant`), otherwise the run is refused. A normal diff gets the usual single
+   `Apply these changes? [Y/n]`.
 3. Strict mode (default) is all-or-nothing: if any file fails, nothing is changed. `--partial` applies the rest.
 4. Before touching files, each file is snapshotted under `.git/codebridge/runs/<id>/` (invisible to git).
 5. After success only: `-b` creates the branch, `-c` commits **only the patch's files**. `-c` is refused up

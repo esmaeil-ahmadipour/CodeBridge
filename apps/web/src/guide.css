@@ -1,25 +1,47 @@
 /* Guide page and the landing "Need help?" cards. Colors come from the tokens in index.css. */
-.guide { display: flex; flex-direction: column; gap: 40px; min-width: 0; }
-.ghead { align-items: flex-start; }
+.guide { display: flex; flex-direction: column; gap: 24px; min-width: 0; max-width: 880px; padding-block: 8px 48px; }
+.ghead { align-items: flex-start; gap: 14px; }
 .toc { display: flex; flex-wrap: wrap; gap: 8px; }
-.toc a { display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border: 1px solid var(--bd); border-radius: 999px; color: var(--mu); text-decoration: none; font-size: 14px; font-weight: 500; }
+.toc a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--bd); border-radius: 999px; color: var(--mu); text-decoration: none; font-size: 15px; font-weight: 500; }
 .toc a:hover { color: var(--ac); border-color: var(--ac); }
-.gsec { display: flex; flex-direction: column; gap: 16px; scroll-margin-top: 84px; min-width: 0; }
-.gsec h2 { display: flex; align-items: center; gap: 12px; }
-.gnum { width: 32px; height: 32px; border-radius: 10px; background: color-mix(in srgb, var(--ac) 16%, var(--sf)); color: var(--ac); font-size: 15px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: none; }
-.gsec .steps { margin: 0; padding: 0; list-style: none; }
-.gshot pre { font-size: 12px; line-height: 1.5; white-space: pre; }
+
+/* One card per section: the numbered title, a short text, then the details. */
+.gsec { display: flex; flex-direction: column; gap: 18px; padding: 24px; background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; scroll-margin-top: 84px; min-width: 0; }
+.gsec h2 { display: flex; align-items: center; gap: 12px; font-size: 24px; line-height: 1.35; }
+.gnum { width: 34px; height: 34px; border-radius: 10px; background: color-mix(in srgb, var(--ac) 16%, var(--sf)); color: var(--ac); font-size: 16px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.guide .mut { font-size: 16px; line-height: 1.7; }
+.guide .lead { font-size: 18px; max-width: 680px; }
+[dir='rtl'] .guide .mut { line-height: 1.9; }
+.gsec > .mut, .gsec .steps, .gnotes { max-width: 70ch; }
+
+.guide .steps { margin: 0; padding: 0; list-style: none; gap: 14px; }
+.guide .steps li { font-size: 16px; line-height: 1.7; }
+.guide .steps .num { width: 28px; height: 28px; font-size: 14px; margin-top: 2px; }
+
+/* Terminal screens: readable size, scroll sideways instead of shrinking. */
+.gshots { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.gshot { background: var(--bg); }
+.gshot pre { font-size: 13.5px; line-height: 1.6; white-space: pre; }
 .gshot pre:focus-visible { outline: 2px solid var(--ac); outline-offset: -2px; }
+.gdet, .qa-item { border: 1px solid var(--bd); border-radius: 14px; background: var(--bg); min-width: 0; }
+.gdet > summary, .qa-item > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 8px 16px; cursor: pointer; list-style: none; font-weight: 600; font-size: 16px; line-height: 1.5; }
+.gdet > summary::-webkit-details-marker, .qa-item > summary::-webkit-details-marker { display: none; }
+.gdet > summary::after, .qa-item > summary::after { content: '+'; margin-inline-start: auto; color: var(--ac); font-size: 20px; font-weight: 500; line-height: 1; flex: none; }
+.gdet[open] > summary::after, .qa-item[open] > summary::after { content: '−'; }
+.gdet > summary:focus-visible, .qa-item > summary:focus-visible { outline: 2px solid var(--ac); outline-offset: -2px; border-radius: 14px; }
+.gdet .gshot { border: 0; border-top: 1px solid var(--bd); border-radius: 0 0 14px 14px; background: var(--sf); }
+.qa { display: flex; flex-direction: column; gap: 10px; margin: 0; }
+.qa-item > p { margin: 0; padding: 0 16px 16px; }
+
 .keys { display: flex; flex-direction: column; gap: 8px; margin: 0; }
-.keys > div { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 10px 14px; background: var(--sf); border: 1px solid var(--bd); border-radius: 12px; }
+.keys > div { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 14px; align-items: baseline; padding: 12px 16px; background: var(--bg); border: 1px solid var(--bd); border-radius: 12px; }
 .keys.stack > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
 .keys dt, .keys dd { margin: 0; min-width: 0; }
-.kbd { display: inline-block; max-width: 100%; font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 13px; font-weight: 600; color: var(--ac); background: var(--bg); border: 1px solid var(--bd); border-radius: 8px; padding: 2px 8px; overflow-wrap: anywhere; }
-.qa { display: flex; flex-direction: column; gap: 10px; margin: 0; }
-.qa .card { gap: 6px; padding: 14px 16px; }
-.qa dt { font-weight: 600; margin: 0; } .qa dd { margin: 0; }
-.gnotes { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.gnotes li { display: flex; gap: 8px; align-items: flex-start; }
+.kbd { display: inline-block; max-width: 100%; font-family: var(--font-jetbrains), ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--ac); background: var(--sf); border: 1px solid var(--bd); border-radius: 8px; padding: 2px 8px; overflow-wrap: anywhere; }
+.gnotes { display: flex; flex-direction: column; gap: 10px; margin: 0; padding: 14px 16px; list-style: none; background: color-mix(in srgb, var(--ac) 7%, var(--sf)); border-radius: 12px; }
+.gnotes li { display: flex; gap: 10px; align-items: flex-start; }
+.gnotes svg { color: var(--ac); }
+
 .hlist { margin: 0; padding: 0; list-style: none; }
 .hcard { height: 100%; box-sizing: border-box; color: inherit; text-decoration: none; }
 .hcard:hover, .hcard:focus-visible { border-color: var(--ac); }
@@ -30,4 +52,38 @@
 .gback svg { transform: scaleX(-1); }
 [dir='rtl'] .gback svg { transform: none; }
 .gfoot { display: flex; }
-@media (max-width: 640px) { .keys > div { grid-template-columns: minmax(0, 1fr); gap: 6px; } .hbtn { align-self: stretch; } }
+
+@media (max-width: 640px) {
+  .gsec { padding: 18px 16px; border-radius: 16px; }
+  .gsec h2 { font-size: 21px; }
+  .keys > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .toc { flex-wrap: nowrap; overflow-x: auto; margin-inline: -20px; padding-inline: 20px; padding-bottom: 4px; scrollbar-width: none; }
+  .toc a { flex: none; }
+  .hbtn { align-self: stretch; }
+}
+
+/* Readable text, and one section at a time (the table of contents switches sections). */
+.guide .mut, .guide .steps li, .gdet > summary, .qa-item > summary { font-size: 17px; line-height: 1.75; }
+[dir='rtl'] .guide .mut, [dir='rtl'] .guide .steps li { line-height: 1.95; }
+.guide .lead { font-size: 19px; }
+.toc a { font-size: 16px; }
+.kbd { font-size: 15px; }
+.gshot pre { font-size: 14px; }
+.guide:has(.gsec:target, .gsec :target) .gsec:not(:target):not(:has(:target)) { display: none; }
+.guide:not(:has(.gsec:target, .gsec :target)) .gsec:not(:first-of-type) { display: none; }
+.gnext { align-self: flex-start; gap: 8px; text-decoration: none; }
+[dir='rtl'] .gnext svg { transform: scaleX(-1); }
+
+/* Phone held sideways: little height, so keep it calm: no extra padding, short gaps, one narrow reading column. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .guide { gap: 16px; max-width: 760px; padding-block: 0 24px; }
+  .ghead { gap: 10px; }
+  .toc { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .toc a { flex: none; }
+  .gsec { gap: 12px; padding: 16px 18px; scroll-margin-top: 64px; }
+  .gsec h2 { font-size: 20px; }
+  .guide .mut, .guide .steps li { line-height: 1.6; }
+  .gshot pre { font-size: 13px; }
+  .guide .lead { display: none; }
+  .guide h1 { font-size: 28px; }
+}

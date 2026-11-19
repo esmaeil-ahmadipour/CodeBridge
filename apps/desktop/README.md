@@ -38,7 +38,7 @@ from the clipboard (Enter) or a manual paste (`p`, finished with `CODEBRIDGE_END
 If a diff cannot be applied, nothing is changed and `codebridge-fix.txt` is created (and copied to the
 clipboard): the errors plus the current content of the affected files, ready to send back to the AI.
 
-If Git accepts a diff only in a tolerant mode, CodeBridge always asks for explicit confirmation (`y` applies, Enter cancels), even with `-y`; non-interactive runs are refused.
+If Git accepts a diff only in a tolerant mode, CodeBridge asks one question (`Apply with tolerant mode? [y/N]`: `y` applies, Enter cancels) and nothing more. `-y` does not skip it; in scripts use `-y --allow-tolerant`, otherwise the run is refused.
 
 More: [docs/USAGE.md](docs/USAGE.md) · releasing: [docs/RELEASING.md](docs/RELEASING.md) · [CHANGELOG](../../CHANGELOG.md)
 

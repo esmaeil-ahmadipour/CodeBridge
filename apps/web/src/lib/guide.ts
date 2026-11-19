@@ -94,12 +94,15 @@ strict mode: nothing was changed
 Fix prompt for the AI written to codebridge-fix.txt and copied to the clipboard.
 Send it to the AI, then apply the new diff.`;
 
-const APPLY_TOLERANT = String.raw`Note  : applies in tolerant mode (--recount --ignore-whitespace)
+const APPLY_TOLERANT = String.raw`Files : 1
+  [MOD] lib/main.dart  (+12 -3)  ok
+Note  : applies in tolerant mode (--recount --ignore-whitespace)
 
-WARNING: Git could only accept this diff using tolerant options.
-The patch may have incomplete or unusual hunk context.
-Type y to apply, or press Enter to cancel.
-Apply tolerant patch? [y/N] `;
+WARNING: Strict apply failed. Git could only accept this diff
+using tolerant options.
+The patch may have incomplete or unusual hunk context; check the
+result afterwards (undo is available).
+Apply with tolerant mode? [y/N] `;
 
 const PROJECTS = String.raw`== Projects ==
  1. app  /home/me/work/app

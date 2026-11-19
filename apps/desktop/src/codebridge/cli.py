@@ -48,6 +48,8 @@ def build_parser() -> argparse.ArgumentParser:
             a.add_argument("--diff", action="store_true", help="also print the cleaned diff")
         if name == "apply":
             a.add_argument("-y", "--yes", action="store_true", help="skip the confirmation")
+            a.add_argument("--allow-tolerant", action="store_true",
+                           help="allow relaxed matching without asking (needed with -y in scripts)")
             a.add_argument("--partial", action="store_true", help="apply what can be applied")
             a.add_argument("-b", "--branch", help="create this branch after a successful apply")
             a.add_argument("-c", "--commit", metavar="MSG", help="commit only the applied files")
@@ -198,17 +200,18 @@ def cmd_patch(a, cfg, s) -> int:
     if plan.status == "fail" and not partial:
         _fail(plan, cfg, s, a, "strict mode: nothing was changed")
         return 2
+    confirmed = False
     if plan.flags:
-        print("\nWARNING: Git could only accept this diff using tolerant options.")
-        print("The patch may have incomplete or unusual hunk context.")
-        print("Type y to apply, or press Enter to cancel.")
-        if not sys.stdin.isatty():
-            raise CBError("tolerant patch requires interactive confirmation")
-        answer = input("Apply tolerant patch? [y/N] ").strip().lower()
-        if answer not in ("y", "yes"):
-            print("Cancelled. Nothing was changed.")
-            return 0
-    if ps["confirm_before_apply"] and not a.yes:
+        print("\nWARNING: Strict apply failed. Git could only accept this diff using tolerant options.")
+        print("The patch may have incomplete or unusual hunk context; check the result afterwards (undo is available).")
+        if not a.allow_tolerant:
+            if not sys.stdin.isatty():
+                raise CBError("tolerant patch needs a person to confirm; to allow it in scripts pass -y --allow-tolerant")
+            if input("Apply with tolerant mode? [y/N] ").strip().lower() not in ("y", "yes"):
+                print("Cancelled. Nothing was changed.")
+                return 0
+            confirmed = True  # this one answer covers the whole apply: no second question
+    if not confirmed and ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():
             raise CBError("no terminal to confirm; re-run with -y")
         if input("\nApply these changes? [Y/n] ").strip().lower() not in ("", "y", "yes"):

@@ -4,16 +4,9 @@
 Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
 
 - **Desktop menu, Apply:** press Enter (clipboard) or `p` (manual paste), `q` cancels. The extra "press Enter when copied" step and the "Press Enter to continue" pause after Apply and Undo are gone. Manual paste accepts multiple lines, ends with `CODEBRIDGE_END` on its own line, and shows only the line count plus the first and last line.
-- **Tolerant apply:** when plain `git apply` fails, a new last fallback (`--recount --ignore-whitespace -C0 --unidiff-zero`) is tried. Any tolerant application now needs explicit confirmation (`y` applies, Enter cancels; the default is to cancel), even with `-y`; non-interactive runs are refused.
+- **Tolerant apply:** when plain `git apply` fails, a new last fallback (`--recount --ignore-whitespace -C0 --unidiff-zero`) is tried. A tolerant application is confirmed with a single question, `Apply with tolerant mode? [y/N]` (`y` applies and nothing more is asked, Enter cancels); the old second `Apply these changes?` question no longer follows it. `-y` does not skip this question; scripts must pass the new `--allow-tolerant` flag together with `-y`, otherwise the run is refused.
 - **Website:** Help, Guide (terminal mockups for `c`, `p` and the tolerant warning), troubleshooting entries and landing text in English, Persian and Arabic no longer tell people to avoid pasting; they explain `p` and the tolerant-mode confirmation.
-- **Docs:** `apps/desktop/docs/USAGE.md` and the desktop README describe the new Apply flow.
-
-## Unreleased
-Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
-
-- **Desktop menu, Apply:** press Enter (clipboard) or `p` (manual paste), `q` cancels. The extra "press Enter when copied" step and the "Press Enter to continue" pause after Apply and Undo are gone. Manual paste accepts multiple lines, ends with `CODEBRIDGE_END` on its own line, and shows only the line count plus the first and last line.
-- **Tolerant apply:** when plain `git apply` fails, a new last fallback (`--recount --ignore-whitespace -C0 --unidiff-zero`) is tried. Any tolerant application now needs explicit confirmation (`y` applies, Enter cancels; the default is to cancel), even with `-y`; non-interactive runs are refused.
-- **Website:** Help and Guide (English, Persian, Arabic) explain `p` and the tolerant-mode confirmation instead of telling people not to paste. The hero preview title, the hero tagline (no more "without copy-paste"), the "Safe apply" card and the CLI guide notes were reworded too.
+- **Website guide:** larger text (17px), one numbered card per section shown one at a time (the table of contents and a next-section button switch between them), long Q&A and extra terminal screens collapsed, and a calmer layout in landscape orientation.
 - **Docs:** `apps/desktop/docs/USAGE.md` and the desktop README describe the new Apply flow.
 
 ## 3.1.3
