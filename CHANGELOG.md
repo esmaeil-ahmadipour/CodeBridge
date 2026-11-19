@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
+
+- **Desktop menu, Apply:** choose `c` (clipboard) or `p` (manual paste). Manual paste accepts multiple lines, ends with `CODEBRIDGE_END` on its own line, and shows only the line count plus the first and last line.
+- **Tolerant apply:** when plain `git apply` fails, a new last fallback (`--recount --ignore-whitespace -C0 --unidiff-zero`) is tried. Any tolerant application now needs explicit confirmation (Enter applies, `c` cancels), even with `-y`; non-interactive runs are refused.
+- **Website:** Help, Guide (terminal mockups for `c`, `p` and the tolerant warning), troubleshooting entries and landing text in English, Persian and Arabic no longer tell people to avoid pasting; they explain `p` and the tolerant-mode confirmation.
+- **Docs:** `apps/desktop/docs/USAGE.md` and the desktop README describe the new Apply flow.
+
+## Unreleased
+Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
+
+- **Desktop menu, Apply:** press Enter (clipboard) or `p` (manual paste), `q` cancels. The extra "press Enter when copied" step and the "Press Enter to continue" pause after Apply and Undo are gone. Manual paste accepts multiple lines, ends with `CODEBRIDGE_END` on its own line, and shows only the line count plus the first and last line.
+- **Tolerant apply:** when plain `git apply` fails, a new last fallback (`--recount --ignore-whitespace -C0 --unidiff-zero`) is tried. Any tolerant application now needs explicit confirmation (`y` applies, Enter cancels; the default is to cancel), even with `-y`; non-interactive runs are refused.
+- **Website:** Help and Guide (English, Persian, Arabic) explain `p` and the tolerant-mode confirmation instead of telling people not to paste. The hero preview title, the hero tagline (no more "without copy-paste"), the "Safe apply" card and the CLI guide notes were reworded too.
+- **Docs:** `apps/desktop/docs/USAGE.md` and the desktop README describe the new Apply flow.
+
 ## 3.1.3
 Fix Google Search Console site verification.
 

@@ -49,13 +49,13 @@ class MenuTests(unittest.TestCase):
         s["projects"] = [{"name": "demo", "path": str(r), "active": True, "overrides": {}}]
         s["patch"]["confirm_before_apply"] = False
         save_settings(s, self.cfg)
-        code, out = run(self.cfg, ["2", "", "c", "", "", "0"], clipboard=diff)   # Enter = demo, Enter = copied, Enter = continue
+        code, out = run(self.cfg, ["2", "", "", "0"], clipboard=diff)   # Enter = demo, Enter = clipboard, 0 = exit
         self.assertEqual(code, 0, out)
-        self.assertIn("Copy the AI's diff, then press Enter.", out)
+        self.assertIn("Enter = clipboard", out)
         self.assertIn("1  demo", out)
         self.assertEqual((r / "a.txt").read_text(), "one\ntwo\nthree\n")
         self.assertEqual(load_settings(self.cfg, quiet=True)["last_project"], "demo")
-        run(self.cfg, ["3", "", "", "0"])
+        run(self.cfg, ["3", "", "0"])
         self.assertEqual((r / "a.txt").read_text(), "one\ntwo\n")
 
     def test_manual_paste_preserves_multiline_diff(self):
@@ -68,7 +68,7 @@ class MenuTests(unittest.TestCase):
         save_settings(s, self.cfg)
 
         out = io.StringIO()
-        inputs = iter(["2", "", "p", "", "0"])
+        inputs = iter(["2", "", "p", "0"])
         terminal_input = (
             diff + "CODEBRIDGE_END\\n"
         )

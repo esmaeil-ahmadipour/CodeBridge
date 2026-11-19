@@ -133,11 +133,9 @@ def run_menu(cfg) -> int:
                 _remember(cfg, target)
                 repo = resolve_repo(s["projects"], target)
                 if c == "2":
-                    source = ask("\nDiff source: [c]lipboard / [p]aste manually", "c").lower()
-                    if source == "c":
-                        print("Copy the AI's diff, then press Enter.")
-                        input("Press Enter when copied (Ctrl+C to cancel) ")
-                        _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                    source = ask("\nDiff source (Enter = clipboard, p = paste here, q = cancel)").lower()
+                    if source in ("", "c"):
+                        _call(cfg, "patch", "apply", "--clipboard", "-r", repo, pause=False)
                     elif source == "p":
                         print("\nPaste the complete diff below.")
                         print("Finish by entering CODEBRIDGE_END on a line by itself.")
@@ -169,14 +167,16 @@ def run_menu(cfg) -> int:
                             f.write(diff)
                             temp_path = f.name
                         try:
-                            _call(cfg, "patch", "apply", temp_path, "-r", repo)
+                            _call(cfg, "patch", "apply", temp_path, "-r", repo, pause=False)
                         finally:
                             from pathlib import Path
                             Path(temp_path).unlink(missing_ok=True)
+                    elif source == "q":
+                        print("Cancelled.")
                     else:
                         print("Invalid choice. Cancelled.")
                 else:
-                    _call(cfg, "patch", "undo", "-r", repo)
+                    _call(cfg, "patch", "undo", "-r", repo, pause=False)
             elif c == "4":
                 projects_menu(cfg)
             elif c == "5":

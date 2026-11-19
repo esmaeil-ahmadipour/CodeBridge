@@ -95,6 +95,24 @@ class T(unittest.TestCase):
         self.assertIn("Cancelled", out)
         self.assertEqual((self.r / "a.txt").read_text(), original)
 
+    def test_tolerant_apply_enter_cancels_and_y_applies(self):
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        hunk = next(line for line in diff.splitlines() if line.startswith("@@ "))
+        bad = diff.replace(hunk, re.sub(r"(@@ -\d+),\d+( \+\d+),\d+( @@)", r"\1,1\2,1\3", hunk))
+        patch_file = Path(self.work, "tolerant2.diff")
+        patch_file.write_text(bad, encoding="utf-8")
+        args = ("--config", self.cfg, "patch", "apply", str(patch_file), "-r", str(self.r), "-y")
+        before = (self.r / "a.txt").read_text()
+        with mock.patch("codebridge.cli.sys.stdin", TTY("\n")):
+            c, out, err = call(*args)
+        self.assertEqual(c, 0, out + err)
+        self.assertIn("Cancelled", out)
+        self.assertEqual((self.r / "a.txt").read_text(), before)
+        with mock.patch("codebridge.cli.sys.stdin", TTY("y\n")):
+            c, out, err = call(*args)
+        self.assertEqual(c, 0, out + err)
+        self.assertNotEqual((self.r / "a.txt").read_text(), before)
+
 
 if __name__ == "__main__":
     unittest.main()

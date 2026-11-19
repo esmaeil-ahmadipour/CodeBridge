@@ -28,6 +28,49 @@ TEST_RULES_BY_PROJECT: dict[str, dict[str, list[str]]] = {
 }
 
 
+# Source extensions per language: turns the wizard's language choice into a file filter.
+LANGUAGE_EXTENSIONS: dict[str, list[str]] = {
+    "dart": [".dart"],
+    "javascript": [".js", ".jsx", ".mjs", ".cjs"],
+    "typescript": [".ts", ".tsx", ".mts", ".cts"],
+    "python": [".py"],
+    "go": [".go"],
+    "rust": [".rs"],
+    "java": [".java"],
+    "kotlin": [".kt", ".kts"],
+    "swift": [".swift"],
+    "c#": [".cs"],
+    "c": [".c", ".h"],
+    "cpp": [".cpp", ".cc", ".hpp", ".h"],
+    "c++": [".cpp", ".cc", ".hpp", ".h"],
+    "ruby": [".rb"],
+    "php": [".php"],
+    "shell": [".sh"],
+}
+# Docs, manifests and configuration kept next to the chosen languages.
+COMPANION_EXTENSIONS = [".md", ".json", ".toml", ".yaml", ".yml", ".cfg", ".ini", ".txt"]
+WEB_EXTENSIONS = [".css", ".html"]
+
+
+def export_extensions(cfg: "ExportConfig") -> list[str]:
+    """Extensions implied by the chosen languages; [] when none were chosen (= all file types)."""
+    names = set(cfg.languages) | set(cfg.custom_languages)
+    if not names:
+        return []
+    exts: set[str] = set(COMPANION_EXTENSIONS)
+    for n in names:
+        found = LANGUAGE_EXTENSIONS.get(n)
+        if found is None:
+            n = n.strip().lstrip("*")
+            found = [n if n.startswith(".") else "." + n]
+        exts.update(found)
+    if {"javascript", "typescript"} & names:
+        exts.update(WEB_EXTENSIONS)
+    if "dart" in names:
+        exts.add(".arb")
+    return sorted(exts)
+
+
 @dataclass(frozen=True)
 class ExportConfig:
     project_type: Optional[Literal["flutter", "react", "nextjs", "node", "python", "other"]] = None

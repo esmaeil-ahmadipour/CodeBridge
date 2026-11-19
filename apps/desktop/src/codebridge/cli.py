@@ -6,7 +6,7 @@ from .context.exporter import export_project
 from .context.scanner import changed_files
 from .core import history
 from .core.config import (PRESETS, export_config_from_dict, load_settings, project_options,
-                          save_settings)
+                          export_extensions, save_settings)
 from .core.git import repo_root, require_repo
 from .core.paths import resolve_config
 from .core.util import CBError, from_clipboard, setup_console, to_clipboard
@@ -108,6 +108,10 @@ def cmd_context(a, cfg, s) -> int:
             o["include_svg"] = export_cfg.include_svg
             o["exclude_lock_files"] = export_cfg.exclude_lock_files
             o["exclude_test_files"] = export_cfg.exclude_test_files
+            # The chosen languages decide which file types are exported (overrides a project preset).
+            ext = export_cfg.only_extensions or export_extensions(export_cfg)
+            if ext:
+                o["only_extensions"] = ext
         only = None
         if a.files:
             only = [f.replace("\\", "/") for f in a.files]
@@ -197,15 +201,12 @@ def cmd_patch(a, cfg, s) -> int:
     if plan.flags:
         print("\nWARNING: Git could only accept this diff using tolerant options.")
         print("The patch may have incomplete or unusual hunk context.")
-        print("Press Enter to apply, or type c to cancel.")
+        print("Type y to apply, or press Enter to cancel.")
         if not sys.stdin.isatty():
             raise CBError("tolerant patch requires interactive confirmation")
-        answer = input("Apply tolerant patch? [Enter/c] ").strip().lower()
-        if answer == "c":
+        answer = input("Apply tolerant patch? [y/N] ").strip().lower()
+        if answer not in ("y", "yes"):
             print("Cancelled. Nothing was changed.")
-            return 0
-        if answer != "":
-            print("Invalid choice. Cancelled. Nothing was changed.")
             return 0
     if ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():
