@@ -231,7 +231,7 @@ export const translations: Record<Locale, Dictionary> = {
           id: 'apply',
           title: 'Apply an AI-Generated Git Diff',
           intro: 'Ask the AI to answer with a git diff. CodeBridge then puts it into your project safely: it checks everything first and changes nothing if any part fails.',
-          steps: ['In the AI’s reply, copy the whole diff with Ctrl+C (or its copy button).', 'In CodeBridge type 2 and press Enter, then choose the repo: Enter picks the first one in the list, or type a number, a name or a folder.', 'Choose the source. Press Enter to read the diff straight from your clipboard (so copy it first). Type p to paste it manually: paste the whole diff, then type CODEBRIDGE_END on a line by itself and press Enter. Type q to cancel. Only the line count and the first and last lines are shown.', 'Look at the list of files, confirm, and you are done.'],
+          steps: ['In the AI’s reply, copy the whole diff with Ctrl+C (or its copy button).', 'In CodeBridge type 2 and press Enter, then choose the repo: Enter picks the first one in the list, or type a number, a name or a folder.', 'Choose the source. Press Enter to read the diff straight from your clipboard (so copy it first). Type p to paste it manually: paste the whole diff, then type CODEBRIDGE_END on a line by itself and press Enter. Type q to cancel. Only the line count and the first and last lines are shown.', 'Look at the list of files and press Enter to confirm (Yes is the default). The menu comes back right away, so the result stays on screen above it.'],
           notes: ['If the diff does not apply, nothing changes and the app writes codebridge-fix.txt (also copied to the clipboard). Send it back to the AI.', 'If Git can only accept the diff with relaxed matching (tolerant mode), CodeBridge warns you and always asks for confirmation, even with -y: type y to apply, or press Enter to cancel. Check the result afterwards; Undo is always available.', 'Git must be installed. Your uncommitted work stays untouched.'],
         },
         {
@@ -269,8 +269,9 @@ export const translations: Record<Locale, Dictionary> = {
           intro: 'Find your message or symptom below.',
           qa: [
             { t: 'My pasted diff is incomplete', s: 'Do not paste at the “Diff source” prompt. Type p first, then paste the diff, then type CODEBRIDGE_END on a line by itself. Or press Enter at that prompt to read the diff from the clipboard instead.' },
-            { t: '“Clipboard has no diff”', s: 'Copy the full AI reply or the whole diff block again and retry. On Linux, install xclip, xsel or wl-clipboard.' },
+            { t: '“Clipboard has no diff”', s: 'Apply reads the clipboard as soon as you press Enter, so copy the diff before choosing the source. Copy the full AI reply or the whole diff block again and retry. On Linux, install xclip, xsel or wl-clipboard.' },
             { t: 'The diff failed to apply', s: 'Nothing was changed. Send codebridge-fix.txt to the AI and apply its new answer.' },
+            { t: '“strict mode: nothing was changed”', s: 'Apply is all-or-nothing by default: if even one file shows CANNOT APPLY, no file is touched. Files marked “already applied” are already in your project; if the diff mixes them with files that no longer match, ask the AI for a fresh diff and send it codebridge-fix.txt. To apply only the files that fit, turn off Strict in Settings (5) or use patch apply --partial.' },
             { t: '“no terminal to confirm; re-run with -y”', s: 'This appears only when the app does not run in a real terminal, for example inside a script. Use a normal terminal, or add -y (this does not skip the tolerant-mode confirmation).' },
             { t: '“tolerant patch requires interactive confirmation”', s: 'This diff only applies with relaxed matching, which always needs a person to confirm, so -y and scripts cannot skip it. Run it in a normal terminal and type y to apply or press Enter to cancel, or ask the AI for a diff with correct context lines.' },
             { t: '“Folder not found”', s: 'Type the full path, or save the project once in Projects (4) and pick it by number.' },
@@ -471,7 +472,7 @@ export const translations: Record<Locale, Dictionary> = {
           id: 'apply',
           title: 'اعمال Git Diff تولیدشده توسط AI',
           intro: 'از AI بخواهید پاسخ را به‌صورت git diff بدهد. بعد CodeBridge آن را امن در پروژه می‌گذارد: اول همه‌چیز را بررسی می‌کند و اگر بخشی شکست بخورد هیچ چیز را عوض نمی‌کند.',
-          steps: ['در پاسخ AI کل Diff را با Ctrl+C کپی کنید (یا با دکمه‌ی کپی).', 'در CodeBridge عدد 2 را بزنید و ریپو را انتخاب کنید: Enter اولین مورد لیست را برمی‌دارد، یا شماره، نام یا پوشه را بنویسید.', 'منبع را انتخاب کنید. Enter، Diff را مستقیم از کلیپ‌بورد می‌خواند (پس اول کپی کنید). p برای Paste دستی است: کل Diff را Paste کنید، سپس در یک خط جداگانه CODEBRIDGE_END را بنویسید و Enter بزنید. q برای انصراف است. فقط تعداد خطوط و خط اول و آخر نمایش داده می‌شود.', 'فهرست فایل‌ها را ببینید و تأیید کنید؛ تمام.'],
+          steps: ['در پاسخ AI کل Diff را با Ctrl+C کپی کنید (یا با دکمه‌ی کپی).', 'در CodeBridge عدد 2 را بزنید و ریپو را انتخاب کنید: Enter اولین مورد لیست را برمی‌دارد، یا شماره، نام یا پوشه را بنویسید.', 'منبع را انتخاب کنید. Enter، Diff را مستقیم از کلیپ‌بورد می‌خواند (پس اول کپی کنید). p برای Paste دستی است: کل Diff را Paste کنید، سپس در یک خط جداگانه CODEBRIDGE_END را بنویسید و Enter بزنید. q برای انصراف است. فقط تعداد خطوط و خط اول و آخر نمایش داده می‌شود.', 'فهرست فایل‌ها را ببینید و برای تأیید Enter بزنید (پیش‌فرض Yes است). منو بلافاصله برمی‌گردد و نتیجه بالای آن روی صفحه می‌ماند.'],
           notes: ['اگر Diff اعمال نشود هیچ چیز عوض نمی‌شود و فایل codebridge-fix.txt ساخته (و کپی) می‌شود. آن را برای AI بفرستید.', 'اگر Git فقط با تطبیق انعطاف‌پذیر (حالت tolerant) بتواند Diff را بپذیرد، CodeBridge هشدار می‌دهد و همیشه تأیید می‌خواهد، حتی با -y: y برای اعمال و Enter برای انصراف. بعد از اعمال نتیجه را بررسی کنید؛ Undo همیشه در دسترس است.', 'Git باید نصب باشد. کارهای Commit‌نشده‌ی شما دست‌نخورده می‌ماند.'],
         },
         {
@@ -509,8 +510,9 @@ export const translations: Record<Locale, Dictionary> = {
           intro: 'پیام یا مشکل خود را در فهرست زیر پیدا کنید.',
           qa: [
             { t: 'Diff که Paste کردم ناقص است', s: 'در پرسش «Diff source» چیزی Paste نکنید. اول p را بزنید، بعد Diff را Paste کنید و در یک خط جداگانه CODEBRIDGE_END بنویسید. یا همان‌جا Enter بزنید تا Diff از کلیپ‌بورد خوانده شود.' },
-            { t: '«Clipboard has no diff»', s: 'کل پاسخ AI یا کل بلوک Diff را دوباره کپی کنید و دوباره امتحان کنید. در لینوکس xclip، xsel یا wl-clipboard نصب کنید.' },
+            { t: '«Clipboard has no diff»', s: 'Apply به‌محض Enter کلیپ‌بورد را می‌خواند، پس Diff را قبل از انتخاب منبع کپی کنید. کل پاسخ AI یا کل بلوک Diff را دوباره کپی کنید و دوباره امتحان کنید. در لینوکس xclip، xsel یا wl-clipboard نصب کنید.' },
             { t: 'Diff اعمال نشد', s: 'هیچ چیز تغییر نکرده است. فایل codebridge-fix.txt را برای AI بفرستید و پاسخ جدیدش را اعمال کنید.' },
+            { t: '«strict mode: nothing was changed»', s: 'در حالت پیش‌فرض (strict) Apply «همه یا هیچ» است: اگر حتی یک فایل CANNOT APPLY بخورد، هیچ فایلی تغییر نمی‌کند. فایل‌های «already applied» قبلاً در پروژه اعمال شده‌اند؛ اگر Diff آن‌ها را با فایل‌هایی که دیگر جور نیستند ترکیب کرده باشد، از AI یک Diff تازه بخواهید و codebridge-fix.txt را برایش بفرستید. برای اعمال فقط فایل‌های سازگار، Strict را در Settings (5) خاموش کنید یا از patch apply --partial استفاده کنید.' },
             { t: '«no terminal to confirm; re-run with -y»', s: 'این پیام فقط وقتی می‌آید که برنامه داخل ترمینال واقعی اجرا نشده باشد، مثلاً داخل یک اسکریپت. از ترمینال معمولی استفاده کنید یا -y بدهید (این گزینه تأیید حالت tolerant را رد نمی‌کند).' },
             { t: '«tolerant patch requires interactive confirmation»', s: 'این Diff فقط با تطبیق انعطاف‌پذیر اعمال می‌شود و برای آن همیشه تأیید دستی لازم است؛ -y و اسکریپت نمی‌توانند آن را رد کنند. در ترمینال معمولی اجرا کنید و y (اعمال) یا Enter (انصراف) بزنید، یا از AI بخواهید Diff را با خطوط context درست بدهد.' },
             { t: '«Folder not found»', s: 'مسیر کامل را بنویسید، یا پروژه را یک‌بار در Projects (گزینه‌ی 4) ذخیره کنید و با شماره انتخاب کنید.' },
@@ -711,7 +713,7 @@ export const translations: Record<Locale, Dictionary> = {
           id: 'apply',
           title: 'تطبيق Git Diff مُنشأ بواسطة الذكاء الاصطناعي',
           intro: 'اطلب من الذكاء الاصطناعي أن يرد بصيغة git diff. ثم يضعه CodeBridge في مشروعك بأمان: يفحص كل شيء أولًا ولا يغيّر شيئًا إذا فشل أي جزء.',
-          steps: ['انسخ الـ diff كاملًا من رد الذكاء الاصطناعي بـ Ctrl+C (أو بزر النسخ).', 'في CodeBridge اكتب 2 ثم Enter، واختر المستودع: Enter يختار أول عنصر في القائمة، أو اكتب رقمًا أو اسمًا أو مجلدًا.', 'اختر المصدر. Enter يقرأ الـ diff مباشرةً من الحافظة (فانسخه أولًا). وp للصق يدويًا: الصق الـ diff كاملًا ثم اكتب CODEBRIDGE_END في سطر مستقل واضغط Enter. وq للإلغاء. تُعرض فقط عدد الأسطر والسطر الأول والأخير.', 'راجع قائمة الملفات وأكّد، وانتهى الأمر.'],
+          steps: ['انسخ الـ diff كاملًا من رد الذكاء الاصطناعي بـ Ctrl+C (أو بزر النسخ).', 'في CodeBridge اكتب 2 ثم Enter، واختر المستودع: Enter يختار أول عنصر في القائمة، أو اكتب رقمًا أو اسمًا أو مجلدًا.', 'اختر المصدر. Enter يقرأ الـ diff مباشرةً من الحافظة (فانسخه أولًا). وp للصق يدويًا: الصق الـ diff كاملًا ثم اكتب CODEBRIDGE_END في سطر مستقل واضغط Enter. وq للإلغاء. تُعرض فقط عدد الأسطر والسطر الأول والأخير.', 'راجع قائمة الملفات واضغط Enter للتأكيد (الافتراضي Yes). تعود القائمة فورًا فتبقى النتيجة ظاهرة فوقها.'],
           notes: ['إذا لم يُطبَّق الـ diff لا يتغير شيء ويكتب التطبيق الملف codebridge-fix.txt (ويُنسخ إلى الحافظة). أرسله إلى الذكاء الاصطناعي.', 'إذا لم يستطع Git قبول الـ diff إلا بمطابقة مرنة (الوضع tolerant) يحذّرك CodeBridge ويطلب التأكيد دائمًا، حتى مع -y: اكتب y للتطبيق أو اضغط Enter للإلغاء. راجع النتيجة بعد ذلك؛ التراجع متاح دائمًا.', 'يجب تثبيت Git. أعمالك غير المُثبَّتة (uncommitted) تبقى كما هي.'],
         },
         {
@@ -749,8 +751,9 @@ export const translations: Record<Locale, Dictionary> = {
           intro: 'ابحث عن رسالتك أو مشكلتك أدناه.',
           qa: [
             { t: 'الـ diff الملصوق ناقص', s: 'لا تلصق عند سؤال «Diff source». اكتب p أولًا ثم الصق الـ diff ثم اكتب CODEBRIDGE_END في سطر مستقل. أو اضغط Enter هناك ليُقرأ الـ diff من الحافظة.' },
-            { t: '«Clipboard has no diff»', s: 'انسخ رد الذكاء الاصطناعي كاملًا أو كتلة الـ diff كاملة مرة أخرى وأعد المحاولة. على لينكس ثبّت xclip أو xsel أو wl-clipboard.' },
+            { t: '«Clipboard has no diff»', s: 'يقرأ Apply الحافظة فور الضغط على Enter، فانسخ الـ diff قبل اختيار المصدر. انسخ رد الذكاء الاصطناعي كاملًا أو كتلة الـ diff كاملة مرة أخرى وأعد المحاولة. على لينكس ثبّت xclip أو xsel أو wl-clipboard.' },
             { t: 'فشل تطبيق الـ diff', s: 'لم يتغير شيء. أرسل codebridge-fix.txt إلى الذكاء الاصطناعي وطبّق إجابته الجديدة.' },
+            { t: '«strict mode: nothing was changed»', s: 'التطبيق في الوضع الافتراضي (strict) إما كل شيء أو لا شيء: إذا ظهر CANNOT APPLY لملف واحد فقط فلن يتغير أي ملف. الملفات المعلّمة «already applied» طُبّقت من قبل؛ وإذا جمعها الـ diff مع ملفات لم تعد تطابق فاطلب من الذكاء الاصطناعي diff جديدًا وأرسل إليه codebridge-fix.txt. ولتطبيق الملفات المتوافقة فقط، أوقف Strict من Settings (5) أو استخدم patch apply --partial.' },
             { t: '«no terminal to confirm; re-run with -y»', s: 'تظهر فقط عندما لا يعمل التطبيق في طرفية حقيقية، مثل داخل سكربت. استخدم طرفية عادية أو أضف -y (لا يتجاوز هذا تأكيد الوضع tolerant).' },
             { t: '«tolerant patch requires interactive confirmation»', s: 'لا يُطبَّق هذا الـ diff إلا بمطابقة مرنة، وهذا يحتاج دائمًا إلى تأكيد يدوي؛ لا يتجاوزه -y ولا السكربتات. شغّله في طرفية عادية واكتب y للتطبيق أو اضغط Enter للإلغاء، أو اطلب من الذكاء الاصطناعي diff بسطور سياق صحيحة.' },
             { t: '«Folder not found»', s: 'اكتب المسار الكامل، أو احفظ المشروع مرة في Projects (الخيار 4) واختره بالرقم.' },

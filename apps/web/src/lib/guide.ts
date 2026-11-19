@@ -59,7 +59,9 @@ Source: clipboard
 Repo  : /home/me/work/app
 Files : 2
   [MOD] lib/main.dart  (+12 -3)  ok
-  [MOD] lib/home.dart  (+40 -8)  ok`;
+  [MOD] lib/home.dart  (+40 -8)  ok
+
+Apply these changes? [Y/n] `;
 
 const APPLY_PASTE = String.raw`Diff source (Enter = clipboard, p = paste here, q = cancel): p
 
@@ -72,9 +74,25 @@ Received 24 lines.
 First: diff --git a/lib/main.dart b/lib/main.dart
 Last : +  runApp(const App());
 Full diff is hidden to keep the terminal clean.
+Source: /tmp/codebridge-k3j9a2.diff
 Repo  : /home/me/work/app
 Files : 1
-  [MOD] lib/main.dart  (+12 -3)  ok`;
+  [MOD] lib/main.dart  (+12 -3)  ok
+
+Apply these changes? [Y/n] `;
+
+const APPLY_DONE = String.raw`Done: 2 applied, 0 skipped. Run 20260101-120000
+Undo with: codebridge patch undo -r "/home/me/work/app"`;
+
+const APPLY_FAIL = String.raw`Files : 2
+  [MOD] lib/main.dart  (+12 -3)  ok
+  [MOD] lib/home.dart  (+40 -8)  CANNOT APPLY
+        error: patch failed: lib/home.dart:12
+        error: lib/home.dart: patch does not apply
+
+strict mode: nothing was changed
+Fix prompt for the AI written to codebridge-fix.txt and copied to the clipboard.
+Send it to the AI, then apply the new diff.`;
 
 const APPLY_TOLERANT = String.raw`Note  : applies in tolerant mode (--recount --ignore-whitespace)
 
@@ -110,7 +128,9 @@ export const guideShots: Record<string, Shot[]> = {
     { title: '2 → Apply', text: PICKER },
     { title: 'Enter', text: APPLY },
     { title: 'p', text: APPLY_PASTE },
+    { title: 'done', text: APPLY_DONE },
     { title: 'tolerant', text: APPLY_TOLERANT },
+    { title: 'strict', text: APPLY_FAIL },
   ],
   manage: [{ title: '4 → Projects', text: PROJECTS }],
   cli: [{ title: 'terminal', text: CLI }],
