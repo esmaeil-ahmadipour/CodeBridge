@@ -194,6 +194,19 @@ def cmd_patch(a, cfg, s) -> int:
     if plan.status == "fail" and not partial:
         _fail(plan, cfg, s, a, "strict mode: nothing was changed")
         return 2
+    if plan.flags:
+        print("\nWARNING: Git could only accept this diff using tolerant options.")
+        print("The patch may have incomplete or unusual hunk context.")
+        print("Press Enter to apply, or type c to cancel.")
+        if not sys.stdin.isatty():
+            raise CBError("tolerant patch requires interactive confirmation")
+        answer = input("Apply tolerant patch? [Enter/c] ").strip().lower()
+        if answer not in ("", "c"):
+            print("Cancelled. Nothing was changed.")
+            return 0
+        if answer == "c":
+            print("Cancelled. Nothing was changed.")
+            return 0
     if ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():
             raise CBError("no terminal to confirm; re-run with -y")

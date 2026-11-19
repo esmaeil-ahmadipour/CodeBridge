@@ -9,7 +9,8 @@ from .parser import split_patches, detect_p
 
 # Tried in order; the first that works is used (and reported).
 MODES = [(), ("--recount",), ("--recount", "--ignore-whitespace"),
-         ("--recount", "--ignore-whitespace", "-C1")]
+         ("--recount", "--ignore-whitespace", "-C1"),
+         ("--recount", "--ignore-whitespace", "-C0", "--unidiff-zero")]
 
 
 @dataclass

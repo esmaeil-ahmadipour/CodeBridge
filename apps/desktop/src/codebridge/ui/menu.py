@@ -1,5 +1,6 @@
 """Interactive menu. It only collects answers and calls the same commands as the CLI."""
 from __future__ import annotations
+import tempfile
 from ..core.config import (export_config_from_dict, export_config_to_dict,
                            PATCH_SPEC, PRESETS,
                            SPEC, load_settings, save_settings)
@@ -131,10 +132,47 @@ def run_menu(cfg) -> int:
                 _remember(cfg, target)
                 repo = resolve_repo(s["projects"], target)
                 if c == "2":
-                    print("\nCopy the AI's diff (Ctrl+C), then press Enter.")
-                    print("Do NOT paste it here - it is read from your clipboard.")
-                    input("Press Enter when copied (Ctrl+C to cancel) ")
-                    _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                    source = ask("\nDiff source: [c]lipboard / [p]aste manually", "c").lower()
+                    if source == "c":
+                        print("Copy the AI's diff, then press Enter.")
+                        input("Press Enter when copied (Ctrl+C to cancel) ")
+                        _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                    elif source == "p":
+                        print("\nPaste the complete diff below.")
+                        print("Finish by entering CODEBRIDGE_END on a line by itself.")
+                        lines = []
+                        while True:
+                            line = __import__("sys").stdin.readline()
+                            if not line:
+                                break
+                            if line.rstrip("\r\n") == "CODEBRIDGE_END":
+                                break
+                            lines.append(line)
+
+                        diff = "".join(lines)
+                        if not diff.strip():
+                            print("No diff received. Cancelled.")
+                            continue
+
+                        preview = diff.splitlines()
+                        print(f"\nReceived {len(preview)} lines.")
+                        print("First: " + preview[0][:160])
+                        if len(preview) > 1:
+                            print("Last : " + preview[-1][:160])
+
+                        with tempfile.NamedTemporaryFile(
+                            mode="w", encoding="utf-8", suffix=".diff",
+                            prefix="codebridge-", delete=False
+                        ) as f:
+                            f.write(diff)
+                            temp_path = f.name
+                        try:
+                            _call(cfg, "patch", "apply", temp_path, "-r", repo)
+                        finally:
+                            from pathlib import Path
+                            Path(temp_path).unlink(missing_ok=True)
+                    else:
+                        print("Invalid choice. Cancelled.")
                 else:
                     _call(cfg, "patch", "undo", "-r", repo)
             elif c == "4":

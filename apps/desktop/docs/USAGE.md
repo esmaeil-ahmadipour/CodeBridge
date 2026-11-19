@@ -33,8 +33,9 @@ Secret redaction is always on. The type is detected from the folder (`pubspec.ya
 
 **2 Apply** and **3 Undo** first ask for the repo: saved projects are listed one per line with their folder
 (the last used one first). Enter picks the first; you can also type a number, a name or a folder path.
-For Apply, copy the AI's diff (Ctrl+C) and press Enter. **Do not paste it into the terminal**: a multi-line
-paste is cut at the first line. The diff is read from the clipboard; to apply a file use the CLI (below).
+For Apply, choose `c` for clipboard or `p` for manual paste. Manual paste accepts multiple lines;
+finish by entering `CODEBRIDGE_END` on a line by itself. The preview displays only the line count,
+the first line and the last line. To apply a file use the CLI (below).
 
 ## Commands
 
@@ -65,7 +66,8 @@ Exit codes: `0` ok · `1` usage/environment error · `2` diff could not be appli
 1. The AI reply is cleaned: prose around the diff, ```` ```diff ```` fences, CRLF, a BOM and blank context
    lines whose leading space was stripped are all tolerated.
 2. The whole diff is checked at once. If plain `git apply` rejects it, tolerant modes are tried in order
-   (`--recount`, ignore whitespace, reduced context) and the mode used is shown.
+   (`--recount`, ignore whitespace, reduced context, then zero context with `--unidiff-zero`).
+   Tolerant application always requires explicit confirmation: Enter applies, `c` cancels, even with `-y`.
 3. Strict mode (default) is all-or-nothing: if any file fails, nothing is changed. `--partial` applies the rest.
 4. Before touching files, each file is snapshotted under `.git/codebridge/runs/<id>/` (invisible to git).
 5. After success only: `-b` creates the branch, `-c` commits **only the patch's files**. `-c` is refused up

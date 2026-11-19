@@ -1,5 +1,6 @@
-import contextlib, io, os, tempfile, unittest
+import contextlib, io, os, re, tempfile, unittest
 from pathlib import Path
+from unittest import mock
 import helpers
 from helpers import make_repo, make_diff
 from codebridge.cli import main
@@ -13,6 +14,11 @@ def call(*argv):
         except SystemExit as e:
             code = e.code
     return code, out.getvalue(), err.getvalue()
+
+
+class TTY(io.StringIO):
+    def isatty(self):
+        return True
 
 
 class T(unittest.TestCase):
@@ -70,6 +76,24 @@ class T(unittest.TestCase):
         c, out, _ = call("--config", self.cfg, "context", "preview", "-p", "demo")
         self.assertEqual(c, 0); self.assertIn("m.py", out)
         self.assertEqual(call("--config", self.cfg, "project", "remove", "demo")[0], 0)
+
+    def test_tolerant_apply_requires_confirmation_even_with_yes(self):
+        original = "one\ntwo\nthree\nfour\nfive\nsix\n"
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        hunk = next(line for line in diff.splitlines() if line.startswith("@@ "))
+        bad_hunk = re.sub(r"(@@ -\d+),\d+( \+\d+),\d+( @@)", r"\1,1\2,1\3", hunk)
+        bad = diff.replace(hunk, bad_hunk)
+        patch_file = Path(self.work, "tolerant.diff")
+        patch_file.write_text(bad, encoding="utf-8")
+
+        with mock.patch("codebridge.cli.sys.stdin", TTY("c\n")):
+            c, out, err = call("--config", self.cfg, "patch", "apply",
+                               str(patch_file), "-r", str(self.r), "-y")
+
+        self.assertEqual(c, 0, out + err)
+        self.assertIn("tolerant", out.lower())
+        self.assertIn("Cancelled", out)
+        self.assertEqual((self.r / "a.txt").read_text(), original)
 
 
 if __name__ == "__main__":
