@@ -109,7 +109,9 @@ class T(unittest.TestCase):
     def test_tolerant_apply_refused_without_terminal_or_flag(self):
         patch_file = self._tolerant_diff("tolerant3.diff")
         before = (self.r / "a.txt").read_text()
-        c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r), "-y")
+        # Force "no terminal" even when the tests run from a real terminal (local IDE).
+        with mock.patch("codebridge.cli.sys.stdin", io.StringIO("")):
+            c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r), "-y")
         self.assertNotEqual(c, 0)
         self.assertIn("--allow-tolerant", out + err)
         self.assertEqual((self.r / "a.txt").read_text(), before)

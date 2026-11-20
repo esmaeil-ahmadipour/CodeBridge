@@ -11,7 +11,11 @@ from codebridge.ui import menu
 def run(cfg, inputs, clipboard=None):
     out = io.StringIO()
     it = iter(inputs)
-    with mock.patch("builtins.input", lambda *_: next(it)), contextlib.redirect_stdout(out), \
+    def fake_input(prompt=""):
+        print(prompt)  # input() prompts go to the terminal, so echo them into the captured output
+        return next(it)
+
+    with mock.patch("builtins.input", fake_input), contextlib.redirect_stdout(out), \
             mock.patch("codebridge.cli.from_clipboard", return_value=clipboard):
         code = menu.run_menu(cfg)
     return code, out.getvalue()
