@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 3.2.0
 Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
 
 - **Desktop menu, Apply:** press Enter (clipboard) or `p` (manual paste), `q` cancels. The extra "press Enter when copied" step and the "Press Enter to continue" pause after Apply and Undo are gone. Manual paste accepts multiple lines, ends with `CODEBRIDGE_END` on its own line, and shows only the line count plus the first and last line.
