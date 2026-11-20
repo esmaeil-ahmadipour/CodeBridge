@@ -11,7 +11,11 @@ from codebridge.ui import menu
 def run(cfg, inputs, clipboard=None):
     out = io.StringIO()
     it = iter(inputs)
-    with mock.patch("builtins.input", lambda *_: next(it)), contextlib.redirect_stdout(out), \
+    def fake_input(prompt=""):
+        print(prompt)  # input() prompts go to the terminal, so echo them into the captured output
+        return next(it)
+
+    with mock.patch("builtins.input", fake_input), contextlib.redirect_stdout(out), \
             mock.patch("codebridge.cli.from_clipboard", return_value=clipboard):
         code = menu.run_menu(cfg)
     return code, out.getvalue()
@@ -49,14 +53,46 @@ class MenuTests(unittest.TestCase):
         s["projects"] = [{"name": "demo", "path": str(r), "active": True, "overrides": {}}]
         s["patch"]["confirm_before_apply"] = False
         save_settings(s, self.cfg)
-        code, out = run(self.cfg, ["2", "", "", "", "0"], clipboard=diff)   # Enter = demo, Enter = copied, Enter = continue
+        code, out = run(self.cfg, ["2", "", "", "0"], clipboard=diff)   # Enter = demo, Enter = clipboard, 0 = exit
         self.assertEqual(code, 0, out)
-        self.assertIn("Do NOT paste it here", out)
+        self.assertIn("Enter = clipboard", out)
         self.assertIn("1  demo", out)
         self.assertEqual((r / "a.txt").read_text(), "one\ntwo\nthree\n")
         self.assertEqual(load_settings(self.cfg, quiet=True)["last_project"], "demo")
-        run(self.cfg, ["3", "", "", "0"])
+        run(self.cfg, ["3", "", "0"])
         self.assertEqual((r / "a.txt").read_text(), "one\ntwo\n")
+
+    def test_manual_paste_preserves_multiline_diff(self):
+        r = make_repo({"a.txt": "one\\ntwo\\n"})
+        diff = make_diff(r, {"a.txt": "one\\ntwo\\nthree\\nfour\\n"})
+        s = load_settings(self.cfg, quiet=True)
+        s["projects"] = [{"name": "demo", "path": str(r),
+                          "active": True, "overrides": {}}]
+        s["patch"]["confirm_before_apply"] = False
+        save_settings(s, self.cfg)
+
+        out = io.StringIO()
+        inputs = iter(["2", "", "p", "0"])
+        terminal_input = (
+            diff + "CODEBRIDGE_END\\n"
+        )
+
+        with (
+            mock.patch("builtins.input", lambda *_: next(inputs)),
+            mock.patch("sys.stdin", io.StringIO(terminal_input)),
+            contextlib.redirect_stdout(out),
+            mock.patch("codebridge.cli.from_clipboard", return_value=None),
+        ):
+            code = menu.run_menu(self.cfg)
+
+        result = out.getvalue()
+        self.assertEqual(code, 0, result)
+        self.assertIn("Received", result)
+        self.assertIn("Full diff is hidden", result)
+        self.assertEqual(
+            (r / "a.txt").read_text(),
+            "one\\ntwo\\nthree\\nfour\\n"
+        )
 
     def test_last_project_survives_settings_migration(self):
         s = load_settings(self.cfg, quiet=True)

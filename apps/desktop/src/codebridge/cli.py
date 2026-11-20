@@ -6,7 +6,7 @@ from .context.exporter import export_project
 from .context.scanner import changed_files
 from .core import history
 from .core.config import (PRESETS, export_config_from_dict, load_settings, project_options,
-                          save_settings)
+                          export_extensions, save_settings)
 from .core.git import repo_root, require_repo
 from .core.paths import resolve_config
 from .core.util import CBError, from_clipboard, setup_console, to_clipboard
@@ -48,6 +48,8 @@ def build_parser() -> argparse.ArgumentParser:
             a.add_argument("--diff", action="store_true", help="also print the cleaned diff")
         if name == "apply":
             a.add_argument("-y", "--yes", action="store_true", help="skip the confirmation")
+            a.add_argument("--allow-tolerant", action="store_true",
+                           help="allow relaxed matching without asking (needed with -y in scripts)")
             a.add_argument("--partial", action="store_true", help="apply what can be applied")
             a.add_argument("-b", "--branch", help="create this branch after a successful apply")
             a.add_argument("-c", "--commit", metavar="MSG", help="commit only the applied files")
@@ -108,6 +110,10 @@ def cmd_context(a, cfg, s) -> int:
             o["include_svg"] = export_cfg.include_svg
             o["exclude_lock_files"] = export_cfg.exclude_lock_files
             o["exclude_test_files"] = export_cfg.exclude_test_files
+            # The chosen languages decide which file types are exported (overrides a project preset).
+            ext = export_cfg.only_extensions or export_extensions(export_cfg)
+            if ext:
+                o["only_extensions"] = ext
         only = None
         if a.files:
             only = [f.replace("\\", "/") for f in a.files]
@@ -194,7 +200,18 @@ def cmd_patch(a, cfg, s) -> int:
     if plan.status == "fail" and not partial:
         _fail(plan, cfg, s, a, "strict mode: nothing was changed")
         return 2
-    if ps["confirm_before_apply"] and not a.yes:
+    confirmed = False
+    if plan.flags:
+        print("\nWARNING: Strict apply failed. Git could only accept this diff using tolerant options.")
+        print("The patch may have incomplete or unusual hunk context; check the result afterwards (undo is available).")
+        if not a.allow_tolerant:
+            if not sys.stdin.isatty():
+                raise CBError("tolerant patch needs a person to confirm; to allow it in scripts pass -y --allow-tolerant")
+            if input("Apply with tolerant mode? [y/N] ").strip().lower() not in ("y", "yes"):
+                print("Cancelled. Nothing was changed.")
+                return 0
+            confirmed = True  # this one answer covers the whole apply: no second question
+    if not confirmed and ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():
             raise CBError("no terminal to confirm; re-run with -y")
         if input("\nApply these changes? [Y/n] ").strip().lower() not in ("", "y", "yes"):

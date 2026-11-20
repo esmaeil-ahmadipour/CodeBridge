@@ -1,5 +1,7 @@
 """Interactive menu. It only collects answers and calls the same commands as the CLI."""
 from __future__ import annotations
+import sys
+import tempfile
 from ..core.config import (export_config_from_dict, export_config_to_dict,
                            PATCH_SPEC, PRESETS,
                            SPEC, load_settings, save_settings)
@@ -131,12 +133,50 @@ def run_menu(cfg) -> int:
                 _remember(cfg, target)
                 repo = resolve_repo(s["projects"], target)
                 if c == "2":
-                    print("\nCopy the AI's diff (Ctrl+C), then press Enter.")
-                    print("Do NOT paste it here - it is read from your clipboard.")
-                    input("Press Enter when copied (Ctrl+C to cancel) ")
-                    _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                    source = ask("\nDiff source (Enter = clipboard, p = paste here, q = cancel)").lower()
+                    if source in ("", "c"):
+                        _call(cfg, "patch", "apply", "--clipboard", "-r", repo, pause=False)
+                    elif source == "p":
+                        print("\nPaste the complete diff below.")
+                        print("Finish by entering CODEBRIDGE_END on a line by itself.")
+                        lines = []
+                        while True:
+                            line = sys.stdin.readline()
+                            if not line:
+                                break
+                            if line.rstrip("\r\n") == "CODEBRIDGE_END":
+                                break
+                            lines.append(line)
+
+                        diff = "".join(lines)
+                        if not diff.strip():
+                            print("No diff received. Cancelled.")
+                            continue
+
+                        preview = diff.splitlines()
+                        print(f"\nReceived {len(preview)} lines.")
+                        print("First: " + preview[0][:120])
+                        if len(preview) > 1:
+                            print("Last : " + preview[-1][:120])
+                        print("Full diff is hidden to keep the terminal clean.")
+
+                        with tempfile.NamedTemporaryFile(
+                            mode="w", encoding="utf-8", suffix=".diff",
+                            prefix="codebridge-", delete=False
+                        ) as f:
+                            f.write(diff)
+                            temp_path = f.name
+                        try:
+                            _call(cfg, "patch", "apply", temp_path, "-r", repo, pause=False)
+                        finally:
+                            from pathlib import Path
+                            Path(temp_path).unlink(missing_ok=True)
+                    elif source == "q":
+                        print("Cancelled.")
+                    else:
+                        print("Invalid choice. Cancelled.")
                 else:
-                    _call(cfg, "patch", "undo", "-r", repo)
+                    _call(cfg, "patch", "undo", "-r", repo, pause=False)
             elif c == "4":
                 projects_menu(cfg)
             elif c == "5":

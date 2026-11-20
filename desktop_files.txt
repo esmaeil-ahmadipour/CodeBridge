@@ -1,0 +1,1324 @@
+
+===== FILE: apps/desktop/src/codebridge/ui/menu.py =====
+"""Interactive menu. It only collects answers and calls the same commands as the CLI."""
+from __future__ import annotations
+import sys
+import tempfile
+from ..core.config import (export_config_from_dict, export_config_to_dict,
+                           PATCH_SPEC, PRESETS,
+                           SPEC, load_settings, save_settings)
+from ..core.util import CBError
+from .repo import pick_repo, resolve_repo
+from .screen import run_screen, to_export_dict
+
+
+def ask(msg, default=""):
+    try:
+        v = input(f"{msg}" + (f" [{default}]" if default else "") + ": ").strip()
+    except EOFError:
+        raise KeyboardInterrupt
+    return v or default
+
+
+def _call(cfg, *argv, pause: bool = True) -> None:
+    from ..cli import main
+    try:
+        main(["--config", str(cfg), *argv])
+    except SystemExit:
+        pass
+    if pause:
+        input("\nPress Enter to continue...")
+
+
+def _edit(spec, cur):
+    label, typ, help_, choices = spec
+    print(f"\n{label}" + (f"  ({help_})" if help_ else "") + f"\n  current: {cur}")
+    if typ == "bool":
+        return not cur
+    if typ == "choice":
+        v = ask(f"  one of {choices}", str(cur))
+        return v if v in choices else cur
+    if typ == "int":
+        v = ask("  number", str(cur))
+        return int(v) if v.lstrip("-").isdigit() else cur
+    if typ == "list":
+        v = ask("  space/comma separated (empty = clear, keep = unchanged)", "keep")
+        if v == "keep":
+            return cur
+        return [x for x in v.replace(",", " ").split() if x]
+    return ask("  value", str(cur))
+
+
+def settings_menu(cfg) -> None:
+    while True:
+        s = load_settings(cfg, quiet=True)
+        rows = [("defaults", k, v) for k, v in SPEC.items()] + [("patch", k, v) for k, v in PATCH_SPEC.items()]
+        print("\n== Settings ==")
+        for i, (sec, k, sp) in enumerate(rows, 1):
+            print(f" {i:>2}. {sp[0]:<34} {s[sec][k]}")
+        print("  r. Reset to defaults    0. Back")
+        c = ask("Choose")
+        if c == "0" or c == "":
+            return
+        if c == "r":
+            _call(cfg, "settings", "reset")
+            continue
+        if c.isdigit() and 1 <= int(c) <= len(rows):
+            sec, k, sp = rows[int(c) - 1]
+            s[sec][k] = _edit(sp, s[sec][k])
+            save_settings(s, cfg)
+
+
+def projects_menu(cfg) -> None:
+    while True:
+        s = load_settings(cfg, quiet=True)
+        print("\n== Projects ==")
+        for i, p in enumerate(s["projects"], 1):
+            print(f" {i}. {p['name']}  {p['path']}")
+        print("  a. Add    d. Delete    0. Back")
+        c = ask("Choose")
+        if c in ("0", ""):
+            return
+        if c == "a":
+            path = ask("Folder path")
+            preset = ask(f"Preset {sorted(PRESETS)} (empty = none)")
+            argv = ["project", "add", path] + (["--preset", preset] if preset in PRESETS else [])
+            _call(cfg, *argv)
+        elif c == "d":
+            _call(cfg, "project", "remove", ask("Project name"))
+
+
+MENU = [("1", "Export project for the AI"), ("2", "Apply the AI's diff"), ("3", "Undo last applied diff"),
+        ("4", "Projects"), ("5", "Settings"), ("6", "History"), ("0", "Exit")]
+
+
+def _menu_box(version: str) -> str:
+    w = 42
+    head = f"─ CodeBridge {version} "
+    rows = ["│" + f"  {k}  {t}".ljust(w) + "│" for k, t in MENU]
+    return "\n".join(["┌" + head + "─" * (w - len(head)) + "┐", *rows, "└" + "─" * w + "┘"])
+
+
+def _remember(cfg, target: str) -> None:
+    s = load_settings(cfg, quiet=True)
+    s["last_project"] = target
+    save_settings(s, cfg)
+
+
+def run_menu(cfg) -> int:
+    from .. import get_version
+    try:
+        while True:
+            print("\n" + _menu_box(get_version()))
+            try:
+                c = input("Type a number, then Enter > ").strip()
+            except EOFError:
+                return 0
+            if c in ("0", "q"):
+                return 0
+            s = load_settings(cfg, quiet=True)
+            if c == "1":
+                st = run_screen(s.get("last_project") or ".", s.get("export"), s["projects"])
+                if st is None:
+                    continue
+                target = st["project"]
+                isname = any(p["name"] == target for p in s["projects"])
+                s["export"] = export_config_to_dict(export_config_from_dict(to_export_dict(st)))
+                s["last_project"] = target
+                save_settings(s, cfg)
+                argv = ["context", "export"] + (["-p", target] if isname else [target]) + (["--changed"] if st["o"] else [])
+                _call(cfg, *argv, pause=False)
+            elif c in ("2", "3"):
+                target = pick_repo(s["projects"], s.get("last_project", ""))
+                if target is None:
+                    continue
+                _remember(cfg, target)
+                repo = resolve_repo(s["projects"], target)
+                if c == "2":
+                    source = ask("\nDiff source: [c]lipboard / [p]aste manually", "c").lower()
+                    if source == "c":
+                        print("Copy the AI's diff, then press Enter.")
+                        input("Press Enter when copied (Ctrl+C to cancel) ")
+                        _call(cfg, "patch", "apply", "--clipboard", "-r", repo)
+                    elif source == "p":
+                        print("\nPaste the complete diff below.")
+                        print("Finish by entering CODEBRIDGE_END on a line by itself.")
+                        lines = []
+                        while True:
+                            line = sys.stdin.readline()
+                            if not line:
+                                break
+                            if line.rstrip("\r\n") == "CODEBRIDGE_END":
+                                break
+                            lines.append(line)
+
+                        diff = "".join(lines)
+                        if not diff.strip():
+                            print("No diff received. Cancelled.")
+                            continue
+
+                        preview = diff.splitlines()
+                        print(f"\nReceived {len(preview)} lines.")
+                        print("First: " + preview[0][:120])
+                        if len(preview) > 1:
+                            print("Last : " + preview[-1][:120])
+                        print("Full diff is hidden to keep the terminal clean.")
+
+                        with tempfile.NamedTemporaryFile(
+                            mode="w", encoding="utf-8", suffix=".diff",
+                            prefix="codebridge-", delete=False
+                        ) as f:
+                            f.write(diff)
+                            temp_path = f.name
+                        try:
+                            _call(cfg, "patch", "apply", temp_path, "-r", repo)
+                        finally:
+                            from pathlib import Path
+                            Path(temp_path).unlink(missing_ok=True)
+                    else:
+                        print("Invalid choice. Cancelled.")
+                else:
+                    _call(cfg, "patch", "undo", "-r", repo)
+            elif c == "4":
+                projects_menu(cfg)
+            elif c == "5":
+                settings_menu(cfg)
+            elif c == "6":
+                _call(cfg, "history")
+    except KeyboardInterrupt:
+        print()
+        return 0
+
+===== FILE: apps/desktop/src/codebridge/cli.py =====
+from __future__ import annotations
+import argparse, os, shutil, sys, time
+from pathlib import Path
+from . import get_version
+from .context.exporter import export_project
+from .context.scanner import changed_files
+from .core import history
+from .core.config import (PRESETS, export_config_from_dict, load_settings, project_options,
+                          save_settings)
+from .core.git import repo_root, require_repo
+from .core.paths import resolve_config
+from .core.util import CBError, from_clipboard, setup_console, to_clipboard
+from .patch import engine
+from .patch.fix import build_fix_prompt
+from .patch.parser import clean_diff
+
+DEFAULT_DIFFS = ("diff.patch", "changes.patch", "diff.txt")
+
+
+def build_parser() -> argparse.ArgumentParser:
+    ap = argparse.ArgumentParser(prog="codebridge", description="AI-assisted code workflow: "
+                                 "export context, apply AI diffs safely, undo.")
+    ap.add_argument("-v", "--version", action="version", version=f"codebridge {get_version()}")
+    ap.add_argument("--config", help="path to settings.json")
+    sub = ap.add_subparsers(dest="cmd")
+
+    c = sub.add_parser("context", help="export project files for an AI").add_subparsers(dest="sub")
+    for name in ("export", "preview"):
+        e = c.add_parser(name, help="write the report" if name == "export" else "list what would be exported")
+        e.add_argument("target", nargs="?", help="project folder (default: current folder)")
+        e.add_argument("-p", "--project", help="registered project name")
+        e.add_argument("--all", action="store_true", help="every active registered project")
+        e.add_argument("--changed", action="store_true", help="only modified/untracked files")
+        e.add_argument("--since", metavar="REF", help="only files changed since a git ref")
+        e.add_argument("--files", nargs="+", metavar="F", help="only these files")
+        e.add_argument("-o", "--output", help="output file")
+        e.add_argument("--clipboard", action="store_true", help="copy report to clipboard")
+        e.add_argument("--no-backup", action="store_true")
+        e.add_argument("--compact", action="store_true")
+
+    p = sub.add_parser("patch", help="check / preview / apply / undo AI diffs").add_subparsers(dest="sub")
+    for name in ("check", "preview", "apply"):
+        a = p.add_parser(name)
+        a.add_argument("source", nargs="?", help="diff file, '-' for stdin; default: diff.patch, else clipboard")
+        a.add_argument("-r", "--repo", help="target repo (default: current folder)")
+        a.add_argument("--clipboard", action="store_true", help="read the diff from the clipboard")
+        if name == "preview":
+            a.add_argument("--diff", action="store_true", help="also print the cleaned diff")
+        if name == "apply":
+            a.add_argument("-y", "--yes", action="store_true", help="skip the confirmation")
+            a.add_argument("--partial", action="store_true", help="apply what can be applied")
+            a.add_argument("-b", "--branch", help="create this branch after a successful apply")
+            a.add_argument("-c", "--commit", metavar="MSG", help="commit only the applied files")
+            a.add_argument("--no-archive", action="store_true")
+            a.add_argument("--no-fix", action="store_true", help="do not write the fix prompt on failure")
+    u = p.add_parser("undo", help="restore the files of the last (or given) run")
+    u.add_argument("run", nargs="?", help="run id (default: last)")
+    u.add_argument("-r", "--repo")
+    u.add_argument("--force", action="store_true")
+
+    pr = sub.add_parser("project", help="manage the project registry").add_subparsers(dest="sub")
+    pr.add_parser("list")
+    pa = pr.add_parser("add")
+    pa.add_argument("path")
+    pa.add_argument("-n", "--name")
+    pa.add_argument("--preset", choices=sorted(PRESETS))
+    prm = pr.add_parser("remove")
+    prm.add_argument("name")
+
+    h = sub.add_parser("history", help="recent exports and patch runs")
+    h.add_argument("-n", type=int, default=20)
+    s = sub.add_parser("settings", help="show / reset settings").add_subparsers(dest="sub")
+    s.add_parser("show")
+    s.add_parser("path")
+    s.add_parser("reset")
+    return ap
+
+
+# ------------------------------------------------------------------ context
+def cmd_context(a, cfg, s) -> int:
+    dry = a.sub == "preview"
+    targets = []
+    if a.project:
+        pj = next((x for x in s["projects"] if x["name"] == a.project), None)
+        if not pj:
+            raise CBError(f"no such project: {a.project}")
+        targets = [(pj["name"], pj["path"], project_options(s, pj))]
+    elif a.all:
+        targets = [(x["name"], x["path"], project_options(s, x)) for x in s["projects"] if x.get("active", True)]
+        if not targets:
+            raise CBError("no active projects registered (codebridge project add PATH)")
+    else:
+        root = os.path.abspath(a.target or ".")
+        pj = next((x for x in s["projects"] if os.path.abspath(x["path"]) == root), None)
+        targets = [(pj["name"] if pj else Path(root).name or "project", root, project_options(s, pj))]
+    total = 0
+    export_cfg = None
+    if s.get("export"):
+        try:
+            export_cfg = export_config_from_dict(s["export"])
+        except Exception:
+            export_cfg = None
+    for name, root, o in targets:
+        if a.compact:
+            o["compact"] = True
+        # Merge wizard export choices into scanner/exporter options.
+        if export_cfg is not None:
+            o["include_svg"] = export_cfg.include_svg
+            o["exclude_lock_files"] = export_cfg.exclude_lock_files
+            o["exclude_test_files"] = export_cfg.exclude_test_files
+        only = None
+        if a.files:
+            only = [f.replace("\\", "/") for f in a.files]
+        elif a.changed or a.since:
+            if not repo_root(root):
+                raise CBError("--changed/--since need a git repository")
+            try:
+                only = changed_files(root, a.since)
+            except ValueError as e:
+                raise CBError(str(e))
+        r = export_project(name, root, o, outdir=os.getcwd(), output=a.output if len(targets) == 1 else None,
+                           dry=dry, backup=not a.no_backup, only=only,
+                           clipboard=True if a.clipboard else None,
+                           export_cfg=export_cfg)
+        if r:
+            total += r["files"]
+            if not dry:
+                history.add(cfg, type="context", project=name, files=r["files"], outs=r["outs"])
+    return 0 if total or dry else 1
+
+
+# ------------------------------------------------------------------ patch
+def _read_source(a):
+    src = a.source
+    if src == "-":
+        return sys.stdin.buffer.read(), "stdin", None
+    if src:
+        pth = Path(src)
+        if not pth.is_file():
+            raise CBError(f"diff file not found: {src}")
+        return pth.read_bytes(), str(pth), pth
+    if not a.clipboard:
+        for d in DEFAULT_DIFFS:
+            if Path(d).is_file():
+                return Path(d).read_bytes(), d, Path(d)
+    clip = from_clipboard()
+    if clip and clip.strip():
+        return clip, "clipboard", None
+    raise CBError("no diff given: pass a file, pipe to stdin ('-'), or copy the AI reply first")
+
+
+def _show_plan(plan, preview=False) -> None:
+    print(f"Repo  : {plan.root}")
+    print(f"Files : {len(plan.patches)}")
+    for fp in plan.patches:
+        st = plan.per_file.get(fp.name, ("ok", ""))[0]
+        tag = {"ok": "ok", "already": "already applied", "fail": "CANNOT APPLY"}[st]
+        print(f"  [{fp.kind}] {fp.name}  (+{fp.added} -{fp.removed})  {tag}")
+        if st == "fail" and plan.per_file[fp.name][1]:
+            print("        " + plan.per_file[fp.name][1].replace("\n", "\n        "))
+    if plan.status == "apply" and plan.flags:
+        print(f"Note  : applies in tolerant mode ({' '.join(plan.flags)})")
+    if plan.status == "fail" and plan.error and not any(s == "fail" for s, _ in plan.per_file.values()):
+        print(f"Error : {plan.error}")
+
+
+def cmd_patch(a, cfg, s) -> int:
+    ps = s["patch"]
+    if a.sub == "undo":
+        root = require_repo(a.repo or ".")
+        meta = engine.undo(root, a.run, a.force)
+        print(f"Reverted run {meta['id']} ({len(meta['touched'])} file(s)) in {root}")
+        history.add(cfg, type="undo", repo=root, run=meta["id"])
+        return 0
+    root = require_repo(a.repo or ".")
+    raw, label, path = _read_source(a)
+    text = clean_diff(raw)
+    plan = engine.analyze(root, text)
+    print(f"Source: {label}")
+    _show_plan(plan)
+    if a.sub == "preview" and a.diff:
+        print("\n" + plan.text)
+    if plan.status == "already":
+        print("\nAlready applied: nothing to do.")
+        return 0
+    if a.sub in ("check", "preview"):
+        print("\nOK: the diff can be applied." if plan.status == "apply" else "\nThe diff cannot be fully applied.")
+        return 0 if plan.status == "apply" else 2
+    # ---- apply
+    partial = a.partial or not ps["strict"]
+    dirty = git_status(root)
+    if dirty:
+        print("\nwarning: the repo has uncommitted changes (they stay untouched).")
+    if plan.status == "fail" and not partial:
+        _fail(plan, cfg, s, a, "strict mode: nothing was changed")
+        return 2
+    if plan.flags:
+        print("\nWARNING: Git could only accept this diff using tolerant options.")
+        print("The patch may have incomplete or unusual hunk context.")
+        print("Press Enter to apply, or type c to cancel.")
+        if not sys.stdin.isatty():
+            raise CBError("tolerant patch requires interactive confirmation")
+        answer = input("Apply tolerant patch? [Enter/c] ").strip().lower()
+        if answer == "c":
+            print("Cancelled. Nothing was changed.")
+            return 0
+        if answer != "":
+            print("Invalid choice. Cancelled. Nothing was changed.")
+            return 0
+    if ps["confirm_before_apply"] and not a.yes:
+        if not sys.stdin.isatty():
+            raise CBError("no terminal to confirm; re-run with -y")
+        if input("\nApply these changes? [Y/n] ").strip().lower() not in ("", "y", "yes"):
+            print("Cancelled. Nothing was changed.")
+            return 0
+    rid_hint = time.strftime("%Y%m%d-%H%M%S")
+    branch = a.branch or (f"codebridge/{rid_hint}" if ps["create_branch"] else None)
+    commit = a.commit or (f"Apply AI patch (codebridge {rid_hint})" if ps["auto_commit"] else None)
+    try:
+        meta = engine.apply_plan(plan, partial=partial, branch=branch, commit=commit, source=label)
+    except CBError as e:
+        if e.code == 2:
+            _fail(plan, cfg, s, a, None)
+        raise
+    print(f"\nDone: {len(meta['files'])} applied, {len(meta['skipped'])} skipped. Run {meta['id']}")
+    for n in meta["notes"]:
+        print("warning:", n)
+    if meta["branch"]:
+        print(f"Branch: {meta['branch']}")
+    if meta["commit"]:
+        print(f"Committed: {meta['commit']}")
+    print(f"Undo with: codebridge patch undo -r \"{root}\"")
+    history.add(cfg, type="patch", repo=root, run=meta["id"], files=[f["name"] for f in meta["files"]])
+    if path and ps["archive_applied"] and not a.no_archive and not meta["skipped"]:
+        dst = path.with_name(f"{path.name}.applied-{time.strftime('%Y%m%d-%H%M%S')}")
+        shutil.move(str(path), str(dst))
+        print(f"Archived: {dst.name}")
+    return 0
+
+
+def git_status(root) -> str:
+    from .core.git import git
+    return git(root, "status", "--porcelain").stdout.strip()
+
+
+def _fail(plan, cfg, s, a, headline) -> None:
+    if headline:
+        print(f"\n{headline}")
+    if getattr(a, "no_fix", False):
+        return
+    prompt = build_fix_prompt(plan, s["defaults"])
+    out = Path.cwd() / "codebridge-fix.txt"
+    out.write_text(prompt, encoding="utf-8")
+    clip = to_clipboard(prompt)
+    print(f"Fix prompt for the AI written to {out.name}" + (" and copied to the clipboard." if clip else "."))
+    print("Send it to the AI, then apply the new diff.")
+    history.add(cfg, type="patch-failed", repo=plan.root, files=[fp.name for fp in plan.patches])
+
+
+# ------------------------------------------------------------------ project / history / settings
+def cmd_project(a, cfg, s) -> int:
+    if a.sub == "list" or not a.sub:
+        if not s["projects"]:
+            print("No projects registered. Add one: codebridge project add PATH")
+        for x in s["projects"]:
+            print(f"  {x['name']}  {x['path']}" + ("" if x.get("active", True) else "  (inactive)"))
+    elif a.sub == "add":
+        path = os.path.abspath(a.path)
+        if not os.path.isdir(path):
+            raise CBError(f"folder not found: {path}")
+        name = a.name or Path(path).name
+        if any(x["name"] == name for x in s["projects"]):
+            raise CBError(f"a project named '{name}' already exists")
+        s["projects"].append({"name": name, "path": path, "active": True,
+                              "overrides": dict(PRESETS[a.preset]) if a.preset else {}})
+        save_settings(s, cfg)
+        print(f"Added {name}")
+    elif a.sub == "remove":
+        n = len(s["projects"])
+        s["projects"] = [x for x in s["projects"] if x["name"] != a.name]
+        if len(s["projects"]) == n:
+            raise CBError(f"no such project: {a.name}")
+        save_settings(s, cfg)
+        print(f"Removed {a.name}")
+    return 0
+
+
+def cmd_history(a, cfg, s) -> int:
+    rows = history.read(cfg, a.n)
+    if not rows:
+        print("No history yet.")
+    for r in rows:
+        t = r.get("type", "?")
+        detail = r.get("project") or r.get("repo") or ""
+        extra = f" run={r['run']}" if r.get("run") else ""
+        n = r.get("files")
+        n = f" files={len(n) if isinstance(n, list) else n}" if n is not None else ""
+        print(f"{r.get('time', '')}  {t:<13} {detail}{extra}{n}")
+    return 0
+
+
+def cmd_settings(a, cfg, s) -> int:
+    import json
+    if a.sub == "path":
+        print(cfg)
+    elif a.sub == "reset":
+        from .core.config import default_settings
+        if Path(cfg).is_file():
+            shutil.copy(cfg, str(cfg) + ".bak")
+        d = default_settings()
+        d["projects"] = s["projects"]
+        save_settings(d, cfg)
+        print(f"Settings reset to defaults (old file saved as {Path(cfg).name}.bak, projects kept)")
+    else:
+        print(json.dumps(s, indent=2, ensure_ascii=False))
+    return 0
+
+
+def main(argv=None) -> int:
+    setup_console()
+    ap = build_parser()
+    a = ap.parse_args(argv)
+    try:
+        cfg = resolve_config(a.config)
+        if not a.cmd:
+            if sys.stdin.isatty() and sys.stdout.isatty():
+                from .ui.menu import run_menu
+                return run_menu(cfg)
+            ap.print_help()
+            return 0
+        s = load_settings(cfg)
+        if a.cmd in ("context", "patch", "project", "settings") and not getattr(a, "sub", None):
+            if a.cmd in ("project", "settings"):
+                a.sub = "list" if a.cmd == "project" else "show"
+            else:
+                ap.parse_args([a.cmd, "-h"])
+        fn = {"context": cmd_context, "patch": cmd_patch, "project": cmd_project,
+              "history": cmd_history, "settings": cmd_settings}[a.cmd]
+        return fn(a, cfg, s)
+    except CBError as e:
+        print(f"error: {e}", file=sys.stderr)
+        return e.code
+    except KeyboardInterrupt:
+        print("\ncancelled", file=sys.stderr)
+        return 130
+
+===== FILE: apps/desktop/src/codebridge/core/config.py =====
+"""Settings: CodeDump v1/v2 compatible, plus a `patch` section (version 3)."""
+from __future__ import annotations
+import copy, json, shutil
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional, Literal
+
+VERSION = 3
+
+# Lock files relevant per project type (user can opt to exclude them).
+LOCK_FILES_BY_PROJECT: dict[str, list[str]] = {
+    "flutter": ["pubspec.lock", "Podfile.lock"],
+    "react": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "npm-shrinkwrap.json"],
+    "nextjs": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "npm-shrinkwrap.json"],
+    "node": ["package-lock.json", "yarn.lock", "pnpm-lock.yaml", "bun.lock", "npm-shrinkwrap.json"],
+    "python": ["poetry.lock", "Pipfile.lock", "uv.lock", "pdm.lock"],
+    "rust": ["Cargo.lock"],
+}
+
+# Test file/dir patterns relevant per project type.
+TEST_RULES_BY_PROJECT: dict[str, dict[str, list[str]]] = {
+    "flutter": {"files": ["_test.dart"], "dirs": ["test", "integration_test"]},
+    "react": {"files": [".test.", ".spec."], "dirs": ["__tests__", "test", "tests", "e2e"]},
+    "nextjs": {"files": [".test.", ".spec."], "dirs": ["__tests__", "test", "tests", "e2e"]},
+    "node": {"files": [".test.", ".spec."], "dirs": ["__tests__", "test", "tests", "e2e"]},
+    "python": {"files": ["test_", "_test.py", "conftest.py"], "dirs": ["test", "tests"]},
+    "rust": {"files": ["_test.rs"], "dirs": ["tests"]},
+}
+
+
+@dataclass(frozen=True)
+class ExportConfig:
+    project_type: Optional[Literal["flutter", "react", "nextjs", "node", "python", "other"]] = None
+    custom_project_type: str = ""
+    languages: frozenset[str] = field(default_factory=frozenset)
+    custom_languages: frozenset[str] = field(default_factory=frozenset)
+    include_svg: Optional[bool] = None
+    exclude_lock_files: Optional[bool] = None
+    exclude_test_files: Optional[bool] = None
+    only_extensions: list[str] = field(default_factory=list)
+    skip_folders: list[str] = field(default_factory=list)
+    skip_files: list[str] = field(default_factory=list)
+    skip_if_contains: list[str] = field(default_factory=list)
+    max_file_mb: int = 10
+    include_hidden: bool = False
+    use_gitignore: bool = True
+    show_tree: bool = True
+    show_token_estimate: bool = True
+    sort_by: str = "path"
+    split_tokens: int = 0
+    copy_to_clipboard: bool = False
+    output_dir: str = "."
+    prompt_header: bool = True
+    redact_secrets: bool = True
+    anonymize_paths: bool = True
+    compact: bool = False
+    backup: dict = field(default_factory=dict)
+
+
+def validate_export_config(cfg: ExportConfig) -> list[str]:
+    errors: list[str] = []
+    if cfg.project_type not in (None, "flutter", "react", "nextjs", "node", "python", "other"):
+        errors.append(f"invalid project_type: {cfg.project_type}")
+    if cfg.project_type == "other" and not cfg.custom_project_type.strip():
+        errors.append("custom_project_type is required when project_type is 'other'")
+    if not cfg.languages and not cfg.custom_languages:
+        errors.append("at least one language is required")
+    for name in ("include_svg", "exclude_lock_files", "exclude_test_files"):
+        v = getattr(cfg, name)
+        if v is not None and not isinstance(v, bool):
+            errors.append(f"{name} must be bool or None, got {type(v).__name__}")
+    return errors
+
+
+def default_export_config() -> ExportConfig:
+    return ExportConfig()
+
+
+def export_config_from_dict(d: dict) -> ExportConfig:
+    return ExportConfig(
+        project_type=d.get("project_type"),
+        custom_project_type=d.get("custom_project_type", "") or "",
+        languages=frozenset(str(x).lower() for x in (d.get("languages") or [])),
+        custom_languages=frozenset(str(x).lower() for x in (d.get("custom_languages") or [])),
+        include_svg=d.get("include_svg"),
+        exclude_lock_files=d.get("exclude_lock_files"),
+        exclude_test_files=d.get("exclude_test_files"),
+        only_extensions=list(d.get("only_extensions") or []),
+        skip_folders=list(d.get("skip_folders") or []),
+        skip_files=list(d.get("skip_files") or []),
+        skip_if_contains=list(d.get("skip_if_contains") or []),
+        max_file_mb=int(d.get("max_file_mb") or 10),
+        include_hidden=bool(d.get("include_hidden", False)),
+        use_gitignore=bool(d.get("use_gitignore", True)),
+        show_tree=bool(d.get("show_tree", True)),
+        show_token_estimate=bool(d.get("show_token_estimate", True)),
+        sort_by=str(d.get("sort_by") or "path"),
+        split_tokens=int(d.get("split_tokens") or 0),
+        copy_to_clipboard=bool(d.get("copy_to_clipboard", False)),
+        output_dir=str(d.get("output_dir") or "."),
+        prompt_header=bool(d.get("prompt_header", True)),
+        redact_secrets=True,
+        anonymize_paths=bool(d.get("anonymize_paths", True)),
+        compact=bool(d.get("compact", False)),
+        backup=dict(d.get("backup") or {}),
+    )
+
+
+def export_config_to_dict(cfg: ExportConfig) -> dict:
+    return {
+        "project_type": cfg.project_type,
+        "custom_project_type": cfg.custom_project_type,
+        "languages": sorted(cfg.languages),
+        "custom_languages": sorted(cfg.custom_languages),
+        "include_svg": cfg.include_svg,
+        "exclude_lock_files": cfg.exclude_lock_files,
+        "exclude_test_files": cfg.exclude_test_files,
+        "only_extensions": cfg.only_extensions,
+        "skip_folders": cfg.skip_folders,
+        "skip_files": cfg.skip_files,
+        "skip_if_contains": cfg.skip_if_contains,
+        "max_file_mb": cfg.max_file_mb,
+        "include_hidden": cfg.include_hidden,
+        "use_gitignore": cfg.use_gitignore,
+        "show_tree": cfg.show_tree,
+        "show_token_estimate": cfg.show_token_estimate,
+        "sort_by": cfg.sort_by,
+        "split_tokens": cfg.split_tokens,
+        "copy_to_clipboard": cfg.copy_to_clipboard,
+        "output_dir": cfg.output_dir,
+        "prompt_header": cfg.prompt_header,
+        "redact_secrets": cfg.redact_secrets,
+        "anonymize_paths": cfg.anonymize_paths,
+        "compact": cfg.compact,
+        "backup": cfg.backup,
+    }
+
+
+DEFAULTS = {
+    "only_extensions": [],
+    "skip_folders": ["node_modules", "dist", "build", "out", "__pycache__", "venv", ".venv",
+                     ".git", ".dart_tool", ".idea"],
+    "skip_files": ["*.log", "*.tmp", ".env*", "package-lock.json", "yarn.lock",
+                   "pnpm-lock.yaml", "pubspec.lock", "poetry.lock"],
+    "skip_if_contains": [".freezed.dart", ".g.dart", ".gr.dart", ".mocks.dart", "generated"],
+    "max_file_mb": 10,
+    "include_hidden": False,
+    "use_gitignore": True,
+    "show_tree": True,
+    "show_token_estimate": True,
+    "sort_by": "path",
+    "split_tokens": 0,
+    "copy_to_clipboard": False,
+    "output_dir": ".",
+    "prompt_header": True,
+    "redact_secrets": True,
+    "anonymize_paths": True,
+    "compact": False,
+    "backup": {"keep": True, "compress": False, "days": 30},
+}
+
+PATCH_DEFAULTS = {
+    "strict": True,
+    "confirm_before_apply": True,
+    "auto_commit": False,
+    "create_branch": False,
+    "archive_applied": True,
+}
+
+# key -> (label, type, help, choices)
+SPEC = {
+    "only_extensions": ("File types to include", "list", "e.g. .py .md  (empty = ALL types)", None),
+    "skip_folders": ("Folders to skip", "list", "folder names, wildcards ok", None),
+    "skip_files": ("Files to skip", "list", "wildcards, e.g. *.log", None),
+    "skip_if_contains": ("Skip paths containing", "list", "any text inside the path", None),
+    "max_file_mb": ("Max file size (MB)", "int", "bigger files are skipped", None),
+    "include_hidden": ("Include hidden files", "bool", "dotfiles", None),
+    "use_gitignore": ("Respect .gitignore", "bool", "", None),
+    "show_tree": ("Show folder tree", "bool", "", None),
+    "show_token_estimate": ("Show token estimate", "bool", "rough: chars / 4", None),
+    "sort_by": ("Sort files by", "choice", "", ["path", "size"]),
+    "split_tokens": ("Split report every N tokens", "int", "0 = no split", None),
+    "copy_to_clipboard": ("Copy report to clipboard", "bool", "", None),
+    "output_dir": ("Output folder", "text", "relative to where you run codebridge", None),
+    "prompt_header": ("Add AI instructions to report", "bool", "asks the AI for a unified diff", None),
+    "redact_secrets": ("Redact secrets in report", "bool", "keys, tokens, private keys", None),
+    "anonymize_paths": ("Hide absolute paths", "bool", "", None),
+    "compact": ("Compact report", "bool", "squeeze blank lines, trim spaces", None),
+}
+PATCH_SPEC = {
+    "strict": ("Strict (all-or-nothing)", "bool", "off = apply what can be applied", None),
+    "confirm_before_apply": ("Ask before applying", "bool", "", None),
+    "auto_commit": ("Auto-commit applied files", "bool", "", None),
+    "create_branch": ("Create a branch per run", "bool", "", None),
+    "archive_applied": ("Archive applied diff file", "bool", "", None),
+}
+
+PRESETS = {
+    "flutter": {"skip_folders": ["build", ".dart_tool", ".idea", "android/.gradle", "ios/Pods"],
+                "skip_if_contains": [".freezed.dart", ".g.dart", ".gr.dart", ".mocks.dart"],
+                "only_extensions": [".dart", ".yaml", ".arb", ".md", ".json"]},
+    "node": {"skip_folders": ["node_modules", "dist", "build", ".next", "coverage"],
+             "skip_if_contains": [".min.js"],
+             "only_extensions": [".js", ".jsx", ".ts", ".tsx", ".json", ".css", ".md"]},
+    "python": {"skip_folders": ["__pycache__", "venv", ".venv", "dist", "build", ".pytest_cache"],
+               "skip_if_contains": [".pyc"],
+               "only_extensions": [".py", ".toml", ".cfg", ".md", ".txt", ".yaml"]},
+    "all": {"only_extensions": []},
+}
+
+OLD_KEYS = {"include_extensions": "only_extensions", "exclude_dirs": "skip_folders",
+            "exclude_files": "skip_files", "exclude_patterns": "skip_if_contains",
+            "max_file_size_mb": "max_file_mb"}
+OLD_BACKUP = {"enabled": "keep", "compress": "compress", "retention_days": "days"}
+
+
+def default_settings() -> dict:
+    return {"version": VERSION, "defaults": copy.deepcopy(DEFAULTS),
+            "patch": copy.deepcopy(PATCH_DEFAULTS), "projects": [], "export": None, "last_project": ""}
+
+
+def _norm_opts(d) -> dict:
+    out = {}
+    for k, v in (d or {}).items():
+        k = OLD_KEYS.get(k, k)
+        if v is None or k == "output_format":
+            continue
+        if k == "backup" and isinstance(v, dict):
+            v = {OLD_BACKUP.get(a, a): b for a, b in v.items() if b is not None}
+        if k == "only_extensions":
+            v = [e.lower() if e.startswith((".", "*")) else "." + e.lower() for e in v]
+            if v == ["*"]:
+                v = []
+        out[k] = v
+    return out
+
+
+def migrate(raw: dict) -> dict:
+    """Accept CodeDump v1/v2 or CodeBridge v3 settings; return v3 filled with defaults."""
+    s = default_settings()
+    d = _norm_opts(raw.get("defaults", raw.get("global")))
+    # Mandatory security: never allow legacy settings to disable redaction.
+    d.pop("redact_secrets", None)
+    bk = d.pop("backup", {})
+    s["defaults"].update(d)
+    s["defaults"]["backup"].update(bk)
+    s["defaults"]["redact_secrets"] = True
+    # Preserve export config block if present; otherwise absent (None = unanswered).
+    if "export" in raw and isinstance(raw["export"], dict):
+        s["export"] = raw["export"]
+    if isinstance(raw.get("last_project"), str):
+        s["last_project"] = raw["last_project"]
+    s["patch"].update({k: v for k, v in (raw.get("patch") or {}).items() if k in PATCH_DEFAULTS})
+    for p in raw.get("projects") or []:
+        ov = {k: v for k, v in p.items() if k in OLD_KEYS or k in DEFAULTS}
+        ov.pop("redact_secrets", None)
+        ov.update(p.get("overrides") or p.get("options") or {})
+        ov.pop("redact_secrets", None)
+        s["projects"].append({"name": p.get("name") or Path(p.get("path", "x")).name,
+                              "path": p.get("path", ""),
+                              "active": p.get("active", p.get("enabled", True)),
+                              "overrides": _norm_opts(ov)})
+    return s
+
+
+def save_settings(s: dict, path) -> None:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(s, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
+def load_settings(path, quiet: bool = False) -> dict:
+    """Missing / empty / broken file => restored to defaults (broken is backed up)."""
+    path = Path(path)
+    msg = None
+    if path.is_file():
+        text = path.read_text(encoding="utf-8-sig", errors="ignore").strip()
+        if text:
+            try:
+                return migrate(json.loads(text))
+            except (json.JSONDecodeError, AttributeError, TypeError) as e:
+                shutil.copy(path, str(path) + ".bak")
+                msg = f"settings invalid ({e}); old file saved as {path.name}.bak, defaults restored"
+        else:
+            msg = "settings file was empty; defaults restored"
+    else:
+        msg = f"settings created with defaults: {path}"
+    s = default_settings()
+    save_settings(s, path)
+    if msg and not quiet:
+        print(f"note: {msg}")
+    return s
+
+
+def project_options(s: dict, proj=None) -> dict:
+    o = copy.deepcopy(s["defaults"])
+    if proj:
+        for k, v in (proj.get("overrides") or {}).items():
+            if k == "backup":
+                o["backup"].update(v)
+            else:
+                o[k] = v
+    return o
+
+===== FILE: apps/desktop/src/codebridge/patch/engine.py =====
+"""Analyze, apply (atomic) and undo AI diffs. Each run is recorded under .git/codebridge/runs/<id>/."""
+from __future__ import annotations
+import contextlib, hashlib, json, os, shutil, tempfile, time
+from dataclasses import dataclass, field
+from pathlib import Path
+from ..core.git import git, git_dir
+from ..core.util import CBError, run
+from .parser import split_patches, detect_p
+
+# Tried in order; the first that works is used (and reported).
+MODES = [(), ("--recount",), ("--recount", "--ignore-whitespace"),
+         ("--recount", "--ignore-whitespace", "-C1"),
+         ("--recount", "--ignore-whitespace", "-C0", "--unidiff-zero")]
+
+
+@dataclass
+class Plan:
+    root: str
+    text: str
+    p: int
+    patches: list
+    status: str                      # apply | already | fail
+    flags: tuple = ()
+    per_file: dict = field(default_factory=dict)   # name -> (ok|already|fail, error)
+    error: str = ""
+
+
+@contextlib.contextmanager
+def _patch_file(text):
+    d = tempfile.mkdtemp(prefix="cb-")
+    try:
+        p = os.path.join(d, "p.diff")
+        Path(p).write_bytes(text.encode("utf-8"))
+        yield p
+    finally:
+        shutil.rmtree(d, ignore_errors=True)
+
+
+def _apply(root, path, p, flags=(), check=False, reverse=False):
+    cmd = ["git", "-C", str(root), "apply", f"-p{p}", "--whitespace=nowarn", *flags]
+    if check:
+        cmd.append("--check")
+    if reverse:
+        cmd.append("-R")
+    cmd.append(path)
+    r = run(cmd)
+    return r.returncode == 0, (r.stderr or "").strip()
+
+
+def _find_mode(root, path, p, reverse=False):
+    err = ""
+    for flags in MODES:
+        ok, err = _apply(root, path, p, flags, check=True, reverse=reverse)
+        if ok:
+            return flags, ""
+    return None, err
+
+
+def analyze(root, text) -> Plan:
+    patches = split_patches(text)
+    if not patches:
+        raise CBError("no per-file changes found in the diff")
+    p = detect_p(text)
+    with _patch_file(text) as f:
+        flags, err = _find_mode(root, f, p)
+        if flags is not None:
+            return Plan(root, text, p, patches, "apply", flags,
+                        {fp.name: ("ok", "") for fp in patches})
+        rflags, _ = _find_mode(root, f, p, reverse=True)
+        if rflags is not None:
+            return Plan(root, text, p, patches, "already", rflags,
+                        {fp.name: ("already", "") for fp in patches})
+    per = {}
+    for fp in patches:
+        with _patch_file(fp.text) as f1:
+            fl, e = _find_mode(root, f1, p)
+            if fl is not None:
+                per[fp.name] = ("ok", "")
+            else:
+                rf, _ = _find_mode(root, f1, p, reverse=True)
+                per[fp.name] = ("already", "") if rf is not None else ("fail", e)
+    return Plan(root, text, p, patches, "fail", (), per, err)
+
+
+# ---------------------------------------------------------------- runs
+def _hash(path: Path):
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+
+
+def runs_dir(root) -> Path:
+    return Path(git_dir(root)) / "codebridge" / "runs"
+
+
+def list_runs(root) -> list:
+    d = runs_dir(root)
+    out = []
+    if d.is_dir():
+        for r in sorted(d.iterdir()):
+            m = r / "meta.json"
+            if m.is_file():
+                out.append(json.loads(m.read_text(encoding="utf-8")))
+    return out
+
+
+def _new_id(base: Path) -> str:
+    rid = time.strftime("%Y%m%d-%H%M%S")
+    n, cand = 1, rid
+    while (base / cand).exists():
+        n += 1
+        cand = f"{rid}-{n}"
+    return cand
+
+
+def _touched(patches) -> list:
+    names = set()
+    for fp in patches:
+        for n in (fp.old, fp.new):
+            if n:
+                names.add(n)
+    return sorted(names)
+
+
+def preflight(root, patches, branch=None, commit=None) -> None:
+    """Fail early (before touching files) on problems that would otherwise appear after."""
+    if branch:
+        if git(root, "check-ref-format", "--branch", branch).returncode != 0:
+            raise CBError(f"invalid branch name: {branch}")
+        if git(root, "rev-parse", "--verify", "-q", f"refs/heads/{branch}").returncode == 0:
+            raise CBError(f"branch already exists: {branch}")
+    if commit:
+        dirty = git(root, "status", "--porcelain", "--", *_touched(patches)).stdout.strip()
+        if dirty:
+            raise CBError("these files already have uncommitted changes, so --commit would include "
+                          "them too; commit/stash them first or run without --commit:\n"
+                          + "\n".join("  " + l for l in dirty.splitlines()))
+
+
+def apply_plan(plan: Plan, partial=False, branch=None, commit=None, source="") -> dict:
+    root, patches = plan.root, plan.patches
+    if plan.status == "fail":
+        if not partial:
+            raise CBError("nothing was changed: some files cannot be applied (strict mode)", 2)
+        patches = [fp for fp in patches if plan.per_file.get(fp.name, ("fail",))[0] == "ok"]
+        if not patches:
+            raise CBError("nothing can be applied", 2)
+    text = plan.text if patches is plan.patches else "".join(fp.text for fp in patches)
+    preflight(root, patches, branch, commit)
+    touched = _touched(patches)
+    base = runs_dir(root)
+    rid = _new_id(base)
+    rdir = base / rid
+    before = {}
+    for n in touched:
+        f = Path(root) / n
+        before[n] = _hash(f)
+        if f.is_file():
+            dst = rdir / "before" / n
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(f, dst)
+    rdir.mkdir(parents=True, exist_ok=True)
+    with _patch_file(text) as pf:
+        flags, err = _find_mode(root, pf, plan.p)
+        if flags is None:
+            shutil.rmtree(rdir, ignore_errors=True)
+            raise CBError(f"nothing was changed: {err}", 2)
+        ok, err = _apply(root, pf, plan.p, flags)
+        if not ok:
+            shutil.rmtree(rdir, ignore_errors=True)
+            raise CBError(f"nothing was changed: {err}", 2)
+    after = {n: _hash(Path(root) / n) for n in touched}
+    meta = {"id": rid, "time": time.strftime("%Y-%m-%d %H:%M:%S"), "source": source,
+            "flags": list(flags), "p": plan.p, "touched": touched, "before": before,
+            "after": after, "files": [{"name": fp.name, "kind": fp.kind} for fp in patches],
+            "skipped": [n for n, (s, _) in plan.per_file.items() if s != "ok"] if partial else [],
+            "undone": None, "branch": None, "commit": None}
+    (rdir / "patch.diff").write_text(text, encoding="utf-8")
+    notes = []
+    if branch:
+        r = git(root, "checkout", "-b", branch)
+        if r.returncode == 0:
+            meta["branch"] = branch
+        else:
+            notes.append(f"could not create branch: {r.stderr.strip()}")
+    if commit:
+        git(root, "add", "-A", "--", *touched)
+        r = git(root, "commit", "-q", "-m", commit)
+        if r.returncode == 0:
+            meta["commit"] = commit
+        else:
+            notes.append(f"commit failed: {(r.stderr or r.stdout).strip()}")
+    (rdir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    meta["notes"] = notes
+    return meta
+
+
+def undo(root, run_id=None, force=False) -> dict:
+    runs = [r for r in list_runs(root) if not r["undone"]]
+    if run_id:
+        runs = [r for r in list_runs(root) if r["id"] == run_id]
+        if not runs:
+            raise CBError(f"no such run: {run_id}", 3)
+        if runs[0]["undone"]:
+            raise CBError(f"run {run_id} was already undone", 3)
+    if not runs:
+        raise CBError("nothing to undo (no recorded runs)", 3)
+    meta = runs[-1]
+    rdir = runs_dir(root) / meta["id"]
+    changed = [n for n in meta["touched"] if _hash(Path(root) / n) != meta["after"][n]]
+    if changed and not force:
+        raise CBError("files changed since this run, nothing was reverted "
+                      "(use --force to restore the pre-run versions anyway):\n"
+                      + "\n".join("  " + n for n in changed), 3)
+    for n in meta["touched"]:
+        f = Path(root) / n
+        snap = rdir / "before" / n
+        if meta["before"][n] is None:
+            if f.is_file():
+                f.unlink()
+            p = f.parent
+            while p != Path(root) and p.is_dir() and not any(p.iterdir()):
+                p.rmdir()
+                p = p.parent
+        else:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(snap, f)
+    meta["undone"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    (rdir / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+    return meta
+
+===== FILE: apps/desktop/tests/helpers.py =====
+import os, subprocess, sys, tempfile
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+ENV = dict(os.environ, GIT_AUTHOR_NAME="t", GIT_AUTHOR_EMAIL="t@t", GIT_COMMITTER_NAME="t",
+           GIT_COMMITTER_EMAIL="t@t", GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_SYSTEM=os.devnull)
+os.environ.update({k: ENV[k] for k in ("GIT_AUTHOR_NAME", "GIT_AUTHOR_EMAIL", "GIT_COMMITTER_NAME",
+                                       "GIT_COMMITTER_EMAIL", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_SYSTEM")})
+
+
+def sh(cwd, *cmd):
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, env=ENV, encoding="utf-8")
+    assert r.returncode == 0, (cmd, r.stderr)
+    return r.stdout
+
+
+def make_repo(files: dict) -> Path:
+    d = Path(tempfile.mkdtemp())
+    sh(d, "git", "init", "-q")
+    sh(d, "git", "config", "core.autocrlf", "false")
+    for n, c in files.items():
+        f = d / n
+        f.parent.mkdir(parents=True, exist_ok=True)
+        with f.open("w", encoding="utf-8", newline="") as stream:
+            stream.write(c)
+    sh(d, "git", "add", "-A")
+    sh(d, "git", "commit", "-q", "-m", "init")
+    return d
+
+
+def make_diff(repo: Path, edits: dict) -> str:
+    """Apply edits (None = delete), capture `git diff`, then restore the tree."""
+    for n, c in edits.items():
+        f = repo / n
+        if c is None:
+            f.unlink()
+        else:
+            f.parent.mkdir(parents=True, exist_ok=True)
+            with f.open("w", encoding="utf-8", newline="") as stream:
+                stream.write(c)
+    sh(repo, "git", "add", "-A")
+    d = sh(repo, "git", "diff", "--cached", "--no-color")
+    sh(repo, "git", "reset", "-q", "--hard")
+    sh(repo, "git", "clean", "-fdq")
+    return d
+
+===== FILE: apps/desktop/tests/test_menu.py =====
+import contextlib, io, os, re, tempfile, unittest
+from pathlib import Path
+from unittest import mock
+import helpers
+from helpers import make_repo, make_diff
+import codebridge
+from codebridge.core.config import load_settings, save_settings
+from codebridge.ui import menu
+
+
+def run(cfg, inputs, clipboard=None):
+    out = io.StringIO()
+    it = iter(inputs)
+    with mock.patch("builtins.input", lambda *_: next(it)), contextlib.redirect_stdout(out), \
+            mock.patch("codebridge.cli.from_clipboard", return_value=clipboard):
+        code = menu.run_menu(cfg)
+    return code, out.getvalue()
+
+
+
+class MenuTests(unittest.TestCase):
+    def setUp(self):
+        self.work = tempfile.mkdtemp()
+        self.cfg = os.path.join(self.work, "settings.json")
+        self.old = os.getcwd(); os.chdir(self.work)
+        self.addCleanup(os.chdir, self.old)
+
+    def test_main_menu_one_item_per_line(self):
+        code, out = run(self.cfg, ["0"])
+        self.assertEqual(code, 0)
+        for n in "1234560":
+            self.assertEqual(len(re.findall(rf"^│  {n}  ", out, re.M)), 1, n)
+        self.assertIn(f"CodeBridge {codebridge.__version__}", out)
+
+    def test_export_from_one_screen(self):
+        r = make_repo({"pubspec.yaml": "name: x\n", "lib/main.dart": "void main() {}\n"})
+        code, out = run(self.cfg, ["1", "p", str(r), "", "0"])
+        self.assertEqual(code, 0, out)
+        self.assertTrue(list(Path(self.work).glob("code_report_*.txt")), out)
+        s = load_settings(self.cfg, quiet=True)
+        self.assertEqual(s["last_project"], str(r))
+        self.assertEqual(s["export"]["project_type"], "flutter")
+        self.assertNotIn("Press Enter to continue", out)
+
+    def test_apply_from_clipboard_and_undo_use_repo_list(self):
+        r = make_repo({"a.txt": "one\ntwo\n"})
+        diff = make_diff(r, {"a.txt": "one\ntwo\nthree\n"})
+        s = load_settings(self.cfg, quiet=True)
+        s["projects"] = [{"name": "demo", "path": str(r), "active": True, "overrides": {}}]
+        s["patch"]["confirm_before_apply"] = False
+        save_settings(s, self.cfg)
+        code, out = run(self.cfg, ["2", "", "c", "", "", "0"], clipboard=diff)   # Enter = demo, Enter = copied, Enter = continue
+        self.assertEqual(code, 0, out)
+        self.assertIn("Copy the AI's diff, then press Enter.", out)
+        self.assertIn("1  demo", out)
+        self.assertEqual((r / "a.txt").read_text(), "one\ntwo\nthree\n")
+        self.assertEqual(load_settings(self.cfg, quiet=True)["last_project"], "demo")
+        run(self.cfg, ["3", "", "", "0"])
+        self.assertEqual((r / "a.txt").read_text(), "one\ntwo\n")
+
+    def test_manual_paste_preserves_multiline_diff(self):
+        r = make_repo({"a.txt": "one\\ntwo\\n"})
+        diff = make_diff(r, {"a.txt": "one\\ntwo\\nthree\\nfour\\n"})
+        s = load_settings(self.cfg, quiet=True)
+        s["projects"] = [{"name": "demo", "path": str(r),
+                          "active": True, "overrides": {}}]
+        s["patch"]["confirm_before_apply"] = False
+        save_settings(s, self.cfg)
+
+        out = io.StringIO()
+        inputs = iter(["2", "", "p", "", "0"])
+        terminal_input = (
+            diff + "CODEBRIDGE_END\\n"
+        )
+
+        with (
+            mock.patch("builtins.input", lambda *_: next(inputs)),
+            mock.patch("sys.stdin", io.StringIO(terminal_input)),
+            contextlib.redirect_stdout(out),
+            mock.patch("codebridge.cli.from_clipboard", return_value=None),
+        ):
+            code = menu.run_menu(self.cfg)
+
+        result = out.getvalue()
+        self.assertEqual(code, 0, result)
+        self.assertIn("Received", result)
+        self.assertIn("Full diff is hidden", result)
+        self.assertEqual(
+            (r / "a.txt").read_text(),
+            "one\\ntwo\\nthree\\nfour\\n"
+        )
+
+    def test_last_project_survives_settings_migration(self):
+        s = load_settings(self.cfg, quiet=True)
+        s["last_project"] = "demo"
+        save_settings(s, self.cfg)
+        self.assertEqual(load_settings(self.cfg, quiet=True)["last_project"], "demo")
+
+
+if __name__ == "__main__":
+    unittest.main()
+
+===== FILE: apps/desktop/tests/test_cli.py =====
+import contextlib, io, os, re, tempfile, unittest
+from pathlib import Path
+from unittest import mock
+import helpers
+from helpers import make_repo, make_diff
+from codebridge.cli import main
+
+
+def call(*argv):
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        try:
+            code = main(list(argv))
+        except SystemExit as e:
+            code = e.code
+    return code, out.getvalue(), err.getvalue()
+
+
+class TTY(io.StringIO):
+    def isatty(self):
+        return True
+
+
+class T(unittest.TestCase):
+    def setUp(self):
+        self.cfg = str(Path(tempfile.mkdtemp()) / "settings.json")
+        self.r = make_repo({"a.txt": "one\ntwo\nthree\nfour\nfive\nsix\n", "m.py": "x=1\n"})
+        self.cwd = os.getcwd()
+        self.work = tempfile.mkdtemp()
+        os.chdir(self.work)
+
+    def tearDown(self):
+        os.chdir(self.cwd)
+
+    def test_version(self):
+        self.assertEqual(call("--version")[0], 0)
+
+    def test_context_export_changed(self):
+        (self.r / "m.py").write_text("x=2\n")
+        c, out, _ = call("--config", self.cfg, "context", "export", str(self.r), "--changed", "--no-backup")
+        self.assertEqual(c, 0)
+        rep = Path(self.work, f"code_report_{self.r.name}.txt").read_text(encoding="utf-8")
+        self.assertIn("m.py", rep); self.assertNotIn("FILE:  a.txt", rep)
+
+    def test_patch_full_cycle(self):
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        d = Path(self.work, "diff.patch"); d.write_text(diff, encoding="utf-8")
+        c, out, err = call("--config", self.cfg, "patch", "check", str(d), "-r", str(self.r))
+        self.assertEqual(c, 0, out + err)
+        c, out, err = call("--config", self.cfg, "patch", "apply", str(d), "-r", str(self.r), "-y")
+        self.assertEqual(c, 0, out + err)
+        self.assertIn("3", (self.r / "a.txt").read_text())
+        self.assertFalse(d.exists()); self.assertTrue(list(Path(self.work).glob("diff.patch.applied-*")))
+        c, out, _ = call("--config", self.cfg, "history")
+        self.assertIn("patch", out)
+        c, out, err = call("--config", self.cfg, "patch", "undo", "-r", str(self.r))
+        self.assertEqual(c, 0, err); self.assertIn("two\nthree", (self.r / "a.txt").read_text())
+
+    def test_failure_writes_fix_prompt(self):
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        (self.r / "a.txt").write_text("different\n")
+        d = Path(self.work, "p.diff"); d.write_text(diff, encoding="utf-8")
+        c, out, err = call("--config", self.cfg, "patch", "apply", str(d), "-r", str(self.r), "-y")
+        self.assertEqual(c, 2)
+        self.assertIn("FIX REQUEST", Path(self.work, "codebridge-fix.txt").read_text(encoding="utf-8"))
+        self.assertEqual((self.r / "a.txt").read_text(), "different\n")
+
+    def test_not_a_repo_and_missing_diff(self):
+        c, _, err = call("--config", self.cfg, "patch", "check", "nope.diff", "-r", self.work)
+        self.assertEqual(c, 1)
+
+    def test_project_registry(self):
+        self.assertEqual(call("--config", self.cfg, "project", "add", str(self.r), "-n", "demo", "--preset", "python")[0], 0)
+        c, out, _ = call("--config", self.cfg, "project", "list")
+        self.assertIn("demo", out)
+        c, out, _ = call("--config", self.cfg, "context", "preview", "-p", "demo")
+        self.assertEqual(c, 0); self.assertIn("m.py", out)
+        self.assertEqual(call("--config", self.cfg, "project", "remove", "demo")[0], 0)
+
+    def test_tolerant_apply_requires_confirmation_even_with_yes(self):
+        original = "one\ntwo\nthree\nfour\nfive\nsix\n"
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        hunk = next(line for line in diff.splitlines() if line.startswith("@@ "))
+        bad_hunk = re.sub(r"(@@ -\d+),\d+( \+\d+),\d+( @@)", r"\1,1\2,1\3", hunk)
+        bad = diff.replace(hunk, bad_hunk)
+        patch_file = Path(self.work, "tolerant.diff")
+        patch_file.write_text(bad, encoding="utf-8")
+
+        with mock.patch("codebridge.cli.sys.stdin", TTY("c\n")):
+            c, out, err = call("--config", self.cfg, "patch", "apply",
+                               str(patch_file), "-r", str(self.r), "-y")
+
+        self.assertEqual(c, 0, out + err)
+        self.assertIn("tolerant", out.lower())
+        self.assertIn("Cancelled", out)
+        self.assertEqual((self.r / "a.txt").read_text(), original)
+
+
+if __name__ == "__main__":
+    unittest.main()

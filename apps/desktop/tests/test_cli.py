@@ -1,5 +1,6 @@
-import contextlib, io, os, tempfile, unittest
+import contextlib, io, os, re, tempfile, unittest
 from pathlib import Path
+from unittest import mock
 import helpers
 from helpers import make_repo, make_diff
 from codebridge.cli import main
@@ -13,6 +14,11 @@ def call(*argv):
         except SystemExit as e:
             code = e.code
     return code, out.getvalue(), err.getvalue()
+
+
+class TTY(io.StringIO):
+    def isatty(self):
+        return True
 
 
 class T(unittest.TestCase):
@@ -70,6 +76,53 @@ class T(unittest.TestCase):
         c, out, _ = call("--config", self.cfg, "context", "preview", "-p", "demo")
         self.assertEqual(c, 0); self.assertIn("m.py", out)
         self.assertEqual(call("--config", self.cfg, "project", "remove", "demo")[0], 0)
+
+    def _tolerant_diff(self, name):
+        diff = make_diff(self.r, {"a.txt": "one\ntwo\n3\nfour\nfive\nsix\n"})
+        hunk = next(line for line in diff.splitlines() if line.startswith("@@ "))
+        bad = diff.replace(hunk, re.sub(r"(@@ -\d+),\d+( \+\d+),\d+( @@)", r"\1,1\2,1\3", hunk))
+        patch_file = Path(self.work, name)
+        patch_file.write_text(bad, encoding="utf-8")
+        return str(patch_file)
+
+    def test_tolerant_apply_asks_once_and_enter_cancels(self):
+        patch_file = self._tolerant_diff("tolerant.diff")
+        before = (self.r / "a.txt").read_text()
+        with mock.patch("codebridge.cli.sys.stdin", TTY("\n")):
+            c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r), "-y")
+        self.assertEqual(c, 0, out + err)
+        self.assertIn("tolerant", out.lower())
+        self.assertIn("Cancelled", out)
+        self.assertEqual((self.r / "a.txt").read_text(), before)
+
+    def test_tolerant_apply_single_question_then_applies(self):
+        patch_file = self._tolerant_diff("tolerant2.diff")
+        before = (self.r / "a.txt").read_text()
+        # Only one answer is supplied: a second question would hit EOF and fail.
+        with mock.patch("codebridge.cli.sys.stdin", TTY("y\n")):
+            c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r))
+        self.assertEqual(c, 0, out + err)
+        self.assertEqual(out.count("[y/N]"), 1)
+        self.assertNotIn("Apply these changes?", out)
+        self.assertNotEqual((self.r / "a.txt").read_text(), before)
+
+    def test_tolerant_apply_refused_without_terminal_or_flag(self):
+        patch_file = self._tolerant_diff("tolerant3.diff")
+        before = (self.r / "a.txt").read_text()
+        # Force "no terminal" even when the tests run from a real terminal (local IDE).
+        with mock.patch("codebridge.cli.sys.stdin", io.StringIO("")):
+            c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r), "-y")
+        self.assertNotEqual(c, 0)
+        self.assertIn("--allow-tolerant", out + err)
+        self.assertEqual((self.r / "a.txt").read_text(), before)
+
+    def test_tolerant_apply_with_allow_tolerant_needs_no_question(self):
+        patch_file = self._tolerant_diff("tolerant4.diff")
+        before = (self.r / "a.txt").read_text()
+        c, out, err = call("--config", self.cfg, "patch", "apply", patch_file, "-r", str(self.r),
+                           "-y", "--allow-tolerant")
+        self.assertEqual(c, 0, out + err)
+        self.assertNotEqual((self.r / "a.txt").read_text(), before)
 
 
 if __name__ == "__main__":

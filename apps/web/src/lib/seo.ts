@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { defaultLocale, localePrefix, locales, type Locale } from '@/i18n/config';
 import { translations } from '@/i18n/translations';
 import { flags } from './flags';
-import { repoUrl, siteUrl } from './site';
+import { getApplicationVersion, repoUrl, siteUrl } from './site';
 
 const urlFor = (locale: Locale, path = '') => `${siteUrl}${localePrefix(locale)}${path}` || siteUrl;
 const ogLocale: Record<Locale, string> = { en: 'en_US', fa: 'fa_IR', ar: 'ar_AR' };
@@ -45,6 +45,8 @@ export function buildJsonLd(locale: Locale) {
           : 'Any modern web browser',
         browserRequirements: 'Requires a modern web browser to use the browser-based ZIP-to-text tool.',
         isAccessibleForFree: true,
+    softwareVersion: getApplicationVersion(),
+    featureList: translations[locale].privacy.items.map((item) => item.t),
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
     author: { '@type': 'Person', name: 'Esmaeil Ahmadipour' },
     codeRepository: repoUrl,
