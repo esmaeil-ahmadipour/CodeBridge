@@ -34,6 +34,7 @@ class FileLine:
     kind: str = ""       # M, A, D ...
     stat: str = ""       # "+12 −3"
     note: str = ""       # reason or remark
+    detail: list = field(default_factory=list)  # extra lines under the file
 
 
 @dataclass
@@ -46,6 +47,7 @@ class Result:
     files: list = field(default_factory=list)    # [FileLine]
     footer: list = field(default_factory=list)   # plain lines under the last rule
     actions: list = field(default_factory=list)  # [(key, label)]
+    open: dict = field(default_factory=dict)     # key -> path opened by that action
 
 
 def _is_tty(stream) -> bool:
@@ -134,6 +136,8 @@ def render(r: Result, *, color: bool = False, unicode: bool = True,
             if f.note:
                 line += "  " + tr(f.note)
             body.append(line)
+            for dl in f.detail:
+                body.append(_INDENT * 3 + paint(tr(dl), _DIM))
 
     lines = [head, rule]
     if body:
@@ -145,10 +149,39 @@ def render(r: Result, *, color: bool = False, unicode: bool = True,
     return "\n".join(x.rstrip() for x in lines)
 
 
+_state = {"prompted": False}
+
+
+def reset_prompted() -> None:
+    _state["prompted"] = False
+
+
+def was_prompted() -> bool:
+    """True when the last card already waited for a key (the caller need not pause again)."""
+    return _state["prompted"]
+
+
+def _prompt(r: Result, stream) -> None:
+    _state["prompted"] = True
+    while True:
+        try:
+            key = input("  > ").strip().lower()
+        except (EOFError, KeyboardInterrupt):
+            print(file=stream)
+            return
+        path = r.open.get(key)
+        if not path:
+            return
+        from .opener import open_path
+        err = open_path(path)
+        print(f"  ! Could not open: {err}" if err else "  Opened.", file=stream)
+
+
 def emit(r: Result, stream=None, *, actions=None) -> None:
     """Print a card. Errors go to stderr, everything else to stdout.
 
-    The key line is shown only in an interactive terminal unless `actions` is given.
+    In an interactive terminal (unless `actions` is given) the key line is shown and
+    a key is read: o/f/x open the card's file, folder or fix prompt; Enter continues.
     """
     if stream is None:
         stream = sys.stderr if r.status == ERROR else sys.stdout
@@ -156,3 +189,5 @@ def emit(r: Result, stream=None, *, actions=None) -> None:
         actions = _is_tty(sys.stdin) and _is_tty(stream)
     print(render(r, color=use_color(stream), unicode=use_unicode(stream),
                  width=_width(), actions=actions), file=stream)
+    if actions and r.open:
+        _prompt(r, stream)
