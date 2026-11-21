@@ -90,7 +90,7 @@ class CardActionTests(unittest.TestCase):
     def test_export_done_can_open_file_and_folder(self):
         r = cards.export_done("p", "/x", {"files": 1, "outs": ["/r/code_report_p.txt"], "tokens": 1, "bytes": 1,
                                           "sizes": [1], "clipboard": None})
-        self.assertEqual(r.open, {"o": "/r/code_report_p.txt", "f": "/r"})
+        self.assertEqual(r.open, {"o": "/r/code_report_p.txt", "f": str(Path("/r/code_report_p.txt").parent)})
         self.assertEqual([k for k, _ in r.actions], ["o", "f", "Enter"])
 
     def test_missing_folder_offers_no_open_action(self):

@@ -1,4 +1,4 @@
-import contextlib, io, os, tempfile, unittest
+import contextlib, io, os, re, tempfile, unittest
 from pathlib import Path
 import helpers
 from helpers import make_repo
@@ -24,7 +24,7 @@ class ExportCardTests(unittest.TestCase):
         self.assertIn("77 files · ", lines[2])
         self.assertIn("~153,549 tokens", lines[2])
         self.assertRegex(out, r"(?m)^  File +code_report_CodeBridge2\.txt   \(.+\)$")
-        self.assertRegex(out, r"(?m)^  Folder +" + DIR + "$")
+        self.assertRegex(out, r"(?m)^  Folder +" + re.escape(str(Path(DIR))) + "$")
         self.assertNotIn("Clipboard", out)
 
     def test_tokens_hidden_when_estimate_is_off(self):
