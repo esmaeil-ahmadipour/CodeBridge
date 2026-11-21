@@ -5,6 +5,7 @@ import { fmt } from '@/lib/fmt';
 import { guideShots, type Shot } from '@/lib/guide';
 import { getApplicationVersion } from '@/lib/site';
 import { Icon } from './Icons';
+import { GuideTabs } from './GuideTabs';
 
 function Terminal({ shot, label, head = true }: { shot: Shot; label: string; head?: boolean }) {
   return (
@@ -54,9 +55,7 @@ export function Guide({ t, locale }: { t: Dictionary['guide']; locale: Locale })
         <span className="chip on hero-eb">{fmt(t.eyebrow, { version: applicationVersion })}</span>
         <h1>{t.title}</h1>
         <p className="mut lead">{t.sub}</p>
-        <nav className="toc" aria-label={t.toc}>
-          {t.sections.map((s) => <a key={s.id} href={`#${s.id}`}>{s.title}</a>)}
-        </nav>
+        <GuideTabs tabs={t.sections.map(({ id, title }) => ({ id, title }))} label={t.toc} />
       </header>
 
       {t.sections.map((s, n) => (

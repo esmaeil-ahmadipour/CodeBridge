@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.3.1
+Website guide: tab bar with a clear active section, a phone layout without sideways scrolling, and the guide now opens at the top.
+
+- **Guide tabs:** the wrapping table-of-contents pills are replaced by a sticky tab bar. Each tab has a number and the open section is highlighted (filled number, accent border, `aria-current`). The two reference sections (scripts and fixes) have dashed borders so they do not look like steps of the flow. The marker follows `location.hash`, so the "next section" buttons update it too. Switching sections is still done with `:target`, so it works without JavaScript.
+- **Phone:** all eight sections show as numbered circles on one line, with no horizontal scrolling. The title of the open section is written under the bar, and the reference group is set apart by a small gap. In landscape the bar scrolls away with the page to save height.
+- **Navigation:** opening the guide from the footer no longer lands at the bottom of the page. Without a `#section` in the URL the page starts at the header; links such as `/guide#export` still open that section.
+- **Internal:** new `GuideTabs` client component (`apps/web/src/components/GuideTabs.tsx`); the old `.toc` rules are removed from `guide.css`.
+
 ## 3.3.0
 Result cards for export and patch commands, with open-file and open-folder actions.
 

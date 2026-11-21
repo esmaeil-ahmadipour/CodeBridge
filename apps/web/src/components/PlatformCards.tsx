@@ -56,7 +56,7 @@ export function PlatformCards({ items, t }: { items: PlatformItem[]; t: Platform
           return (
             <li key={i.id} className={rec ? 'dl-card rec' : 'dl-card'} data-os={i.id}>
               <div className="dl-card-top">
-                <span className="ico"><Icon name={i.id} fill={i.id === 'windows' ? 'currentColor' : 'none'} /></span>
+                <span className="ico"><Icon name={i.id} size={24} /></span>
                 <span className={rec ? 'dl-recommended on' : 'dl-recommended'} aria-hidden={!rec}>{t.recommended}</span>
               </div>
               <div className="dl-info">

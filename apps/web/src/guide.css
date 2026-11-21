@@ -1,9 +1,6 @@
 /* Guide page and the landing "Need help?" cards. Colors come from the tokens in index.css. */
 .guide { display: flex; flex-direction: column; gap: 24px; min-width: 0; max-width: 880px; padding-block: 8px 48px; }
 .ghead { align-items: flex-start; gap: 14px; }
-.toc { display: flex; flex-wrap: wrap; gap: 8px; }
-.toc a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--bd); border-radius: 999px; color: var(--mu); text-decoration: none; font-size: 15px; font-weight: 500; }
-.toc a:hover { color: var(--ac); border-color: var(--ac); }
 
 /* One card per section: the numbered title, a short text, then the details. */
 .gsec { display: flex; flex-direction: column; gap: 18px; padding: 24px; background: var(--sf); border: 1px solid var(--bd); border-radius: 20px; scroll-margin-top: 84px; min-width: 0; }
@@ -57,8 +54,6 @@
   .gsec { padding: 18px 16px; border-radius: 16px; }
   .gsec h2 { font-size: 21px; }
   .keys > div { grid-template-columns: minmax(0, 1fr); gap: 6px; }
-  .toc { flex-wrap: nowrap; overflow-x: auto; margin-inline: -20px; padding-inline: 20px; padding-bottom: 4px; scrollbar-width: none; }
-  .toc a { flex: none; }
   .hbtn { align-self: stretch; }
 }
 
@@ -66,7 +61,6 @@
 .guide .mut, .guide .steps li, .gdet > summary, .qa-item > summary { font-size: 17px; line-height: 1.75; }
 [dir='rtl'] .guide .mut, [dir='rtl'] .guide .steps li { line-height: 1.95; }
 .guide .lead { font-size: 19px; }
-.toc a { font-size: 16px; }
 .kbd { font-size: 15px; }
 .gshot pre { font-size: 14px; }
 .guide:has(.gsec:target, .gsec :target) .gsec:not(:target):not(:has(:target)) { display: none; }
@@ -78,12 +72,48 @@
 @media (orientation: landscape) and (max-height: 520px) {
   .guide { gap: 16px; max-width: 760px; padding-block: 0 24px; }
   .ghead { gap: 10px; }
-  .toc { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-  .toc a { flex: none; }
   .gsec { gap: 12px; padding: 16px 18px; scroll-margin-top: 64px; }
   .gsec h2 { font-size: 20px; }
   .guide .mut, .guide .steps li { line-height: 1.6; }
   .gshot pre { font-size: 13px; }
   .guide .lead { display: none; }
   .guide h1 { font-size: 28px; }
+}
+
+.gtabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; align-self: stretch;
+  background: var(--bg); padding-block: 8px; margin-block: -4px 0; border-bottom: 1px solid var(--bd); }
+.gtabs-nav { display: flex; flex-wrap: wrap; gap: 8px; }
+.gtab { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px 0 8px;
+  border: 1px solid var(--bd); border-radius: 999px; color: var(--mu); text-decoration: none;
+  font-size: 15px; font-weight: 500; transition: background .15s, color .15s, border-color .15s; }
+.gtab:hover { color: var(--ac); border-color: var(--ac); }
+.gtab-n { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid currentColor; font-size: 13px; font-weight: 700; flex: none; }
+.gtab[aria-current] { color: var(--ac); border-color: var(--ac); font-weight: 700;
+  background: color-mix(in srgb, var(--ac) 14%, transparent); box-shadow: 0 0 0 1px var(--ac) inset; }
+.gtab[aria-current] .gtab-n { background: var(--ac); border-color: var(--ac); color: var(--bg); }
+.gtab.ref { border-style: dashed; }          /* reference sections: not part of the flow */
+.gtab.ref[aria-current] { border-style: solid; }
+.gtabs-now { display: none; margin: 8px 0 0; font-weight: 700; font-size: 16px; color: var(--ac); }
+.gsec { scroll-margin-top: 140px; }
+
+/* Phone: all 8 fit on one line, nothing scrolls sideways; the open title is written below. */
+@media (max-width: 640px) {
+  .gtabs { margin-inline: -20px; padding-inline: 20px; }
+  .gtabs-nav { flex-wrap: nowrap; gap: 6px; }
+  .gtab { flex: 1 1 0; min-width: 0; max-width: 44px; aspect-ratio: 1; min-height: 0; padding: 0;
+    justify-content: center; border-radius: 50%; }
+  .gtab-n { border: 0; width: 100%; height: 100%; font-size: 15px; background: none; }
+  .gtab[aria-current] { transform: scale(1.12); }
+  .gtab[aria-current] .gtab-n { background: var(--ac); }
+  .gtab-t { display: none; }
+  .gtab.ref-start { margin-inline-start: 10px; }   /* gap before the reference group */
+  .gtabs-now { display: block; }
+  .gsec { scroll-margin-top: 110px; }
+}
+@media (prefers-reduced-motion: reduce) { .gtab { transition: none; } }
+
+/* Phone held sideways: little height, so the bar scrolls away with the page. */
+@media (orientation: landscape) and (max-height: 520px) {
+  .gtabs { position: static; }
 }

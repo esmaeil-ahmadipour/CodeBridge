@@ -1,6 +1,6 @@
 'use client';
 
-import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent } from 'react';
 import {
   buildReport, defaultOptions, loadFiles, sizeStr,
   type InFile, type LoadStats, type Options,
@@ -56,6 +56,7 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
   const [copying, setCopying] = useState(-1);
   const [dlg, setDlg] = useState(false);
   const [fin, setFin] = useState(false);
+  const [drag, setDrag] = useState(false);
   const srcRef = useRef<HTMLDivElement>(null);
   const okRef = useRef<HTMLSpanElement>(null);
   const nameRef = useRef<HTMLElement>(null);
@@ -128,6 +129,16 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
     if (f) { setFile(f); void convert(f); }
   }
 
+  function onDrop(e: DragEvent<HTMLLabelElement>) {
+    e.preventDefault();
+    setDrag(false);
+    const f = e.dataTransfer.files?.[0];
+    if (!f) return;
+    if (!/\.zip$/i.test(f.name)) { setErr(t.errNotZip); return; }
+    setFile(f);
+    void convert(f);
+  }
+
   const selected = useMemo(() => (res ? res.files.filter((f) => !off.has(f.path)) : []), [res, off]);
   const report = useMemo(() => (res && selected.length ? buildReport(res.name, selected, opts) : null), [res, selected, opts]);
 
@@ -174,9 +185,17 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
           <p className="mut">{t.sub}</p>
         </div>
 
-        <label className="ref-button ref-button-secondary ref-upload">
+        <label
+          className={`ref-drop${drag ? ' drag' : ''}`}
+          onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={onDrop}
+        >
           <input type="file" accept=".zip,application/zip,application/x-zip-compressed" onChange={onPick} className="vh" />
-          <span>{t.choose}</span>
+          <span className="ref-drop-ico" aria-hidden="true"><Icon name="zip" size={28} /></span>
+          <span className="ref-drop-title">{t.choose}</span>
+          <span className="ref-drop-hint">{t.chooseHint}</span>
+          <span className="ref-drop-or" aria-hidden="true">{t.drop}</span>
         </label>
 
         {file && (
@@ -185,14 +204,6 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
               {chip(t.optGitignore, 'useGitignore')}{chip(t.optRedact, 'redact')}{chip(t.optCompact, 'compact')}
               {chip(t.optHeader, 'header')}{chip(t.optTree, 'tree')}
             </div>
-            <div className="selects">
-              <label className="sel"><span>{t.split}</span>
-                <select value={opts.splitBytes / 1024} onChange={(e) => set('splitBytes', Number(e.target.value) * 1024)}>
-                  {SPLITS_KB.map((n) => <option key={n} value={n}>{n ? kbLabel(n) : t.splitOff}</option>)}
-                </select>
-              </label>
-            </div>
-            {opts.splitBytes > 0 && <p className="mut sm">{t.splitNote}</p>}
             <button
               type="button"
               className={`ref-button ref-convert ${res || err ? 'ref-button-secondary' : 'ref-button-primary'}`}
@@ -201,6 +212,14 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
             >
               {res || err ? t.convertAgain : t.convert}
             </button>
+            <div className="selects">
+              <label className="sel"><span>{t.split}</span>
+                <select value={opts.splitBytes / 1024} onChange={(e) => set('splitBytes', Number(e.target.value) * 1024)}>
+                  {SPLITS_KB.map((n) => <option key={n} value={n}>{n ? kbLabel(n) : t.splitOff}</option>)}
+                </select>
+              </label>
+            </div>
+            {opts.splitBytes > 0 && <p className="mut sm">{t.splitNote}</p>}
           </div>
         )}
 
@@ -236,8 +255,15 @@ export function Tool({ t }: { t: Dictionary['tool'] }) {
               )}
             </div>
 
-            <button type="button" className="btn" onClick={() => setDlg(true)}>
-              {t.pick} · {fmt(t.pickCount, { a: selected.length, b: res.files.length })}
+            <button
+              type="button"
+              className="btn ref-pick"
+              onClick={() => setDlg(true)}
+              aria-label={`${t.pick} · ${fmt(t.pickCount, { a: selected.length, b: res.files.length })}`}
+            >
+              <Icon name="file" size={18} />
+              <span>{t.pick}</span>
+              <span className="ref-pick-n" aria-hidden="true">{selected.length}/{res.files.length}</span>
             </button>
             <SelectDialog
               open={dlg} files={res.files} off={off} t={t} onClose={() => setDlg(false)}
