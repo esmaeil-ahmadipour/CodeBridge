@@ -20,11 +20,13 @@ def ask(msg, default=""):
 
 def _call(cfg, *argv, pause: bool = True) -> None:
     from ..cli import main
+    from .result import reset_prompted, was_prompted
+    reset_prompted()
     try:
         main(["--config", str(cfg), *argv])
     except SystemExit:
         pass
-    if pause:
+    if pause and not was_prompted():
         input("\nPress Enter to continue...")
 
 

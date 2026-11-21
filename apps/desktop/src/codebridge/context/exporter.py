@@ -140,8 +140,12 @@ def do_backup(out_files, outdir, o) -> None:
 
 def export_project(name, root, o, outdir=".", output=None, dry=False, backup=True,
                    only=None, clipboard=None, say=print,
-                   export_cfg: Optional[ExportConfig] = None):
-    """Export one project. Returns dict(files, outs, tokens) or None when nothing matched."""
+                   export_cfg: Optional[ExportConfig] = None, quiet: bool = False):
+    """Export one project. Returns dict(files, outs, tokens, bytes, sizes, clipboard) or None
+    when nothing matched. With quiet=True nothing is printed; the caller shows the result."""
+    if quiet:
+        def say(*_a, **_k):
+            return None
     root = os.path.abspath(root)
     if not os.path.isdir(root):
         say(f"  x {name}: path not found: {root}")
@@ -155,7 +159,8 @@ def export_project(name, root, o, outdir=".", output=None, dry=False, backup=Tru
         say(f"  [dry-run] {name}: {len(files)} files, {size_str(total)}")
         for rel, s, _ in files:
             say(f"    {rel}  ({size_str(s)})")
-        return {"files": len(files), "outs": [], "tokens": 0}
+        return {"files": len(files), "outs": [], "tokens": 0, "bytes": total,
+                "list": [(rel, size_str(s)) for rel, s, _ in files]}
     if not files:
         say(f"  - {name}: no files matched")
         return None
@@ -174,8 +179,11 @@ def export_project(name, root, o, outdir=".", output=None, dry=False, backup=Tru
     for f in outs:
         say(f"    -> {f} ({size_str(f.stat().st_size)})")
     want_clip = o["copy_to_clipboard"] if clipboard is None else clipboard
+    clip = None
     if want_clip and len(parts) == 1:
-        say("    copied to clipboard" if to_clipboard(parts[0]) else "    clipboard unavailable")
+        clip = bool(to_clipboard(parts[0]))
+        say("    copied to clipboard" if clip else "    clipboard unavailable")
     if backup:
         do_backup(outs, out.parent, o)
-    return {"files": len(files), "outs": [str(f) for f in outs], "tokens": tk}
+    return {"files": len(files), "outs": [str(f) for f in outs], "tokens": tk, "bytes": total,
+            "sizes": [f.stat().st_size for f in outs], "clipboard": clip}

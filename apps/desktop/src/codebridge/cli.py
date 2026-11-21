@@ -102,6 +102,7 @@ def cmd_context(a, cfg, s) -> int:
             export_cfg = export_config_from_dict(s["export"])
         except Exception:
             export_cfg = None
+    ok = 0
     for name, root, o in targets:
         if a.compact:
             o["compact"] = True
@@ -119,20 +120,42 @@ def cmd_context(a, cfg, s) -> int:
             only = [f.replace("\\", "/") for f in a.files]
         elif a.changed or a.since:
             if not repo_root(root):
-                raise CBError("--changed/--since need a git repository")
+                return _export_fail(name, root, CBError("--changed/--since need a git repository"))
             try:
                 only = changed_files(root, a.since)
             except ValueError as e:
-                raise CBError(str(e))
-        r = export_project(name, root, o, outdir=os.getcwd(), output=a.output if len(targets) == 1 else None,
-                           dry=dry, backup=not a.no_backup, only=only,
-                           clipboard=True if a.clipboard else None,
-                           export_cfg=export_cfg)
-        if r:
-            total += r["files"]
-            if not dry:
-                history.add(cfg, type="context", project=name, files=r["files"], outs=r["outs"])
+                return _export_fail(name, root, CBError(str(e)))
+        try:
+            r = export_project(name, root, o, outdir=os.getcwd(), output=a.output if len(targets) == 1 else None,
+                               dry=dry, backup=not a.no_backup, only=only,
+                               clipboard=True if a.clipboard else None,
+                               export_cfg=export_cfg, quiet=True)
+        except CBError as e:
+            return _export_fail(name, root, e)
+        if r is None:
+            if os.path.isdir(root):
+                _card("export_empty", name, root)
+            else:
+                _card("export_failed", name, root, f"path not found: {root}")
+            continue
+        total += r["files"]
+        if dry and not r["files"]:
+            _card("export_empty", name, root)
+            continue
+        ok += 1
+        if dry:
+            _card("export_preview", name, root, r, stdout=True)
+        else:
+            _card("export_done", name, root, r, show_tokens=bool(o.get("show_token_estimate")), stdout=True)
+            history.add(cfg, type="context", project=name, files=r["files"], outs=r["outs"])
+    if len(targets) > 1:
+        _card("export_summary", ok, len(targets), stdout=True)
     return 0 if total or dry else 1
+
+
+def _export_fail(name, root, e) -> int:
+    _card("export_failed", name, root, str(e))
+    return e.code
 
 
 # ------------------------------------------------------------------ patch
@@ -175,22 +198,21 @@ def cmd_patch(a, cfg, s) -> int:
     if a.sub == "undo":
         root = require_repo(a.repo or ".")
         meta = engine.undo(root, a.run, a.force)
-        print(f"Reverted run {meta['id']} ({len(meta['touched'])} file(s)) in {root}")
+        _card("undo_done", root, meta)
         history.add(cfg, type="undo", repo=root, run=meta["id"])
         return 0
     root = require_repo(a.repo or ".")
     raw, label, path = _read_source(a)
     text = clean_diff(raw)
     plan = engine.analyze(root, text)
-    print(f"Source: {label}")
-    _show_plan(plan)
+    _card("patch_plan", plan, label, a.sub, stdout=True,
+          partial=a.sub == "apply" and (a.partial or not ps["strict"]))
     if a.sub == "preview" and a.diff:
         print("\n" + plan.text)
     if plan.status == "already":
-        print("\nAlready applied: nothing to do.")
+        _card("apply_already", root, label)
         return 0
     if a.sub in ("check", "preview"):
-        print("\nOK: the diff can be applied." if plan.status == "apply" else "\nThe diff cannot be fully applied.")
         return 0 if plan.status == "apply" else 2
     # ---- apply
     partial = a.partial or not ps["strict"]
@@ -198,7 +220,7 @@ def cmd_patch(a, cfg, s) -> int:
     if dirty:
         print("\nwarning: the repo has uncommitted changes (they stay untouched).")
     if plan.status == "fail" and not partial:
-        _fail(plan, cfg, s, a, "strict mode: nothing was changed")
+        _fail(plan, cfg, s, a, True, label)
         return 2
     confirmed = False
     if plan.flags:
@@ -208,14 +230,14 @@ def cmd_patch(a, cfg, s) -> int:
             if not sys.stdin.isatty():
                 raise CBError("tolerant patch needs a person to confirm; to allow it in scripts pass -y --allow-tolerant")
             if input("Apply with tolerant mode? [y/N] ").strip().lower() not in ("y", "yes"):
-                print("Cancelled. Nothing was changed.")
+                _card("apply_cancelled", root, label)
                 return 0
             confirmed = True  # this one answer covers the whole apply: no second question
     if not confirmed and ps["confirm_before_apply"] and not a.yes:
         if not sys.stdin.isatty():
             raise CBError("no terminal to confirm; re-run with -y")
         if input("\nApply these changes? [Y/n] ").strip().lower() not in ("", "y", "yes"):
-            print("Cancelled. Nothing was changed.")
+            _card("apply_cancelled", root, label)
             return 0
     rid_hint = time.strftime("%Y%m%d-%H%M%S")
     branch = a.branch or (f"codebridge/{rid_hint}" if ps["create_branch"] else None)
@@ -224,21 +246,19 @@ def cmd_patch(a, cfg, s) -> int:
         meta = engine.apply_plan(plan, partial=partial, branch=branch, commit=commit, source=label)
     except CBError as e:
         if e.code == 2:
-            _fail(plan, cfg, s, a, None)
+            _fail(plan, cfg, s, a, False, label)
         raise
-    print(f"\nDone: {len(meta['files'])} applied, {len(meta['skipped'])} skipped. Run {meta['id']}")
-    for n in meta["notes"]:
-        print("warning:", n)
-    if meta["branch"]:
-        print(f"Branch: {meta['branch']}")
-    if meta["commit"]:
-        print(f"Committed: {meta['commit']}")
-    print(f"Undo with: codebridge patch undo -r \"{root}\"")
     history.add(cfg, type="patch", repo=root, run=meta["id"], files=[f["name"] for f in meta["files"]])
+    archived, extra_notes = None, []
     if path and ps["archive_applied"] and not a.no_archive and not meta["skipped"]:
         dst = path.with_name(f"{path.name}.applied-{time.strftime('%Y%m%d-%H%M%S')}")
-        shutil.move(str(path), str(dst))
-        print(f"Archived: {dst.name}")
+        try:
+            shutil.move(str(path), str(dst))
+            archived = dst.name
+        except OSError as e:
+            extra_notes.append(f"could not archive the diff: {e}")
+    _card("apply_done", root, label, meta, flags=list(plan.flags or ()),
+          archived=archived, extra_notes=extra_notes)
     return 0
 
 
@@ -247,18 +267,25 @@ def git_status(root) -> str:
     return git(root, "status", "--porcelain").stdout.strip()
 
 
-def _fail(plan, cfg, s, a, headline) -> None:
-    if headline:
-        print(f"\n{headline}")
-    if getattr(a, "no_fix", False):
-        return
-    prompt = build_fix_prompt(plan, s["defaults"])
-    out = Path.cwd() / "codebridge-fix.txt"
-    out.write_text(prompt, encoding="utf-8")
-    clip = to_clipboard(prompt)
-    print(f"Fix prompt for the AI written to {out.name}" + (" and copied to the clipboard." if clip else "."))
-    print("Send it to the AI, then apply the new diff.")
-    history.add(cfg, type="patch-failed", repo=plan.root, files=[fp.name for fp in plan.patches])
+def _card(build: str, *args, stdout: bool = False, **kw) -> None:
+    """Print the result card made by ui.cards.<build>. Errors go to stderr
+    unless stdout=True (used for the plan, which is a report, not a failure)."""
+    from .ui import cards
+    from .ui.result import emit
+    print()
+    emit(getattr(cards, build)(*args, **kw), sys.stdout if stdout else None)
+
+
+def _fail(plan, cfg, s, a, strict, label) -> None:
+    fix_file, copied = None, False
+    if not getattr(a, "no_fix", False):
+        prompt = build_fix_prompt(plan, s["defaults"])
+        out = Path.cwd() / "codebridge-fix.txt"
+        out.write_text(prompt, encoding="utf-8")
+        copied = bool(to_clipboard(prompt))
+        fix_file = out.name
+        history.add(cfg, type="patch-failed", repo=plan.root, files=[fp.name for fp in plan.patches])
+    _card("apply_failed", plan, label, strict=strict, fix_file=fix_file, fix_copied=copied)
 
 
 # ------------------------------------------------------------------ project / history / settings

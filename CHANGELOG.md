@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.3.0
+Result cards for export and patch commands, with open-file and open-folder actions.
+
+- **Desktop results:** Export, Patch check/preview/apply and Undo now print one result card with the same layout for every outcome (done, review, partial, failed, empty, cancelled, preview). The report file name and its folder are on separate rows, and the git reason for a file that cannot be applied appears under that file. Errors go to stderr; `NO_COLOR` and ASCII-only terminals are supported. Exit codes and history entries are unchanged.
+- **Open actions:** in an interactive terminal a card offers `o` (open the report), `f` (open the folder) and `x` (open `codebridge-fix.txt` after a failed apply); Enter continues. The menu does not ask for a second key after a card that already waited. Pipes, CI and scripts are never prompted.
+- **Apply:** if archiving the diff fails after a successful apply, the card shows a note instead of an unhandled error.
+- **Internal:** `export_project` accepts `quiet=True` and also returns `bytes`, `sizes` and `clipboard` (and `list` for preview); the existing keys are unchanged.
+- **Tests:** new tests for result cards, plan cards, export cards and open actions; path assertions no longer depend on the operating system.
+
 ## 3.2.0
 Manual diff paste and mandatory confirmation for tolerant patches. Website and docs updated to match.
 
