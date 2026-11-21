@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Dictionary } from '@/i18n/translations';
 import { Icon } from './Icons';
 
@@ -23,18 +24,20 @@ export function MobileShowcase({
             </div>
             <span className="ref-mobile-note">{mobile.note}</span>
           </div>
-          <figure className="ref-phone">
-            <div className="ref-phone-frame">
-              <div className="ref-phone-screen">
-                <div className="ref-phone-project">
-                  <b>{mobile.project}</b>
-                  {mobile.files.map((file) => (
-                    <div className={`ref-phone-file ref-phone-${file.kind}`} key={file.path}>
-                      <code dir="ltr">{file.path}</code><span>{file.status}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="ref-phone-ready">{mobile.ready}</div>
+          <figure className="ref-win">
+            <div className="ref-win-frame" role="img" aria-label={mobile.project}>
+              <div className="ref-win-bar" dir="ltr" aria-hidden="true">
+                <span className="ref-win-dots"><i /><i /><i /></span>
+                <span className="ref-win-url"><Icon name="lock" size={12} />CodeBridge</span>
+              </div>
+              <div className="ref-win-body">
+                <b className="ref-win-title">{mobile.project}</b>
+                {mobile.files.map((file, index) => (
+                  <div className={`ref-win-file ref-win-${file.kind}`} key={file.path} style={{ '--i': index } as CSSProperties}>
+                    <code dir="ltr">{file.path}</code><span>{file.status}</span>
+                  </div>
+                ))}
+                <div className="ref-win-ready"><Icon name="check" size={16} />{mobile.ready}</div>
               </div>
             </div>
             <figcaption>{mobile.note}</figcaption>

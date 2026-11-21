@@ -22,7 +22,7 @@ export interface Dictionary {
   };
   how: { title: string; steps: Pair[] };
   tool: {
-    title: string; sub: string; choose: string; chooseHint: string;
+    title: string; sub: string; choose: string; chooseHint: string; drop: string;
     optGitignore: string; optRedact: string; optCompact: string; optHeader: string; optTree: string;
     split: string; splitOff: string; 
     pick: string; pickCount: string; dlgTitle: string; dlgHint: string; selAll: string; selNone: string; done: string; cancel: string; applyChanges: string; pendChanges: string; pendNone: string; hideTitle: string; hideImages: string; hideLocks: string; projNone: string; lockHint: string; projLabel: string; hideTests: string; applying: string; applied: string; pendOpts: string; resSize: string; splitNote: string;
@@ -66,7 +66,7 @@ export const translations: Record<Locale, Dictionary> = {
       titleAccent: 'bring changes back without hunting for lines.',
       sub: 'Turn a codebase ZIP into clean, AI-ready code context without unnecessary files or wasted tokens. Use the desktop app to apply AI-generated Git diffs directly to your project, then undo changes when needed.',
       ctaDownload: 'Download the desktop app',
-      ctaMobile: 'Try it in your phone or desktop browser',
+      ctaMobile: 'Try it in browser (Phone/Desktop)',
       proof: ['Your code is not uploaded', 'Android, iOS and desktop', 'Precise undo', 'Free and open source'],
       previewLabel: 'An example of applying an AI diff',
       previewTitle: 'Copy or paste the AI diff, then confirm',
@@ -114,8 +114,9 @@ export const translations: Record<Locale, Dictionary> = {
       sub: 'Convert a project ZIP into an AI-ready code context file right in your browser. No installation or upload required. Apply AI-generated Git diffs and undo changes with the desktop app.',
       choose: 'Choose ZIP',
       chooseHint: 'from Files, Drive or Downloads',
+      drop: 'or drop it here',
       optGitignore: 'Respect .gitignore', optRedact: 'Hide secrets', optCompact: 'Compact', optHeader: 'AI instructions', optTree: 'File tree',
-      split: 'Split report', splitOff: 'No split',       pick: 'Choose files and folders', pickCount: '{a} of {b} files selected', dlgTitle: 'Choose what to include', dlgHint: 'Untick a folder or a file to leave it out of the report.', selAll: 'Select all', selNone: 'Unselect all', done: 'Done', cancel: 'Cancel', applyChanges: 'Apply changes', pendChanges: 'Pending: {r} to remove from the report, {a} to add back', pendNone: 'No pending changes', hideTitle: 'Hide file contents from the report (the path stays)', hideImages: 'Hide the contents of image files (e.g. SVG)', hideLocks: 'Hide the contents of lock files', projNone: 'Not selected', lockHint: 'Pick your project type to enable the lock and test options.', projLabel: 'Project type', hideTests: 'Hide the contents of test files', applying: 'Applying…', applied: 'Done', pendOpts: 'display options changed', resSize: 'Report size: {size}', splitNote: 'Each part stays within the chosen size. A very large file continues in the next part.',
+      split: 'Split report', splitOff: 'No split',       pick: 'Choose files/folders', pickCount: '{a} of {b} files selected', dlgTitle: 'Choose what to include', dlgHint: 'Untick a folder or a file to leave it out of the report.', selAll: 'Select all', selNone: 'Unselect all', done: 'Done', cancel: 'Cancel', applyChanges: 'Apply changes', pendChanges: 'Pending: {r} to remove from the report, {a} to add back', pendNone: 'No pending changes', hideTitle: 'Hide file contents from the report (the path stays)', hideImages: 'Hide the contents of image files (e.g. SVG)', hideLocks: 'Hide the contents of lock files', projNone: 'Not selected', lockHint: 'Pick your project type to enable the lock and test options.', projLabel: 'Project type', hideTests: 'Hide the contents of test files', applying: 'Applying…', applied: 'Done', pendOpts: 'display options changed', resSize: 'Report size: {size}', splitNote: 'Each part stays within the chosen size. A very large file continues in the next part.',
       convert: 'Convert', convertAgain: 'Convert again', working: 'Reading {done} of {total}…',
       resFiles: '{n} files', resTokens: '≈ {n} tokens', resRedacted: '{n} secrets hidden', resSkipped: '{n} skipped (ignored, binary or too large)',
             download: 'Download TXT', downloadPart: 'Download part {n}', copy: 'Copy', copyPart: 'Copy part {n}', copied: 'Copied',
@@ -307,7 +308,7 @@ export const translations: Record<Locale, Dictionary> = {
       titleAccent: 'تغییرات را بدون پیدا کردن خط‌به‌خط برگردان.',
       sub: 'CodeBridge پروژه‌ات را امن و بدون فایل‌های اضافه به متن تبدیل می‌کند تا توکن هدر نرود، و diff جواب هوش مصنوعی را خودش روی پروژه اعمال می‌کند. دیگر لازم نیست فایل باز کنی، دنبال خط بگردی و یکی‌یکی کپی کنی.',
       ctaDownload: 'دانلود اپ دسکتاپ',
-      ctaMobile: 'امتحان در مرورگر گوشی یا دسکتاپ',
+      ctaMobile: 'امتحان در مرورگر (گوشی/دسکتاپ)',
       proof: ['کد آپلود نمی‌شود', 'اندروید، iOS و دسکتاپ', 'Undo دقیق', 'رایگان و متن‌باز'],
       previewLabel: 'نمونه‌ی اعمال diff جواب هوش مصنوعی',
       previewTitle: 'diff جواب AI را کپی یا Paste کن و تأیید کن',
@@ -355,8 +356,9 @@ export const translations: Record<Locale, Dictionary> = {
       sub: 'ZIP را بینداز و متن آماده بگیر؛ بدون نصب و بدون آپلود، روی گوشی و دسکتاپ. اعمال diff و Undo در اپ دسکتاپ انجام می‌شود.',
       choose: 'انتخاب ZIP',
       chooseHint: 'از Files، Drive یا Downloads',
+      drop: 'یا همین‌جا رهایش کن',
       optGitignore: 'رعایت .gitignore', optRedact: 'پنهان‌کردن رمزها', optCompact: 'فشرده', optHeader: 'دستور برای AI', optTree: 'درخت فایل',
-      split: 'تقسیم گزارش', splitOff: 'بدون تقسیم',       pick: 'انتخاب فایل‌ها و پوشه‌ها', pickCount: '{a} از {b} فایل انتخاب شده', dlgTitle: 'انتخاب آنچه وارد گزارش شود', dlgHint: 'تیک پوشه یا فایلی را که نمی‌خواهید در گزارش باشد بردارید.', selAll: 'انتخاب همه', selNone: 'برداشتن همه', done: 'تأیید', cancel: 'انصراف', applyChanges: 'تأیید و اعمال تغییرات', pendChanges: 'در انتظار تأیید: {r} فایل حذف از گزارش، {a} فایل بازگردانی', pendNone: 'تغییری در انتظار نیست', hideTitle: 'حذف محتوای فایل‌ها از گزارش (مسیر فایل می‌ماند)', hideImages: 'محتوای فایل‌های تصویری (مثل SVG) نمایش داده نشود', hideLocks: 'محتوای فایل‌های lock نمایش داده نشود', projNone: 'انتخاب نشده', lockHint: 'برای فعال شدن گزینه‌های lock و تست، نوع پروژه را انتخاب کنید.', projLabel: 'نوع پروژه', hideTests: 'محتوای فایل‌های تست (test) نمایش داده نشود', applying: 'در حال اعمال…', applied: 'انجام شد', pendOpts: 'تنظیمات نمایش تغییر کرده', resSize: 'حجم گزارش: {size}', splitNote: 'هر بخش از حجم انتخابی بیشتر نمی‌شود. فایل خیلی بزرگ در بخش بعدی ادامه پیدا می‌کند.',
+      split: 'تقسیم گزارش', splitOff: 'بدون تقسیم',       pick: 'انتخاب فایل/پوشه', pickCount: '{a} از {b} فایل انتخاب شده', dlgTitle: 'انتخاب آنچه وارد گزارش شود', dlgHint: 'تیک پوشه یا فایلی را که نمی‌خواهید در گزارش باشد بردارید.', selAll: 'انتخاب همه', selNone: 'برداشتن همه', done: 'تأیید', cancel: 'انصراف', applyChanges: 'تأیید و اعمال تغییرات', pendChanges: 'در انتظار تأیید: {r} فایل حذف از گزارش، {a} فایل بازگردانی', pendNone: 'تغییری در انتظار نیست', hideTitle: 'حذف محتوای فایل‌ها از گزارش (مسیر فایل می‌ماند)', hideImages: 'محتوای فایل‌های تصویری (مثل SVG) نمایش داده نشود', hideLocks: 'محتوای فایل‌های lock نمایش داده نشود', projNone: 'انتخاب نشده', lockHint: 'برای فعال شدن گزینه‌های lock و تست، نوع پروژه را انتخاب کنید.', projLabel: 'نوع پروژه', hideTests: 'محتوای فایل‌های تست (test) نمایش داده نشود', applying: 'در حال اعمال…', applied: 'انجام شد', pendOpts: 'تنظیمات نمایش تغییر کرده', resSize: 'حجم گزارش: {size}', splitNote: 'هر بخش از حجم انتخابی بیشتر نمی‌شود. فایل خیلی بزرگ در بخش بعدی ادامه پیدا می‌کند.',
       convert: 'تبدیل', convertAgain: 'تبدیل دوباره', working: 'خواندن {done} از {total}…',
       resFiles: '{n} فایل', resTokens: '≈ {n} توکن', resRedacted: '{n} رمز پنهان شد', resSkipped: '{n} مورد رد شد (نادیده‌گرفته، باینری یا بزرگ)',
             download: 'دانلود TXT', downloadPart: 'دانلود بخش {n}', copy: 'کپی', copyPart: 'کپی بخش {n}', copied: 'کپی شد',
@@ -548,7 +550,7 @@ export const translations: Record<Locale, Dictionary> = {
       titleAccent: 'وأعِد التغييرات دون البحث عن الأسطر.',
       sub: 'يحوّل CodeBridge مشروعك بأمان إلى نص من دون ملفات زائدة كي لا تُهدر الرموز، ويطبّق diff إجابة الذكاء الاصطناعي على مشروعك مباشرة. لن تحتاج بعد الآن إلى فتح الملفات والبحث عن الأسطر ونسخها واحدًا تلو الآخر.',
       ctaDownload: 'تحميل تطبيق سطح المكتب',
-      ctaMobile: 'جرّبه في متصفح الهاتف أو الحاسوب',
+      ctaMobile: 'جرّبه في المتصفح (هاتف/حاسوب)',
       proof: ['لا يُرفع كودك', 'أندرويد وiOS والحاسوب', 'تراجع دقيق', 'مجاني ومفتوح المصدر'],
       previewLabel: 'مثال على تطبيق diff من إجابة الذكاء الاصطناعي',
       previewTitle: 'انسخ diff إجابة الذكاء الاصطناعي أو الصقه ثم أكّد',
@@ -596,8 +598,9 @@ export const translations: Record<Locale, Dictionary> = {
       sub: 'أسقط ملف ZIP واحصل على نص جاهز؛ بلا تثبيت أو رفع، على الهاتف والحاسوب. تطبيق diff والتراجع متاحان في تطبيق سطح المكتب.',
       choose: 'اختيار ZIP',
       chooseHint: 'من Files أو Drive أو Downloads',
+      drop: 'أو أسقطه هنا',
       optGitignore: 'احترام .gitignore', optRedact: 'إخفاء الأسرار', optCompact: 'مضغوط', optHeader: 'تعليمات للذكاء الاصطناعي', optTree: 'شجرة الملفات',
-      split: 'تقسيم التقرير', splitOff: 'من دون تقسيم',       pick: 'اختيار الملفات والمجلدات', pickCount: 'تم تحديد {a} من {b} ملف', dlgTitle: 'اختر ما يُضمَّن في التقرير', dlgHint: 'ألغِ تحديد مجلد أو ملف لاستبعاده من التقرير.', selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل', done: 'تم', cancel: 'إلغاء', applyChanges: 'تأكيد وتطبيق التغييرات', pendChanges: 'بانتظار التأكيد: حذف {r} من التقرير، وإعادة {a}', pendNone: 'لا توجد تغييرات معلقة', hideTitle: 'إخفاء محتوى الملفات من التقرير (يبقى المسار)', hideImages: 'عدم عرض محتوى ملفات الصور (مثل SVG)', hideLocks: 'عدم عرض محتوى ملفات lock', projNone: 'غير محدد', lockHint: 'اختر نوع المشروع لتفعيل خياري lock والاختبارات.', projLabel: 'نوع المشروع', hideTests: 'عدم عرض محتوى ملفات الاختبار (test)', applying: 'جارٍ التطبيق…', applied: 'تم', pendOpts: 'تغيرت خيارات العرض', resSize: 'حجم التقرير: {size}', splitNote: 'لا يتجاوز كل جزء الحجم المختار. الملف الكبير جدًا يتابع في الجزء التالي.',
+      split: 'تقسيم التقرير', splitOff: 'من دون تقسيم',       pick: 'اختيار ملفات/مجلدات', pickCount: 'تم تحديد {a} من {b} ملف', dlgTitle: 'اختر ما يُضمَّن في التقرير', dlgHint: 'ألغِ تحديد مجلد أو ملف لاستبعاده من التقرير.', selAll: 'تحديد الكل', selNone: 'إلغاء تحديد الكل', done: 'تم', cancel: 'إلغاء', applyChanges: 'تأكيد وتطبيق التغييرات', pendChanges: 'بانتظار التأكيد: حذف {r} من التقرير، وإعادة {a}', pendNone: 'لا توجد تغييرات معلقة', hideTitle: 'إخفاء محتوى الملفات من التقرير (يبقى المسار)', hideImages: 'عدم عرض محتوى ملفات الصور (مثل SVG)', hideLocks: 'عدم عرض محتوى ملفات lock', projNone: 'غير محدد', lockHint: 'اختر نوع المشروع لتفعيل خياري lock والاختبارات.', projLabel: 'نوع المشروع', hideTests: 'عدم عرض محتوى ملفات الاختبار (test)', applying: 'جارٍ التطبيق…', applied: 'تم', pendOpts: 'تغيرت خيارات العرض', resSize: 'حجم التقرير: {size}', splitNote: 'لا يتجاوز كل جزء الحجم المختار. الملف الكبير جدًا يتابع في الجزء التالي.',
       convert: 'تحويل', convertAgain: 'تحويل مرة أخرى', working: 'قراءة {done} من {total}…',
       resFiles: '{n} ملف', resTokens: '≈ {n} رمز', resRedacted: 'تم إخفاء {n} سر', resSkipped: 'تم تخطي {n} (متجاهَل أو ثنائي أو كبير)',
             download: 'تحميل TXT', downloadPart: 'تحميل الجزء {n}', copy: 'نسخ', copyPart: 'نسخ الجزء {n}', copied: 'تم النسخ',
