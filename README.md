@@ -1,4 +1,9 @@
-# CodeBridge
+<h1 align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="apps/web/public/brand/logo-dark.svg">
+    <img src="apps/web/public/brand/logo-light.svg" alt="CodeBridge" height="48">
+  </picture>
+</h1>
 
 Turn a project into one clean, AI-ready text file, apply the AI's diff safely, and undo it.
 Private by design: nothing is uploaded.
