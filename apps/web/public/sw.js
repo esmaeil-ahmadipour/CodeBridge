@@ -1,5 +1,5 @@
 // Minimal offline support. Bump VERSION on each release so old caches are dropped.
-const VERSION = 'cb-v3';
+const VERSION = 'cb-v4';
 const SHELL = ['/', '/fa', '/ar', '/guide', '/fa/guide', '/ar/guide'];
 
 self.addEventListener('install', (e) => {
