@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Metadata } from 'next';
 import { defaultLocale, localePrefix, locales, type Locale } from '@/i18n/config';
 import { translations } from '@/i18n/translations';
@@ -6,9 +8,26 @@ import { getApplicationVersion, repoUrl, siteUrl } from './site';
 
 const urlFor = (locale: Locale, path = '') => `${siteUrl}${localePrefix(locale)}${path}` || siteUrl;
 const ogLocale: Record<Locale, string> = { en: 'en_US', fa: 'fa_IR', ar: 'ar_AR' };
+const ogAlt: Record<Locale, string> = {
+  en: 'CodeBridge: export code for AI, apply AI diffs, undo',
+  fa: 'CodeBridge: خروجی کد برای AI، اعمال Diff و Undo',
+  ar: 'CodeBridge: تصدير الكود للذكاء الاصطناعي وتطبيق Diff والتراجع',
+};
+
+// One pre-rendered 1200x630 image per locale and page kind: public/og/<kind>-<locale>-v2.png (sources in /brand).
+// The -v2 suffix busts social-platform caches. A missing file falls back to the English image, then to og.png.
+type OgKind = 'home' | 'guide';
+const ogKind = (path: string): OgKind => (path.startsWith('/guide') ? 'guide' : 'home');
+const ogFile = (kind: OgKind, locale: Locale) => `${kind}-${locale}-v2.png`;
+function ogImage(locale: Locale, path: string): string {
+  const kind = ogKind(path);
+  const found = [ogFile(kind, locale), ogFile(kind, defaultLocale)].find((f) => existsSync(join(process.cwd(), 'public', 'og', f)));
+  return `/og/${found ?? 'og.png'}`;
+}
 
 export function buildMetadata(locale: Locale, path = '', page = translations[locale].metadata): Metadata {
   const { title, description } = page;
+  const image = ogImage(locale, path);
   return {
     metadataBase: new URL(siteUrl),
     title,
@@ -23,9 +42,10 @@ export function buildMetadata(locale: Locale, path = '', page = translations[loc
     },
     openGraph: {
       type: 'website', siteName: 'CodeBridge', title, description, url: urlFor(locale, path), locale: ogLocale[locale],
-      images: [{ url: '/og/og.png', width: 1200, height: 630, alt: 'CodeBridge' }],
+      alternateLocale: locales.filter((l) => l !== locale).map((l) => ogLocale[l]),
+      images: [{ url: image, width: 1200, height: 630, type: 'image/png', alt: ogAlt[locale] }],
     },
-    twitter: { card: 'summary_large_image', title, description, images: ['/og/og.png'] },
+    twitter: { card: 'summary_large_image', title, description, images: [{ url: image, alt: ogAlt[locale] }] },
   };
 }
 
