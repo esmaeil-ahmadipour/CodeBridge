@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { localePrefix, type Locale } from '@/i18n/config';
 import { translations, type Dictionary } from '@/i18n/translations';
+import { Logo } from './Icons';
 import { fmt } from '@/lib/fmt';
 import { formatReleaseDate, getLatestRelease } from '@/lib/release';
 import { getApplicationVersion, latestReleaseUrl } from '@/lib/site';
@@ -16,7 +17,7 @@ export async function Footer({ t, nav, locale, dir }: { t: Dictionary['footer'];
       <div className="ref-wrap ft">
         <div className="ft-main">
           <div className="ft-brand">
-            <Link href={home} className="ref-brand">CodeBridge<span>.</span></Link>
+            <Link href={home} className="ref-brand" aria-label="CodeBridge"><Logo size={28} /><span className="ref-word">Code<b>Bridge</b></span></Link>
             <p className="mut">{t.tagline}</p>
           </div>
           <nav className="ft-links" aria-label="Footer">
