@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>CodeBridge OG template</title>
+<!-- Source for apps/web/public/og/*.png and brand/github-social-preview.png.
+     Open as og.html#<locale>-<kind>  (locale: en | fa | ar, kind: home | guide | social). Render with brand/render-og.sh.
+     Fonts are the website's own files, so the output matches the site. -->
+<style>
+@font-face{font-family:'CB Inter';src:url('../../apps/web/public/fonts/inter-variable.woff') format('woff');font-weight:100 900}
+@font-face{font-family:'JetBrains Mono Local';src:url('../../apps/web/public/fonts/jetbrains-mono-latin.woff2') format('woff2');font-weight:100 800}
+@font-face{font-family:'Vazirmatn';src:url('../../apps/web/public/fonts/vazirmatn-latin.woff2') format('woff2');font-weight:100 900;unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Vazirmatn';src:url('../../apps/web/public/fonts/vazirmatn-arabic.woff2') format('woff2');font-weight:100 900;unicode-range:U+0600-06FF,U+0750-077F,U+08A0-08FF,U+FB50-FDFF,U+FE70-FEFF}
+:root{--bg:#0C1117;--sf:#151C25;--bd:#2A384A;--tx:#E9EEF5;--mu:#A3AFBF;--ac:#2DD4BF;--on:#06201D;--rm-bg:#2A1518;--rm-tx:#FCA5A5;--ad-bg:#12261B;--ad-tx:#86EFAC}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg)}
+.og{position:relative;width:1200px;height:630px;padding:56px 64px;display:flex;flex-direction:column;justify-content:space-between;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'CB Inter','Inter',system-ui,sans-serif}
+.og.social{width:1280px;height:640px}
+.og::before{content:"";position:absolute;inset:0;background:radial-gradient(900px 520px at 88% -8%,rgba(45,212,191,.14),transparent 62%)}
+.og[dir=rtl]::before{background:radial-gradient(900px 520px at 12% -8%,rgba(45,212,191,.14),transparent 62%)}
+.og>*{position:relative}
+.brand{display:flex;align-items:center;gap:14px;direction:ltr;unicode-bidi:isolate;width:max-content}
+.og[dir=rtl] .brand{align-self:flex-start}
+.wm{font-family:'JetBrains Mono Local',ui-monospace,monospace;font-size:36px;font-weight:500;letter-spacing:-.02em;line-height:1}
+.wm b{font-weight:800;color:var(--ac)}
+.mid{flex:1;display:flex;align-items:center;justify-content:space-between;gap:56px;min-height:0;padding:18px 0}
+.txt{flex:1;min-width:0}
+.eb{font-size:26px;font-weight:600;color:var(--ac);margin:0 0 16px}
+h1{margin:0;font-size:62px;line-height:1.12;letter-spacing:-.025em;font-weight:700;text-wrap:balance}
+.sub{margin:20px 0 0;font-size:26px;line-height:1.5;color:var(--mu);max-width:30em}
+.og[dir=rtl]{font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif}
+.og[dir=rtl] h1{font-size:56px;line-height:1.5;letter-spacing:0;font-weight:700}
+.og[dir=rtl] .eb,.og[dir=rtl] .sub,.og[dir=rtl] .chips span{letter-spacing:0}
+.og[dir=rtl] .sub{line-height:1.8}
+.card{flex:none;width:360px;direction:ltr;text-align:left;background:var(--sf);border:1px solid var(--bd);border-radius:20px;padding:20px;font-family:'JetBrains Mono Local',ui-monospace,monospace;font-size:15px;line-height:1.7;color:var(--mu)}
+.card .f{color:var(--tx);font-size:14px;margin-bottom:10px}
+.card .l{padding:2px 10px;border-radius:6px;margin-bottom:4px;white-space:nowrap;overflow:hidden}
+.card .r{background:var(--rm-bg);color:var(--rm-tx)}.card .a{background:var(--ad-bg);color:var(--ad-tx)}
+.card .u{margin-top:16px;display:flex;gap:8px;font:600 14px 'CB Inter','Inter',system-ui,sans-serif}
+.card .u span{display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:9px;border:1px solid var(--bd);color:var(--tx)}
+.card .u span:first-child{background:var(--ac);border-color:var(--ac);color:var(--on)}
+.bot{display:flex;justify-content:space-between;align-items:center}
+.chips{display:flex;gap:12px}
+.chips span{font-size:22px;font-weight:500;padding:8px 18px;border:1px solid var(--bd);border-radius:999px;color:var(--mu);background:var(--sf)}
+.dom{direction:ltr;font-family:'JetBrains Mono Local',ui-monospace,monospace;font-size:20px;color:var(--mu)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+var D={
+ en:{dir:'ltr',
+  home:{eb:'An AI-assisted tool for developers',h:'Give AI clean code, bring changes back without hunting for lines.',sub:'',chips:['Free','Private','Nothing is uploaded']},
+  guide:{eb:'Guide',h:'Learn CodeBridge in 5 minutes',sub:'Export your project for an AI, apply its reply safely, and undo if needed.',chips:['Export','Apply','Undo']},
+  social:{eb:'',h:'Export. Apply. Undo.',sub:'Turn a project into one clean, AI-ready text file, apply the AI’s diff safely, and undo it.',chips:['Free','Open source','Private by design']}},
+ fa:{dir:'rtl',
+  home:{eb:'ابزار برنامه‌نویسانِ همراه با هوش مصنوعی',h:'کدت را تمیز به AI بده، تغییرات را بدون پیدا کردن خط‌به‌خط برگردان.',sub:'',chips:['رایگان','خصوصی','بدون آپلود کد']},
+  guide:{eb:'راهنما',h:'CodeBridge را در ۵ دقیقه یاد بگیرید',sub:'پروژه‌تان را برای AI خروجی بگیرید، پاسخ آن را امن اعمال کنید و در صورت نیاز Undo بزنید.',chips:['خروجی','اعمال','Undo']}},
+ ar:{dir:'rtl',
+  home:{eb:'أداة للمطورين بمساعدة الذكاء الاصطناعي',h:'أرسل للذكاء الاصطناعي كودًا نظيفًا، وأعِد التغييرات دون البحث عن الأسطر.',sub:'',chips:['مجاني','خاص','دون رفع ملفاتك']},
+  guide:{eb:'الدليل',h:'تعلّم CodeBridge في 5 دقائق',sub:'صدّر مشروعك للذكاء الاصطناعي، وطبّق رده بأمان، وتراجع عند الحاجة.',chips:['تصدير','تطبيق','تراجع']}}
+};
+var key=(location.hash||'#en-home').slice(1).split('-'),loc=key[0],kind=key[1],d=D[loc],p=d&&d[kind];
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+var mark='<svg width="52" height="52" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#2DD4BF"/><path d="M7 24v-7c0-6 4-9 9-9s9 3 9 9v7M5 24h22" fill="none" stroke="#06201D" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="16" cy="15" r="2.2" fill="#06201D"/></svg>';
+var card='<div class="card"><div class="f">src/app/page.tsx</div><div class="l r">- const title = "Untitled";</div><div class="l a">+ const title = t.metadata.title;</div><div class="u"><span>Apply</span><span>Undo</span></div></div>';
+document.documentElement.setAttribute('data-fonts','pending');
+if(!p){document.body.textContent='Unknown template key: '+location.hash}else{
+ document.getElementById('root').innerHTML='<div class="og'+(kind==='social'?' social':'')+'" dir="'+d.dir+'" lang="'+loc+'"><div class="brand">'+mark+'<span class="wm">Code<b>Bridge</b></span></div>'
+  +'<div class="mid"><div class="txt">'+(p.eb?'<p class="eb">'+esc(p.eb)+'</p>':'')+'<h1>'+esc(p.h)+'</h1>'+(p.sub?'<p class="sub">'+esc(p.sub)+'</p>':'')+'</div>'+card+'</div>'
+  +'<div class="bot"><div class="chips">'+p.chips.map(function(c){return '<span>'+esc(c)+'</span>'}).join('')+'</div><div class="dom">codebridge.tarvix.org</div></div></div>';
+ var rtl=d.dir==='rtl';
+ // Chrome reports unicode-range without leading zeros (U+600-6FF); normalise before matching
+ function norm(r){return r.replace(/U\+0+(?=[0-9A-F])/g,'U+').replace(/-0+(?=[0-9A-F])/g,'-')}
+ var need=rtl?[['700 56px Vazirmatn','ک','Vazirmatn','U+600-6FF'],['700 56px Vazirmatn','C','Vazirmatn','U+0-FF'],['500 20px "JetBrains Mono Local"','C','JetBrains Mono Local','']]
+            :[['700 56px "CB Inter"','A','CB Inter',''],['500 20px "JetBrains Mono Local"','C','JetBrains Mono Local','']];
+ Promise.all(need.map(function(n){return document.fonts.load(n[0],n[1])})).then(function(){
+  // a face counts only if it is the declared project font and actually loaded
+  var ok=need.every(function(n){return Array.from(document.fonts).some(function(f){return f.family.replace(/["']/g,'')===n[2]&&f.status==='loaded'&&(!n[3]||norm(f.unicodeRange).indexOf(n[3])>-1)})});
+  // shrink the headline block until it fits the middle row (long translations)
+  var h=document.querySelector('h1'),txt=document.querySelector('.txt'),mid=document.querySelector('.mid'),fs=parseFloat(getComputedStyle(h).fontSize);
+  while(txt.scrollHeight>mid.clientHeight-36&&fs>40){fs-=2;h.style.fontSize=fs+'px'}
+  document.documentElement.setAttribute('data-fonts',ok?'ok':'missing');
+ });
+}
+</script>
+</body>
+</html>

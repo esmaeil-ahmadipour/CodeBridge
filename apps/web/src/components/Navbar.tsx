@@ -6,7 +6,7 @@ import { useLanguage } from '@/context/LanguageContext';
 import { useTheme } from '@/context/ThemeContext';
 import { isLocale, localePrefix, locales, stripLocale, type Locale } from '@/i18n/config';
 import { flags } from '@/lib/flags';
-import { Icon } from './Icons';
+import { Icon, Logo } from './Icons';
 
 const LABEL: Record<Locale, string> = { en: 'EN', fa: 'فا', ar: 'ع' };
 
@@ -46,7 +46,7 @@ export function Navbar() {
         >
           <Icon name={open ? 'close' : 'menu'} size={20} />
         </button>
-        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand">CodeBridge<span>.</span></a>
+        <a href={onHome ? '#top' : localePrefix(locale) || '/'} className="ref-brand" aria-label="CodeBridge"><Logo size={28} /><span className="ref-word">Code<b>Bridge</b></span></a>
         {open && (
           <div
             id="site-menu"

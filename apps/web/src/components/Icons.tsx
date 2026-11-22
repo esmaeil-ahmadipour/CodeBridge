@@ -38,10 +38,23 @@ export function Icon({ name, size = 22, ...rest }: { name: keyof typeof paths; s
   return <svg {...base} width={size} height={size} {...rest}>{paths[name]}</svg>;
 }
 
+/** CodeBridge mark: arch bridge with one node, on an accent tile. Uses the site tokens, so it follows light/dark. Heavier S master at 24 px and below. */
 export function Logo({ size = 28 }: { size?: number }) {
+  const small = size <= 24;
   return (
-    <svg width={size} height={size} viewBox="0 0 28 28" fill="none" stroke="var(--ac)" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
-      <path d="M3 21c4-12 18-12 22 0" /><path d="M3 21v3M25 21v3M14 11v13" />
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+      <rect width="32" height="32" rx={small ? 7 : 8} fill="var(--ac)" />
+      {small ? (
+        <>
+          <path d="M6.5 24.5v-7c0-6.2 4-9.5 9.5-9.5s9.5 3.3 9.5 9.5v7M4.5 24.5h23" stroke="var(--on)" strokeWidth="3.1" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="16" cy="16" r="3" fill="var(--on)" />
+        </>
+      ) : (
+        <>
+          <path d="M7 24v-7c0-6 4-9 9-9s9 3 9 9v7M5 24h22" stroke="var(--on)" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="16" cy="15" r="2.2" fill="var(--on)" />
+        </>
+      )}
     </svg>
   );
 }

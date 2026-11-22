@@ -49,6 +49,6 @@ test('terminal screens belong to real sections, fit a phone scroll area and matc
 
 test('service worker cache is versioned and includes the guide route', () => {
   const sw = readFileSync(new URL('../public/sw.js', import.meta.url), 'utf8');
-  assert.match(sw, /VERSION = 'cb-v3'/);
+  assert.match(sw, /VERSION = 'cb-v4'/);
   assert.match(sw, /'\/guide'/);
 });

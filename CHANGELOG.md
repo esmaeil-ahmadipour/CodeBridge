@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.4.0
+New CodeBridge identity: logo, favicons and app icons, and localized social previews for English, Persian and Arabic.
+
+- **Logo:** an arch bridge with one node on an accent tile, paired with a JetBrains Mono wordmark (`Code` regular, `Bridge` bold in the accent). The navbar and footer use the new lockup instead of the text-only "CodeBridge."; the trailing dot is gone. The wordmark stays left-to-right on Persian and Arabic pages and is hidden below 340 px, leaving the mark. At 24 px and below the mark switches to a heavier version so the node stays visible.
+- **Icons:** new `icon.svg`, `favicon.ico`, Apple touch icon and PWA icons, including a maskable one that keeps the mark inside the safe zone. The service worker cache is bumped to `cb-v4` so installed copies pick up the new icons, and the manifest gains an `id` and an explicit icon purpose.
+- **Social previews:** one 1200×630 image per language and page, home and guide, for English, Persian and Arabic. Persian and Arabic are mirrored for right-to-left with Vazirmatn typography; the code card and domain stay left-to-right. `og:image`, `twitter:image`, alt text and `og:locale` alternates now follow the page language, falling back to the English image if a file is missing. Image names end in `-v2` so social platforms drop their cached previews.
+- **Brand files:** logo SVGs for light, dark and one-colour use with the wordmark outlined, plus Diff-motif icons for Apply and Undo moments. The README header switches between light and dark logos on GitHub.
+- **Internal:** sources and tools live in `brand/` (`og/og.html` template, `render-og.sh`, logo and icon build scripts); `render-og.sh` refuses to write images if a project font fails to load. New `og-assets` test checks that every language and page has a 1200×630 PNG, and the guide test expects service worker `cb-v4`.
+- **Desktop:** no changes.
+
 ## 3.3.1
 Website guide: tab bar with a clear active section, a phone layout without sideways scrolling, and the guide now opens at the top.
 
